@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches-ignore:
+      - 'bugfix/**'
+      - 'feature/**'
+      - 'topic/**'
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: macos-12
+    env:
+      DEVELOPER_DIR: "/Applications/Xcode_13.4.1.app/Contents/Developer"
+
+    steps:
+      - name: Runner Overview
+        run: system_profiler SPHardwareDataType SPSoftwareDataType SPDeveloperToolsDataType
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Upgrade Bash
+        run: make bash
+
+      - name: Run Tests
+        run: make tests
+
+      - name: Upload Code Coverage Report
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./.coverage/
+          fail_ci_if_error: true
+          verbose: true

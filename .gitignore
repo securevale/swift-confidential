@@ -1,0 +1,22 @@
+### macOS ###
+
+.DS_Store
+
+### SwiftPM ###
+
+/.build
+/Packages
+/.swiftpm
+
+### Xcode ###
+
+/*.xcodeproj
+xcuserdata/
+
+### Other ###
+
+# Code coverage reports
+/.coverage
+
+# Release artifacts
+/.release
