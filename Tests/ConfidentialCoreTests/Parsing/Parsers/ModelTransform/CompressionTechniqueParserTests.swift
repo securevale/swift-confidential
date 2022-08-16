@@ -20,7 +20,7 @@ final class CompressionTechniqueParserTests: XCTestCase {
         super.tearDown()
     }
 
-    func test_givenValidInputData_whenParse_thenReturnsExpectedEnumValuesAndInputIsEmpty() throws {
+    func test_givenValidInput_whenParse_thenReturnsExpectedEnumValueAndInputIsEmpty() throws {
         // given
         var inputData = Algorithm.allCases.map { algorithm in
             "\(C.Parsing.Keywords.compress) \(C.Parsing.Keywords.using) \(algorithm.description)"[...]
@@ -43,7 +43,7 @@ final class CompressionTechniqueParserTests: XCTestCase {
 
     func test_givenValidInputWithExtraWhitespaces_whenParse_thenReturnsExpectedEnumValueAndInputIsEmpty() throws {
         // given
-        var input = " \(C.Parsing.Keywords.compress) \(C.Parsing.Keywords.using)   \(Algorithm.lz4.description)"[...]
+        var input = " \(C.Parsing.Keywords.compress)  \(C.Parsing.Keywords.using)   \(Algorithm.lz4.description)"[...]
 
         // when
         let technique = try sut.parse(&input)
@@ -60,6 +60,64 @@ final class CompressionTechniqueParserTests: XCTestCase {
         // when & then
         XCTAssertThrowsError(try sut.parse(&input))
         XCTAssertEqual("\(C.Parsing.Keywords.shuffle)", input)
+    }
+
+    func test_givenInputWithoutExpectedWhitespace_whenParse_thenThrowsErrorAndInputEqualsExpectedRemainder() {
+        // given
+        let inputData = [
+            "\(C.Parsing.Keywords.compress)\(C.Parsing.Keywords.using) \(Algorithm.lz4.description)",
+            "\(C.Parsing.Keywords.compress) \(C.Parsing.Keywords.using)\(Algorithm.lz4.description)"
+        ]
+
+        // when & then
+        let expectedRemainders = [
+            "\(C.Parsing.Keywords.using) \(Algorithm.lz4.description)",
+            "\(Algorithm.lz4.description)"
+        ]
+        for idx in inputData.indices {
+            var input = inputData[idx][...]
+            XCTAssertThrowsError(try sut.parse(&input))
+            XCTAssertEqual(expectedRemainders[idx][...], input)
+        }
+    }
+
+    func test_givenInputWithVerticalWhitespace_whenParse_thenThrowsErrorAndInputEqualsExpectedRemainder() {
+        // given
+        let inputData = [
+            """
+
+            \(C.Parsing.Keywords.compress)
+            """,
+            """
+            \(C.Parsing.Keywords.compress)
+            \(C.Parsing.Keywords.using)
+            """,
+            """
+            \(C.Parsing.Keywords.compress) \(C.Parsing.Keywords.using)
+            \(Algorithm.lz4.description)
+            """
+        ]
+
+        // when & then
+        let expectedRemainders = [
+            """
+
+            \(C.Parsing.Keywords.compress)
+            """,
+            """
+
+            \(C.Parsing.Keywords.using)
+            """,
+            """
+
+            \(Algorithm.lz4.description)
+            """
+        ]
+        for idx in inputData.indices {
+            var input = inputData[idx][...]
+            XCTAssertThrowsError(try sut.parse(&input))
+            XCTAssertEqual(expectedRemainders[idx][...], input)
+        }
     }
 
     func test_givenInputWithUnexpectedTrailingData_whenParse_thenThrowsErrorAndInputEqualsTrailingData() {

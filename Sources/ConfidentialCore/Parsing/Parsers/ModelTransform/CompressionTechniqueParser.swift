@@ -8,13 +8,13 @@ struct CompressionTechniqueParser: Parser {
     private typealias Algorithm = Obfuscation.Compression.CompressionAlgorithm
 
     func parse(_ input: inout Substring) throws -> Technique {
-        try Parse {
+        try Parse(Technique.compression(algorithm:)) {
             Parse {
-                Whitespace()
+                Whitespace(.horizontal)
                 C.Parsing.Keywords.compress
-                Whitespace(1...)
+                Whitespace(1..., .horizontal)
                 C.Parsing.Keywords.using
-                Whitespace(1...)
+                Whitespace(1..., .horizontal)
             }
             OneOf {
                 for algorithm in Algorithm.allCases {
@@ -22,8 +22,6 @@ struct CompressionTechniqueParser: Parser {
                 }
             }
             End()
-        }.map {
-            .compression(algorithm: $0)
         }.parse(&input)
     }
 }

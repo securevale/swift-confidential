@@ -12,7 +12,7 @@ final class RandomizationTechniqueParserTests: XCTestCase {
     override func setUp() {
         super.setUp()
         generateNonceSpy = .init(result: nonceStub)
-        sut = .init(generateNonce: generateNonceSpy.closureWithError)
+        sut = .init(generateNonce: try self.generateNonceSpy.closureWithError())
     }
 
     override func tearDown() {
@@ -22,6 +22,19 @@ final class RandomizationTechniqueParserTests: XCTestCase {
     }
 
     func test_givenValidInput_whenParse_thenReturnsExpectedEnumValueAndInputIsEmpty() throws {
+        // given
+        var input = "\(C.Parsing.Keywords.shuffle)"[...]
+
+        // when
+        let technique = try sut.parse(&input)
+
+        // then
+        XCTAssertEqual(.randomization(nonce: nonceStub), technique)
+        XCTAssertEqual(1, generateNonceSpy.callCount)
+        XCTAssertTrue(input.isEmpty)
+    }
+
+    func test_givenValidInputWithExtraWhitespaces_whenParse_thenReturnsExpectedEnumValueAndInputIsEmpty() throws {
         // given
         var input = "   \(C.Parsing.Keywords.shuffle)"[...]
 
@@ -42,6 +55,24 @@ final class RandomizationTechniqueParserTests: XCTestCase {
         XCTAssertThrowsError(try sut.parse(&input))
         XCTAssertEqual(.zero, generateNonceSpy.callCount)
         XCTAssertEqual("\(C.Parsing.Keywords.compress)", input)
+    }
+
+    func test_givenInputWithLeadingVerticalWhitespace_whenParse_thenThrowsErrorAndInputLeftIntact() {
+        // given
+        var input = """
+
+                    \(C.Parsing.Keywords.shuffle)
+                    """[...]
+
+        // when & then
+        XCTAssertThrowsError(try sut.parse(&input))
+        XCTAssertEqual(
+            """
+
+            \(C.Parsing.Keywords.shuffle)
+            """,
+            input
+        )
     }
 
     func test_givenInputWithUnexpectedTrailingData_whenParse_thenThrowsErrorAndInputEqualsTrailingData() {

@@ -20,30 +20,35 @@ struct SecretNamespaceParser: Parser {
         }
 
         return try Parse {
-            Whitespace()
+            Whitespace(.horizontal)
             OneOf {
                 C.Parsing.Keywords.create.map { NamespaceKind.create }
                 C.Parsing.Keywords.extend.map { NamespaceKind.extend }
             }
         }.flatMap { namespaceKind in
             Always(namespaceKind)
-            Whitespace()
+            Whitespace(1..., .horizontal)
             Prefix(1...) { !$0.isWhitespace }
             if case .extend = namespaceKind {
-                Optionally {
-                    Whitespace()
-                    C.Parsing.Keywords.from
-                    Whitespace()
-                    Prefix(1...) { !$0.isWhitespace }
+                OneOf {
+                    Parse(Substring?.some) {
+                        Whitespace(1..., .horizontal)
+                        C.Parsing.Keywords.from
+                        Whitespace(1..., .horizontal)
+                        Prefix(1...) { !$0.isWhitespace }
+                        End()
+                    }
+                    End().map { Substring?.none }
                 }
+            } else {
+                End().map { Substring?.none }
             }
-            End()
         }.map { namespaceKind, identifier, moduleName -> Namespace in
             switch namespaceKind {
             case .create:
                 return .create(identifier: .init(identifier))
             case .extend:
-                return .extend(identifier: .init(identifier), moduleName: moduleName?.map(String.init))
+                return .extend(identifier: .init(identifier), moduleName: moduleName.map(String.init))
             }
         }.parse(&input)
     }

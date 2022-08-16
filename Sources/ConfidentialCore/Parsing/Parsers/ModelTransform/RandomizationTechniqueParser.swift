@@ -7,13 +7,13 @@ struct RandomizationTechniqueParser: Parser {
 
     private let generateNonce: GenerateNonce
 
-    init(generateNonce: @escaping GenerateNonce = { try UInt64.secureRandom() }) {
+    init(generateNonce: @autoclosure @escaping GenerateNonce = try UInt64.secureRandom()) {
         self.generateNonce = generateNonce
     }
 
     func parse(_ input: inout Substring) throws -> Technique {
         try Parse {
-            Whitespace()
+            Whitespace(.horizontal)
             C.Parsing.Keywords.shuffle
             End()
         }.parse(&input)

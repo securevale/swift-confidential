@@ -20,7 +20,7 @@ final class SecretNamespaceParserTests: XCTestCase {
         super.tearDown()
     }
 
-    func test_givenValidInputData_whenParse_thenReturnsExpectedEnumValuesAndInputIsEmpty() throws {
+    func test_givenValidInput_whenParse_thenReturnsExpectedEnumValueAndInputIsEmpty() throws {
         // given
         var inputData = [
             ""[...],
@@ -51,7 +51,7 @@ final class SecretNamespaceParserTests: XCTestCase {
 
     func test_givenValidInputWithExtraWhitespaces_whenParse_thenReturnsExpectedEnumValueAndInputIsEmpty() throws {
         // given
-        var input = " \(C.Parsing.Keywords.extend) \(secretsNamespaceStub)   \(C.Parsing.Keywords.from) \(secretModuleStub)"[...]
+        var input = " \(C.Parsing.Keywords.extend)  \(secretsNamespaceStub)   \(C.Parsing.Keywords.from)  \(secretModuleStub)"[...]
 
         // when
         let namespace = try sut.parse(&input)
@@ -68,6 +68,76 @@ final class SecretNamespaceParserTests: XCTestCase {
         // when & then
         XCTAssertThrowsError(try sut.parse(&input))
         XCTAssertEqual("\(C.Parsing.Keywords.shuffle)", input)
+    }
+
+    func test_givenInputWithoutExpectedWhitespace_whenParse_thenThrowsErrorAndInputEqualsExpectedRemainder() {
+        // given
+        let inputData = [
+            "\(C.Parsing.Keywords.create)\(secretsNamespaceStub)",
+            "\(C.Parsing.Keywords.extend)\(secretsNamespaceStub)",
+            "\(C.Parsing.Keywords.extend) \(secretsNamespaceStub)\(C.Parsing.Keywords.from) \(secretModuleStub)",
+            "\(C.Parsing.Keywords.extend) \(secretsNamespaceStub) \(C.Parsing.Keywords.from)\(secretModuleStub)"
+        ]
+
+        // when & then
+        let expectedRemainders = [
+            "\(secretsNamespaceStub)",
+            "\(secretsNamespaceStub)",
+            " \(secretModuleStub)",
+            " \(C.Parsing.Keywords.from)\(secretModuleStub)"
+        ]
+        for idx in inputData.indices {
+            var input = inputData[idx][...]
+            XCTAssertThrowsError(try sut.parse(&input))
+            XCTAssertEqual(expectedRemainders[idx][...], input)
+        }
+    }
+
+    func test_givenInputWithVerticalWhitespace_whenParse_thenThrowsErrorAndInputEqualsExpectedRemainder() {
+        // given
+        let inputData = [
+            """
+
+            \(C.Parsing.Keywords.extend)
+            """,
+            """
+            \(C.Parsing.Keywords.extend)
+            \(secretsNamespaceStub)
+            """,
+            """
+            \(C.Parsing.Keywords.extend) \(secretsNamespaceStub)
+            \(C.Parsing.Keywords.from)
+            """,
+            """
+            \(C.Parsing.Keywords.extend) \(secretsNamespaceStub) \(C.Parsing.Keywords.from)
+            \(secretModuleStub)
+            """
+        ]
+
+        // when & then
+        let expectedRemainders = [
+            """
+
+            \(C.Parsing.Keywords.extend)
+            """,
+            """
+
+            \(secretsNamespaceStub)
+            """,
+            """
+
+            \(C.Parsing.Keywords.from)
+            """,
+            """
+             \(C.Parsing.Keywords.from)
+            \(secretModuleStub)
+            """
+        ]
+        for idx in inputData.indices {
+            var input = inputData[idx][...]
+            XCTAssertThrowsError(try sut.parse(&input))
+            XCTAssertEqual(expectedRemainders[idx][...], input)
+        }
     }
 
     func test_givenInputWithUnexpectedTrailingData_whenParse_thenThrowsErrorAndInputEqualsTrailingData() {

@@ -8,13 +8,13 @@ struct EncryptionTechniqueParser: Parser {
     private typealias Algorithm = Obfuscation.Encryption.SymmetricEncryptionAlgorithm
 
     func parse(_ input: inout Substring) throws -> Technique {
-        try Parse {
+        try Parse(Technique.encryption(algorithm:)) {
             Parse {
-                Whitespace()
+                Whitespace(.horizontal)
                 C.Parsing.Keywords.encrypt
-                Whitespace(1...)
+                Whitespace(1..., .horizontal)
                 C.Parsing.Keywords.using
-                Whitespace(1...)
+                Whitespace(1..., .horizontal)
             }
             OneOf {
                 for algorithm in Algorithm.allCases {
@@ -22,8 +22,6 @@ struct EncryptionTechniqueParser: Parser {
                 }
             }
             End()
-        }.map {
-            .encryption(algorithm: $0)
         }.parse(&input)
     }
 }
