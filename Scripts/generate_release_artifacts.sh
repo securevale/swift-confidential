@@ -26,6 +26,12 @@ readonly SWIFT_BUILD_DIR_NAME=".build"
 
 readonly UNIVERSAL_BIN_DIR_ABS_PATH="$SCRIPT_ABS_PATH/../$SWIFT_BUILD_DIR_NAME/universal"
 
+# In general, the package identifier shall not be changed for the OS X Installer 
+# to recognize a package as being an upgrade to an already-installed package.
+readonly PACKAGE_IDENTIFIER_PREFIX="com.securevale."
+readonly PACKAGE_INSTALL_LOCATION="/usr/local/bin"
+readonly PACKAGE_MIN_OS_VERSION="10.15"
+
 readonly LICENSE_ABS_PATH="$SCRIPT_ABS_PATH/../LICENSE"
 readonly ARTIFACT_BUNDLE_INFO_TEMPLATE_ABS_PATH="$SCRIPT_TEMPLATES_ABS_PATH/artifactbundle-info.json.template"
 
@@ -65,9 +71,13 @@ ${BOLD}DESCRIPTION${NORMAL}
     Generated artifacts include:
         • The zip archive containing SwiftPM artifact bundle with ${BOLD}$PRODUCT_CONFIDENTIAL${NORMAL} CLI tool
           binary for macOS.
+        • The macOS installer package for installing ${BOLD}$PRODUCT_CONFIDENTIAL${NORMAL} CLI tool on the host 
+          machine.
 
 ${BOLD}DEPENDENCIES${NORMAL}
     The ${BOLD}$SCRIPT_NAME${NORMAL} script has the following dependencies:
+        • ${BOLD}macOS 12 or newer${NORMAL} - the script uses optimization options that are not
+          available on older systems.
         • ${BOLD}Bash 4.2 or newer${NORMAL} - you can upgrade Bash with ${UNDERLINE}upgrade_bash.sh${NORMAL} script.
         • ${BOLD}Swift 5.6${NORMAL} - Swift toolchain comes bundled with Xcode.
 
@@ -153,10 +163,13 @@ function build_product() {
 }
 
 function build_universal_binary() {
+    echo "----------------------- UNIVERSAL BINARY -----------------------"
+
     local -r product="$1"
-    echo_progress "Building $product product for $SWIFT_BUILD_ARCH_X86 architecture"
+
+    echo_progress "Building ${BOLD}$product${NORMAL} product for $SWIFT_BUILD_ARCH_X86 architecture"
     local -r x86_bin_path=$(build_product "$product" "$SWIFT_BUILD_ARCH_X86")
-    echo_progress "Building $product product for $SWIFT_BUILD_ARCH_ARM architecture"
+    echo_progress "Building ${BOLD}$product${NORMAL} product for $SWIFT_BUILD_ARCH_ARM architecture"
     local -r arm_bin_path=$(build_product "$product" "$SWIFT_BUILD_ARCH_ARM")
 
     echo_progress "Creating fat binary for $SWIFT_BUILD_ARCH_X86+$SWIFT_BUILD_ARCH_ARM"
@@ -164,13 +177,14 @@ function build_universal_binary() {
     UNIVERSAL_BIN_ABS_PATH="$UNIVERSAL_BIN_DIR_ABS_PATH/$product"
     lipo "$x86_bin_path" "$arm_bin_path" -create -output "$UNIVERSAL_BIN_ABS_PATH"
     strip -rSTx "$UNIVERSAL_BIN_ABS_PATH"
+
+    echo "--------------------- END UNIVERSAL BINARY ---------------------"
 }
 
 function spm_artifactbundle() {
     echo "---------------------- SPM ARTIFACT BUNDLE ---------------------"
 
     local -r product="$1"
-    build_universal_binary "$product"
 
     echo_progress "Generating SPM artifact bundle"
     local -r bundle_name="$product.artifactbundle"
@@ -187,13 +201,40 @@ function spm_artifactbundle() {
     local -r bundle_archive_name="${product^}Binary-macos.artifactbundle.zip"
     pushd_quiet "$TMP_DIR_PATH"
     zip -qr "$RELEASE_DIR_ABS_PATH/$bundle_archive_name" "$bundle_name"
+    echo -e "Output:\n${BOLD}$RELEASE_DIR_NAME/$bundle_archive_name${NORMAL}"
     popd_quiet
 
     pushd_quiet "$SCRIPT_ABS_PATH/.."
-    echo -e "Bundle checksum:\n$(swift package compute-checksum "./$RELEASE_DIR_NAME/$bundle_archive_name")"
+    echo -e "Bundle checksum:\n${BOLD}$(swift package compute-checksum "./$RELEASE_DIR_NAME/$bundle_archive_name")${NORMAL}"
     popd_quiet
 
     echo "-------------------- END SPM ARTIFACT BUNDLE -------------------"
+}
+
+function installer_package() {
+    echo "----------------------- INSTALLER PACKAGE ----------------------"
+
+    local -r product="$1"
+
+    echo_progress "Preparing package contents"
+    local -r package_root="$TMP_DIR_PATH/$product.pkgroot"
+    mkdir -p "$package_root"
+    cp -f "$UNIVERSAL_BIN_ABS_PATH" "$package_root"
+
+    echo_progress "Building macOS Installer component package"
+    local -r package_name="${product^}.pkg"
+    pkgbuild \
+        --identifier "$PACKAGE_IDENTIFIER_PREFIX$product" \
+        --install-location "$PACKAGE_INSTALL_LOCATION" \
+        --root "$package_root" \
+        --version "$VERSION_STRING" \
+        --min-os-version "$PACKAGE_MIN_OS_VERSION" \
+        --compression latest \
+        --quiet \
+        "$RELEASE_DIR_ABS_PATH/$package_name"
+    echo -e "Output:\n${BOLD}$RELEASE_DIR_NAME/$package_name${NORMAL}"
+
+    echo "--------------------- END INSTALLER PACKAGE --------------------"
 }
 
 ###################
@@ -221,4 +262,6 @@ trap clean_up EXIT
 
 set_up
 
+build_universal_binary "$PRODUCT_CONFIDENTIAL"
 spm_artifactbundle "$PRODUCT_CONFIDENTIAL"
+installer_package "$PRODUCT_CONFIDENTIAL"
