@@ -59,7 +59,8 @@ private extension DeobfuscateDataFunctionDeclParser {
             expression: FunctionCallExpr(
                 calledExpression: deobfuscateFunctionAccessExpr(
                     for: obfuscationStep.technique,
-                    indentWidth: calledExprIndentWidth),
+                    indentWidth: calledExprIndentWidth
+                ),
                 leftParen: .leftParen,
                 rightParen: .rightParen,
                 argumentListBuilder: {

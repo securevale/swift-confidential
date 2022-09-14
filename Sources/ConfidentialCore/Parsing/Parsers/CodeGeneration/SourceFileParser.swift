@@ -5,9 +5,9 @@ import SwiftSyntaxBuilder
 
 public struct SourceFileParser<CodeBlockParsers: Parser>: Parser
 where
-CodeBlockParsers.Input == SourceSpecification,
-CodeBlockParsers.Output == [ExpressibleAsCodeBlockItem]
-{
+    CodeBlockParsers.Input == SourceSpecification,
+    CodeBlockParsers.Output == [ExpressibleAsCodeBlockItem]
+{ // swiftlint:disable:this opening_brace
 
     private let codeBlockParsers: CodeBlockParsers
 
@@ -17,8 +17,7 @@ CodeBlockParsers.Output == [ExpressibleAsCodeBlockItem]
 
     public func parse(_ input: inout SourceSpecification) throws -> SourceFileText {
         var statements = Self.makeModuleImportList(from: input.secrets.namespaces)
-            .enumerated()
-            .map { idx, moduleName -> ExpressibleAsCodeBlockItem in
+            .map { moduleName -> ExpressibleAsCodeBlockItem in
                 ImportDecl(
                     path: AccessPath([AccessPathComponent(name: .identifier(moduleName))])
                 )
@@ -27,10 +26,12 @@ CodeBlockParsers.Output == [ExpressibleAsCodeBlockItem]
             contentsOf: try codeBlockParsers.parse(&input)
         )
 
-        return .init(from: SourceFile(
-            statements: CodeBlockItemList(statements),
-            eofToken: .eof
-        ))
+        return .init(
+            from: SourceFile(
+                statements: CodeBlockItemList(statements),
+                eofToken: .eof
+            )
+        )
     }
 }
 
@@ -38,7 +39,7 @@ private extension SourceFileParser {
 
     static func makeModuleImportList<Namespaces: Collection>(from namespaces: Namespaces) -> [String]
     where
-    Namespaces.Element == SourceSpecification.Secret.Namespace
+        Namespaces.Element == SourceSpecification.Secret.Namespace
     {
         let confidentialKitModuleName = TypeInfo(of: Obfuscation.self).moduleName
         let foundationModuleName = TypeInfo(of: Data.self).moduleName

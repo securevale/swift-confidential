@@ -11,7 +11,7 @@ final class FixedWidthInteger_ByteWidthTests: XCTestCase {
         ]
 
         // when
-        let byteWidths = types.map { ($0 as! FixedWidthInteger.Type).byteWidth }
+        let byteWidths = types.map { ($0 as! any FixedWidthInteger.Type).byteWidth }
 
         // then
         XCTAssertEqual(

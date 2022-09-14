@@ -3,11 +3,11 @@ import SwiftSyntaxBuilder
 
 struct NamespaceDeclParser<MembersParser: Parser, DeobfuscateDataFunctionDeclParser: Parser>: Parser
 where
-MembersParser.Input == ArraySlice<SourceSpecification.Secret>,
-MembersParser.Output == [ExpressibleAsMemberDeclListItem],
-DeobfuscateDataFunctionDeclParser.Input == SourceSpecification.Algorithm,
-DeobfuscateDataFunctionDeclParser.Output == ExpressibleAsMemberDeclListItem
-{
+    MembersParser.Input == ArraySlice<SourceSpecification.Secret>,
+    MembersParser.Output == [ExpressibleAsMemberDeclListItem],
+    DeobfuscateDataFunctionDeclParser.Input == SourceSpecification.Algorithm,
+    DeobfuscateDataFunctionDeclParser.Output == ExpressibleAsMemberDeclListItem
+{ // swiftlint:disable:this opening_brace
 
     private let membersParser: MembersParser
     private let deobfuscateDataFunctionDeclParser: DeobfuscateDataFunctionDeclParser

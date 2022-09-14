@@ -2,11 +2,11 @@ import Parsing
 
 public struct SourceSpecificationParser<AlgorithmParser: Parser, SecretsParser: Parser>: Parser
 where
-AlgorithmParser.Input == Configuration,
-AlgorithmParser.Output == SourceSpecification.Algorithm,
-SecretsParser.Input == Configuration,
-SecretsParser.Output == SourceSpecification.Secrets
-{
+    AlgorithmParser.Input == Configuration,
+    AlgorithmParser.Output == SourceSpecification.Algorithm,
+    SecretsParser.Input == Configuration,
+    SecretsParser.Output == SourceSpecification.Secrets
+{ // swiftlint:disable:this opening_brace
 
     private let algorithmParser: AlgorithmParser
     private let secretsParser: SecretsParser

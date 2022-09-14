@@ -18,7 +18,7 @@ extension Obfuscation.Encryption.DataCrypter: DataObfuscationStep {
              See https://developer.apple.com/documentation/cryptokit/aes/gcm/sealedbox
              for more details
              */
-            obfuscatedData = sealedBox.combined!
+            obfuscatedData = sealedBox.combined! // swiftlint:disable:this force_unwrapping
         case .chaChaPoly:
             let sealedBox = try ChaChaPoly.seal(data, using: key, nonce: .init())
             obfuscatedData = sealedBox.combined

@@ -12,11 +12,22 @@ on:
   workflow_dispatch:
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: macos-12
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Lint Swift Code
+        run: swiftlint lint --strict --reporter github-actions-logging
+
   tests:
     name: Tests
     runs-on: macos-12
     env:
-      DEVELOPER_DIR: "/Applications/Xcode_13.4.1.app/Contents/Developer"
+      DEVELOPER_DIR: "/Applications/Xcode_14.0.app/Contents/Developer"
 
     steps:
       - name: Runner Overview

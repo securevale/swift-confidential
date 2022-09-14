@@ -1,0 +1,29 @@
+####################
+#   RULES STATE    #
+####################
+
+disabled_rules:
+  - force_cast
+  - force_try
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+
+opt_in_rules:
+  - single_test_class
+  - test_case_accessibility
+  - xct_specific_matcher
+
+####################
+#   RULES CONFIG   #
+####################
+
+### Idiomatic ###
+type_name:
+  max_length: 60
+  allowed_symbols: 
+    - "_"
+
+### Metrics ###
+line_length:
+  ignores_function_declarations: true
+  ignores_interpolated_strings: true

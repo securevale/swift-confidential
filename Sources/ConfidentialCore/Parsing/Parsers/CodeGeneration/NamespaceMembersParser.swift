@@ -3,9 +3,9 @@ import SwiftSyntaxBuilder
 
 struct NamespaceMembersParser<SecretDeclParser: Parser>: Parser
 where
-SecretDeclParser.Input == SourceSpecification.Secret,
-SecretDeclParser.Output == ExpressibleAsSecretDecl
-{
+    SecretDeclParser.Input == SourceSpecification.Secret,
+    SecretDeclParser.Output == ExpressibleAsSecretDecl
+{ // swiftlint:disable:this opening_brace
 
     private let secretDeclParser: SecretDeclParser
 
@@ -24,7 +24,7 @@ SecretDeclParser.Output == ExpressibleAsSecretDecl
                 return decl
             }
             input.removeFirst(parsedSecretsCount)
-        } catch let error {
+        } catch {
             input.removeFirst(parsedSecretsCount)
             throw error
         }

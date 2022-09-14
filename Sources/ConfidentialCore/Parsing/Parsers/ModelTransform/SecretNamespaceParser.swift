@@ -25,7 +25,8 @@ struct SecretNamespaceParser: Parser {
                 C.Parsing.Keywords.create.map { NamespaceKind.create }
                 C.Parsing.Keywords.extend.map { NamespaceKind.extend }
             }
-        }.flatMap { namespaceKind in
+        }
+        .flatMap { namespaceKind in
             Always(namespaceKind)
             Whitespace(1..., .horizontal)
             Prefix(1...) { !$0.isWhitespace }
@@ -43,13 +44,15 @@ struct SecretNamespaceParser: Parser {
             } else {
                 End().map { Substring?.none }
             }
-        }.map { namespaceKind, identifier, moduleName -> Namespace in
+        }
+        .map { namespaceKind, identifier, moduleName -> Namespace in
             switch namespaceKind {
             case .create:
                 return .create(identifier: .init(identifier))
             case .extend:
                 return .extend(identifier: .init(identifier), moduleName: moduleName.map(String.init))
             }
-        }.parse(&input)
+        }
+        .parse(&input)
     }
 }

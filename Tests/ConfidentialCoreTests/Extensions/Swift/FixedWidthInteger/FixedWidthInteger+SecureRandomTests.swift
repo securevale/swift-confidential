@@ -11,7 +11,7 @@ final class FixedWidthInteger_SecureRandomTests: XCTestCase {
         ]
 
         // when
-        let values = try types.map { try ($0 as! FixedWidthInteger.Type).secureRandom() }
+        let values = try types.map { try ($0 as! any FixedWidthInteger.Type).secureRandom() }
 
         // then
         values.forEach {

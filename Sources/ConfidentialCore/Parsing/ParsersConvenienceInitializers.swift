@@ -6,10 +6,13 @@ public typealias AnySecretsParser = AnyParser<Configuration, SourceSpecification
 
 public extension Parsers.ModelTransform.SourceSpecification
 where
-AlgorithmParser == AnyAlgorithmParser,
-SecretsParser == AnySecretsParser {
+    AlgorithmParser == AnyAlgorithmParser,
+    SecretsParser == AnySecretsParser
+{ // swiftlint:disable:this opening_brace
 
-    private typealias OneOfManyTechniques = Parsers.OneOfMany<AnyParser<Substring, SourceSpecification.ObfuscationStep.Technique>>
+    private typealias OneOfManyTechniques = Parsers.OneOfMany<
+        AnyParser<Substring, SourceSpecification.ObfuscationStep.Technique>
+    >
 
     init() {
         self.init(
@@ -19,10 +22,12 @@ SecretsParser == AnySecretsParser {
                     EncryptionTechniqueParser().eraseToAnyParser()
                     RandomizationTechniqueParser().eraseToAnyParser()
                 }
-            ).eraseToAnyParser(),
+            )
+            .eraseToAnyParser(),
             secretsParser: ConfidentialCore.SecretsParser(
                 namespaceParser: SecretNamespaceParser()
-            ).eraseToAnyParser()
+            )
+            .eraseToAnyParser()
         )
     }
 }
@@ -31,7 +36,8 @@ public typealias AnyCodeBlockParser = AnyParser<SourceSpecification, [Expressibl
 
 public extension Parsers.CodeGeneration.SourceFile
 where
-CodeBlockParsers == AnyCodeBlockParser {
+    CodeBlockParsers == AnyCodeBlockParser
+{ // swiftlint:disable:this opening_brace
 
     init() {
         self.init {
@@ -40,7 +46,8 @@ CodeBlockParsers == AnyCodeBlockParser {
                     secretDeclParser: SecretDeclParser()
                 ),
                 deobfuscateDataFunctionDeclParser: DeobfuscateDataFunctionDeclParser(functionNestingLevel: 1)
-            ).eraseToAnyParser()
+            )
+            .eraseToAnyParser()
         }
     }
 }

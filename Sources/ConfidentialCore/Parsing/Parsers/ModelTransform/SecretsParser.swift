@@ -4,9 +4,10 @@ import Parsing
 
 struct SecretsParser<NamespaceParser: Parser>: Parser
 where
-NamespaceParser.Input == Substring,
-NamespaceParser.Output == SourceSpecification.Secret.Namespace
-{
+    NamespaceParser.Input == Substring,
+    NamespaceParser.Output == SourceSpecification.Secret.Namespace
+{ // swiftlint:disable:this opening_brace
+
     typealias Secrets = SourceSpecification.Secrets
 
     private let namespaceParser: NamespaceParser
@@ -47,7 +48,7 @@ NamespaceParser.Output == SourceSpecification.Secret.Namespace
                 }
             })
             input.secrets.removeFirst(parsedSecretsCount)
-        } catch let error {
+        } catch {
             input.secrets.removeFirst(parsedSecretsCount)
             throw error
         }
@@ -58,7 +59,9 @@ NamespaceParser.Output == SourceSpecification.Secret.Namespace
 
 private extension SecretsParser {
 
-    func dataAccessWrapperInfo(for value: Configuration.Secret.Value) -> SourceSpecification.Secret.DataAccessWrapperInfo {
+    func dataAccessWrapperInfo(for value: Configuration.Secret.Value)
+        -> SourceSpecification.Secret.DataAccessWrapperInfo
+    {
         typealias DataTypes = Configuration.Secret.Value.DataTypes
 
         let typeInfo: TypeInfo

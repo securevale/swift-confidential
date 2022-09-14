@@ -3,9 +3,9 @@ import SwiftSyntaxBuilder
 
 public struct ExpressibleAsCodeBlockItemFlatMap<P: Parser>: Parser
 where
-P.Input == SourceSpecification,
-P.Output == [ExpressibleAsCodeBlockItem]
-{
+    P.Input == SourceSpecification,
+    P.Output == [ExpressibleAsCodeBlockItem]
+{ // swiftlint:disable:this opening_brace
 
     private let parsers: [P]
 
@@ -31,8 +31,9 @@ extension OneOfBuilder {
 
     static func buildBlock<P>(_ parsers: P...) -> Parsers.OneOfMany<P>
     where
-    P.Input == Substring,
-    P.Output == SourceSpecification.ObfuscationStep.Technique {
+        P.Input == Substring,
+        P.Output == SourceSpecification.ObfuscationStep.Technique
+    {
         .init(parsers)
     }
 }

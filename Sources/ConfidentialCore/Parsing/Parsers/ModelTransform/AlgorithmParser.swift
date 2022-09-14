@@ -2,9 +2,10 @@ import Parsing
 
 struct AlgorithmParser<ObfuscationStepParser: Parser>: Parser
 where
-ObfuscationStepParser.Input == Substring,
-ObfuscationStepParser.Output == SourceSpecification.ObfuscationStep
-{
+    ObfuscationStepParser.Input == Substring,
+    ObfuscationStepParser.Output == SourceSpecification.ObfuscationStep
+{ // swiftlint:disable:this opening_brace
+
     typealias Algorithm = SourceSpecification.Algorithm
 
     private let obfuscationStepParser: ObfuscationStepParser
@@ -24,7 +25,7 @@ ObfuscationStepParser.Output == SourceSpecification.ObfuscationStep
                 steps.append(obfuscationStep)
             })
             input.algorithm.removeFirst(parsedObfuscationStepsCount)
-        } catch let error {
+        } catch {
             input.algorithm.removeFirst(parsedObfuscationStepsCount)
             throw error
         }

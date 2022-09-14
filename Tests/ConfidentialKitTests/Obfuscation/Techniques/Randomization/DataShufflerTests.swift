@@ -27,7 +27,7 @@ final class DataShufflerTests: XCTestCase {
             .init([0x55, 0x2a, 0x49, 0x30])
         ]
         let count = Int(4 ^ nonce)
-        let shuffledIndexes = [3,0,2,1]
+        let shuffledIndexes = [3, 0, 2, 1]
         let shuffledData = plainData.enumerated().map { idx, data -> Data in
             let dataBytes = reorderBytes(.init(data), given: shuffledIndexes)
             let indexesByteWidth = UInt8(1 << idx)

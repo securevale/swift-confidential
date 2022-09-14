@@ -11,7 +11,7 @@ final class BinaryInteger_BytesTests: XCTestCase {
         ]
 
         // when
-        let bytes = integers.map { ($0 as! FixedWidthInteger).littleEndian.bytes }
+        let bytes = integers.map { ($0 as! any FixedWidthInteger).littleEndian.bytes }
 
         // then
         XCTAssertEqual(

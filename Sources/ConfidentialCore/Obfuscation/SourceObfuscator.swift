@@ -38,10 +38,10 @@ private extension SourceObfuscator {
         algorithm
             .map(\.technique)
             .map(obfuscationStepResolver.obfuscationStep(for:))
-            .reduce({ $0 }) { partialFunc, step in
+            .reduce({ $0 }, { partialFunc, step in
                 return {
                     try step.obfuscate(partialFunc($0))
                 }
-            }
+            })
     }
 }
