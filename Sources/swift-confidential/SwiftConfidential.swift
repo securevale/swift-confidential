@@ -1,10 +1,10 @@
 import ArgumentParser
 
 @main
-struct Confidential: ParsableCommand {
+struct SwiftConfidential: ParsableCommand {
 
     static let configuration = CommandConfiguration(
-        commandName: "confidential",
+        commandName: "swift-confidential",
         abstract: "A command-line tool to obfuscate secret literals embedded in Swift project.",
         subcommands: [
             Obfuscate.self

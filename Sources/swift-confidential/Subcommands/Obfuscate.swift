@@ -3,7 +3,7 @@ import ConfidentialCore
 import Foundation
 import Yams
 
-extension Confidential {
+extension SwiftConfidential {
 
     struct Obfuscate: ParsableCommand {
 

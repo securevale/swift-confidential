@@ -18,7 +18,7 @@ readonly SCRIPT_TEMPLATES_ABS_PATH="$SCRIPT_ABS_PATH/Templates"
 readonly OPTION_HELP_SHORT="-h"
 readonly OPTION_HELP="--help"
 
-readonly PRODUCT_CONFIDENTIAL="confidential"
+readonly PRODUCT_SWIFT_CONFIDENTIAL="swift-confidential"
 
 readonly SWIFT_BUILD_ARCH_X86="x86_64"
 readonly SWIFT_BUILD_ARCH_ARM="arm64" 
@@ -69,9 +69,9 @@ ${BOLD}DESCRIPTION${NORMAL}
     ${BOLD}$RELEASE_DIR_NAME${NORMAL} directory located in the package's root directory.
 
     Generated artifacts include:
-        • The zip archive containing SwiftPM artifact bundle with ${BOLD}$PRODUCT_CONFIDENTIAL${NORMAL} CLI tool
+        • The zip archive containing SwiftPM artifact bundle with ${BOLD}$PRODUCT_SWIFT_CONFIDENTIAL${NORMAL} CLI tool
           binary for macOS.
-        • The macOS installer package for installing ${BOLD}$PRODUCT_CONFIDENTIAL${NORMAL} CLI tool on the host 
+        • The macOS installer package for installing ${BOLD}$PRODUCT_SWIFT_CONFIDENTIAL${NORMAL} CLI tool on the host 
           machine.
 
 ${BOLD}DEPENDENCIES${NORMAL}
@@ -151,6 +151,13 @@ function clean_up() {
     echo "------------------------- END CLEAN UP -------------------------"
 }
 
+function friendly_product_name() {
+    local IFS=" "; read -r -a components <<< "${1//-/ }"
+    local result="${components[*]^}"
+    result="${result// /}"
+    echo "$result"
+}
+
 function swift_build_cmd() {
     echo "swift build --product $1 --configuration release -Xlinker -dead_strip --arch $2"
 }
@@ -198,9 +205,9 @@ function spm_artifactbundle() {
     mkdir -p "$RELEASE_DIR_ABS_PATH"
 
     echo_progress "Archiving SPM artifact bundle"
-    local -r bundle_archive_name="${product^}Binary-macos.artifactbundle.zip"
+    local -r bundle_archive_name="$(friendly_product_name "$product")Binary-macos.artifactbundle.zip"
     pushd_quiet "$TMP_DIR_PATH"
-    zip -qr "$RELEASE_DIR_ABS_PATH/$bundle_archive_name" "$bundle_name"
+    zip -FSrq "$RELEASE_DIR_ABS_PATH/$bundle_archive_name" "$bundle_name"
     echo -e "Output:\n${BOLD}$RELEASE_DIR_NAME/$bundle_archive_name${NORMAL}"
     popd_quiet
 
@@ -222,7 +229,7 @@ function installer_package() {
     cp -f "$UNIVERSAL_BIN_ABS_PATH" "$package_root"
 
     echo_progress "Building macOS Installer component package"
-    local -r package_name="${product^}.pkg"
+    local -r package_name="$(friendly_product_name "$product").pkg"
     pkgbuild \
         --identifier "$PACKAGE_IDENTIFIER_PREFIX$product" \
         --install-location "$PACKAGE_INSTALL_LOCATION" \
@@ -262,6 +269,6 @@ trap clean_up EXIT
 
 set_up
 
-build_universal_binary "$PRODUCT_CONFIDENTIAL"
-spm_artifactbundle "$PRODUCT_CONFIDENTIAL"
-installer_package "$PRODUCT_CONFIDENTIAL"
+build_universal_binary "$PRODUCT_SWIFT_CONFIDENTIAL"
+spm_artifactbundle "$PRODUCT_SWIFT_CONFIDENTIAL"
+installer_package "$PRODUCT_SWIFT_CONFIDENTIAL"

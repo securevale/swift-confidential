@@ -50,7 +50,7 @@ package.targets.append(contentsOf: [
 
     // CLI Tool
     .executableTarget(
-        name: "confidential",
+        name: "swift-confidential",
         dependencies: [
             "ConfidentialCore",
             "Yams",
