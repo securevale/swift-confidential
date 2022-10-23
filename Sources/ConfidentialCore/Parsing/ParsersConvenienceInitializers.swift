@@ -25,7 +25,8 @@ where
             )
             .eraseToAnyParser(),
             secretsParser: ConfidentialCore.SecretsParser(
-                namespaceParser: SecretNamespaceParser()
+                namespaceParser: SecretNamespaceParser(),
+                accessModifierParser: SecretAccessModifierParser()
             )
             .eraseToAnyParser()
         )

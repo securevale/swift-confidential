@@ -2,22 +2,27 @@ import ConfidentialKit
 import Foundation
 import Parsing
 
-struct SecretsParser<NamespaceParser: Parser>: Parser
+struct SecretsParser<NamespaceParser: Parser, AccessModifierParser: Parser>: Parser
 where
     NamespaceParser.Input == Substring,
-    NamespaceParser.Output == SourceSpecification.Secret.Namespace
+    NamespaceParser.Output == SourceSpecification.Secret.Namespace,
+    AccessModifierParser.Input == Substring,
+    AccessModifierParser.Output == SourceSpecification.Secret.AccessModifier
 { // swiftlint:disable:this opening_brace
 
     typealias Secrets = SourceSpecification.Secrets
 
     private let namespaceParser: NamespaceParser
+    private let accessModifierParser: AccessModifierParser
     private let secretValueEncoder: DataEncoder
 
     init(
         namespaceParser: NamespaceParser,
+        accessModifierParser: AccessModifierParser,
         secretValueEncoder: DataEncoder = JSONEncoder()
     ) {
         self.namespaceParser = namespaceParser
+        self.accessModifierParser = accessModifierParser
         self.secretValueEncoder = secretValueEncoder
     }
 
@@ -34,6 +39,9 @@ where
                     secret.namespace ?? input.defaultNamespace ?? ""
                 )
                 let secret = SourceSpecification.Secret(
+                    accessModifier: try accessModifierParser.parse(
+                        secret.accessModifier ?? input.defaultAccessModifier ?? ""
+                    ),
                     name: secret.name,
                     data: try secretValueEncoder.encode(secret.value.underlyingValue),
                     dataAccessWrapperInfo: dataAccessWrapperInfo(for: secret.value)

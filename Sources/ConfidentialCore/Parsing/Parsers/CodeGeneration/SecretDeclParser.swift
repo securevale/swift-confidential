@@ -1,4 +1,5 @@
 import Parsing
+import SwiftSyntax
 import SwiftSyntaxBuilder
 
 struct SecretDeclParser: Parser {
@@ -17,6 +18,7 @@ struct SecretDeclParser: Parser {
             }
 
         return SecretDecl(
+            accessModifier: tokenSyntax(for: input.accessModifier),
             name: input.name,
             dataArgumentExpression: ArrayExpr(elements: ArrayElementList(dataArgumentElements)),
             dataAccessWrapper: dataAccessWrapper(with: input.dataAccessWrapperInfo)
@@ -25,6 +27,15 @@ struct SecretDeclParser: Parser {
 }
 
 private extension SecretDeclParser {
+
+    func tokenSyntax(for accessModifier: Secret.AccessModifier) -> TokenSyntax {
+        switch accessModifier {
+        case .internal:
+            return .internal
+        case .public:
+            return .public
+        }
+    }
 
     func dataAccessWrapper(with wrapperInfo: Secret.DataAccessWrapperInfo) -> ExpressibleAsCustomAttribute {
         CustomAttribute(

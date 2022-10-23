@@ -6,16 +6,18 @@ final class ConfigurationTests: XCTestCase {
     func test_givenJSONEncodedConfiguration_whenDecodeWithJSONDecoder_thenNoThrowAndReturnsExpectedConfigurationInstance() {
         // given
         let algorithm = ["compress using lz4", "encrypt using aes-128-gcm"]
+        let defaultAccessModifier = "internal"
         let defaultNamespace = "create Secrets"
-        let secret1 = ("secret1", "value", "extend Obfuscation.Secret from ConfidentialKit")
+        let secret1 = ("secret1", "value", "extend Obfuscation.Secret from ConfidentialKit", "public")
         let secret2 = ("secret2", ["value1", "value2"])
         let jsonConfiguration =
         """
         {
           "algorithm": [\(algorithm.map { #""\#($0)""# }.joined(separator: ","))],
+          "defaultAccessModifier": "\(defaultAccessModifier)",
           "defaultNamespace": "\(defaultNamespace)",
           "secrets": [
-            { "name": "\(secret1.0)", "value": "\(secret1.1)", "namespace": "\(secret1.2)" },
+            { "name": "\(secret1.0)", "value": "\(secret1.1)", "namespace": "\(secret1.2)", "accessModifier": "\(secret1.3)" },
             { "name": "\(secret2.0)", "value": [\(secret2.1.map { #""\#($0)""# }.joined(separator: ","))] }
           ]
         }
@@ -30,10 +32,21 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertEqual(
             Configuration(
                 algorithm: algorithm[...],
+                defaultAccessModifier: defaultAccessModifier,
                 defaultNamespace: defaultNamespace,
                 secrets: [
-                    .init(name: secret1.0, value: .singleValue(secret1.1), namespace: secret1.2),
-                    .init(name: secret2.0, value: .array(secret2.1), namespace: .none)
+                    .init(
+                        name: secret1.0,
+                        value: .singleValue(secret1.1),
+                        namespace: secret1.2,
+                        accessModifier: secret1.3
+                    ),
+                    .init(
+                        name: secret2.0,
+                        value: .array(secret2.1),
+                        namespace: .none,
+                        accessModifier: .none
+                    )
                 ][...]
             ),
             configuration

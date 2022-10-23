@@ -10,6 +10,7 @@ extension Configuration {
         ) -> Configuration {
             .init(
                 algorithm: algorithm,
+                defaultAccessModifier: .none,
                 defaultNamespace: .none,
                 secrets: secrets
             )

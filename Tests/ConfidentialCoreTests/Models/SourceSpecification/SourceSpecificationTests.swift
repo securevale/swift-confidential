@@ -3,37 +3,55 @@ import XCTest
 
 final class SourceSpecificationTests: XCTestCase {
 
-    func test_givenTwoSecretsWithSameNameAndData_whenComparedForEquality_thenTwoSecretsAreEqual() {
+    func test_givenTwoSecretsWithSameFieldValues_whenComparedForEquality_thenTwoSecretsAreEqual() {
         // given
-        let secret1 = SourceSpecification.Secret.StubFactory.makeSecret()
-        let secret2 = SourceSpecification.Secret.StubFactory.makeSecret()
+        let secret1 = SourceSpecification.Secret.StubFactory.makeInternalSecret()
+        let secret2 = SourceSpecification.Secret.StubFactory.makeInternalSecret()
 
         // when & then
         XCTAssertEqual(secret1, secret2)
     }
 
-    func test_givenTwoSecretsWithDifferentData_whenComparedForEquality_thenTwoSecretsAreNotEqual() {
+    func test_givenTwoSecretsWithDifferentAccessModifier_whenComparedForEquality_thenTwoSecretsAreNotEqual() {
         // given
-        let secret1 = SourceSpecification.Secret.StubFactory.makeSecret()
-        let secret2 = SourceSpecification.Secret.StubFactory.makeSecret(with: .init([0x20, 0x20]))
+        let secret1 = SourceSpecification.Secret.StubFactory.makeInternalSecret()
+        let secret2 = SourceSpecification.Secret.StubFactory.makePublicSecret()
 
         // when & then
         XCTAssertNotEqual(secret1, secret2)
     }
 
-    func test_givenTwoSecretsWithSameNameAndData_whenHashValue_thenReturnedHashesAreEqual() {
+    func test_givenTwoSecretsWithDifferentData_whenComparedForEquality_thenTwoSecretsAreNotEqual() {
         // given
-        let secret1 = SourceSpecification.Secret.StubFactory.makeSecret()
-        let secret2 = SourceSpecification.Secret.StubFactory.makeSecret()
+        let secret1 = SourceSpecification.Secret.StubFactory.makeInternalSecret()
+        let secret2 = SourceSpecification.Secret.StubFactory.makeInternalSecret(with: .init([0x20, 0x20]))
+
+        // when & then
+        XCTAssertNotEqual(secret1, secret2)
+    }
+
+    func test_givenTwoSecretsWithSameFieldValues_whenHashValue_thenReturnedHashesAreEqual() {
+        // given
+        let secret1 = SourceSpecification.Secret.StubFactory.makeInternalSecret()
+        let secret2 = SourceSpecification.Secret.StubFactory.makeInternalSecret()
 
         // when & then
         XCTAssertEqual(secret1.hashValue, secret2.hashValue)
     }
 
+    func test_givenTwoSecretsWithDifferentAccessModifier_whenHashValue_thenReturnedHashesAreNotEqual() {
+        // given
+        let secret1 = SourceSpecification.Secret.StubFactory.makeInternalSecret()
+        let secret2 = SourceSpecification.Secret.StubFactory.makePublicSecret()
+
+        // when & then
+        XCTAssertNotEqual(secret1.hashValue, secret2.hashValue)
+    }
+
     func test_givenTwoSecretsWithDifferentName_whenHashValue_thenReturnedHashesAreNotEqual() {
         // given
-        let secret1 = SourceSpecification.Secret.StubFactory.makeSecret(named: "secret1")
-        let secret2 = SourceSpecification.Secret.StubFactory.makeSecret(named: "secret2")
+        let secret1 = SourceSpecification.Secret.StubFactory.makeInternalSecret(named: "secret1")
+        let secret2 = SourceSpecification.Secret.StubFactory.makeInternalSecret(named: "secret2")
 
         // when & then
         XCTAssertNotEqual(secret1.hashValue, secret2.hashValue)
@@ -60,7 +78,7 @@ final class SourceSpecificationTests: XCTestCase {
     func test_givenNonEmptySecrets_whenReadValueAtNamespace_thenReturnsExpectedValue() {
         // given
         let createNamespaceKey = SourceSpecification.Secrets.Key.create(identifier: "Secrets")
-        let secret = SourceSpecification.Secret.StubFactory.makeSecret()
+        let secret = SourceSpecification.Secret.StubFactory.makeInternalSecret()
         let secrets: SourceSpecification.Secrets = [
             createNamespaceKey: [secret][...],
             SourceSpecification.Secrets.Key.extend(identifier: "Secret", moduleName: "Test"): [][...]
@@ -76,7 +94,7 @@ final class SourceSpecificationTests: XCTestCase {
     func test_givenMutableSecretsWithModifiedValueAtNamespace_whenReadValueAtNamespace_thenReturnsExpectedValue() {
         // given
         let createNamespaceKey = SourceSpecification.Secrets.Key.create(identifier: "Secrets")
-        let secret = SourceSpecification.Secret.StubFactory.makeSecret()
+        let secret = SourceSpecification.Secret.StubFactory.makeInternalSecret()
         var secrets: SourceSpecification.Secrets = [
             createNamespaceKey: [secret][...],
             SourceSpecification.Secrets.Key.extend(identifier: "Secret", moduleName: "Test"): [][...]
@@ -94,7 +112,7 @@ final class SourceSpecificationTests: XCTestCase {
         // given
         let secretsDict = [
             SourceSpecification.Secrets.Key.create(identifier: "Secrets"): [
-                SourceSpecification.Secret.StubFactory.makeSecret()
+                SourceSpecification.Secret.StubFactory.makeInternalSecret()
             ][...],
             SourceSpecification.Secrets.Key.extend(identifier: "Secret", moduleName: "Test"): [][...]
         ]
@@ -111,7 +129,7 @@ final class SourceSpecificationTests: XCTestCase {
         // given
         let secretsDict = [
             SourceSpecification.Secrets.Key.create(identifier: "Secrets"): [
-                SourceSpecification.Secret.StubFactory.makeSecret()
+                SourceSpecification.Secret.StubFactory.makeInternalSecret()
             ][...],
             SourceSpecification.Secrets.Key.extend(identifier: "Secret", moduleName: "Test"): [][...]
         ]
@@ -141,7 +159,7 @@ final class SourceSpecificationTests: XCTestCase {
     func test_givenSecretsWithOneElement_whenReadElementAtStartIndex_thenReturnsExpectedElement() {
         // given
         let key = SourceSpecification.Secrets.Key.create(identifier: "Secrets")
-        let value = [SourceSpecification.Secret.StubFactory.makeSecret()][...]
+        let value = [SourceSpecification.Secret.StubFactory.makeInternalSecret()][...]
         let secrets: SourceSpecification.Secrets = [
             key: value
         ]

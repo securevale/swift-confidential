@@ -1,4 +1,5 @@
 import Parsing
+import SwiftSyntax
 import SwiftSyntaxBuilder
 
 struct NamespaceDeclParser<MembersParser: Parser, DeobfuscateDataFunctionDeclParser: Parser>: Parser
@@ -28,26 +29,28 @@ where
                     fatalError("Unexpected source specification integrity violation")
                 }
 
-                var declarations = try membersParser.parse(&secrets)
-                declarations.append(deobfuscateDataFunctionDecl)
-                let members = MemberDeclBlock(
-                    leftBrace: .leftBrace.withLeadingTrivia(.spaces(1)),
-                    members: MemberDeclList(declarations)
-                )
                 let decl: ExpressibleAsCodeBlockItem
                 switch namespace {
                 case let .create(identifier):
+                    let accessModifier: TokenSyntax = secrets
+                        .map(\.accessModifier)
+                        .contains(.public)
+                    ? .public
+                    : .internal
                     decl = EnumDecl(
-                        enumKeyword: .enum.withLeadingTrivia(.newlines(1)),
+                        enumKeyword: .enum,
                         identifier: identifier,
-                        members: members
+                        members: try members(from: &secrets, with: deobfuscateDataFunctionDecl),
+                        modifiersBuilder: {
+                            DeclModifier(name: accessModifier.withLeadingTrivia(.newlines(1)))
+                        }
                     )
                 case let .extend(identifier, _):
                     decl = ExtensionDecl(
                         modifiers: .none,
                         extensionKeyword: .extension.withLeadingTrivia(.newlines(1)),
                         extendedType: SimpleTypeIdentifier(identifier),
-                        members: members
+                        members: try members(from: &secrets, with: deobfuscateDataFunctionDecl)
                     )
                 }
                 input.secrets[namespace] = secrets.isEmpty ? nil : secrets
@@ -56,5 +59,21 @@ where
             }
 
         return codeBlocks
+    }
+}
+
+private extension NamespaceDeclParser {
+
+    func members(
+        from secrets: inout ArraySlice<SourceSpecification.Secret>,
+        with deobfuscateDataFunctionDecl: ExpressibleAsMemberDeclListItem
+    ) throws -> MemberDeclBlock {
+        var declarations = try membersParser.parse(&secrets)
+        declarations.append(deobfuscateDataFunctionDecl)
+
+        return .init(
+            leftBrace: .leftBrace.withLeadingTrivia(.spaces(1)),
+            members: MemberDeclList(declarations)
+        )
     }
 }

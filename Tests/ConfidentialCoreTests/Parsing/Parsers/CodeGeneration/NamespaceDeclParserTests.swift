@@ -44,12 +44,14 @@ final class NamespaceDeclParserTests: XCTestCase {
 
     func test_givenSourceSpecification_whenParse_thenReturnsExpectedNamespaceDeclarationsAndSourceSpecificationIsEmpty() throws {
         // given
-        let namespaceNameStub = "Secrets"
-        let secretStub = SourceSpecification.Secret.StubFactory.makeSecret()
+        let namespaceNameStubs = ["A", "B", "C"].map { "Secrets" + $0 }
+        let internalSecretStub = SourceSpecification.Secret.StubFactory.makeInternalSecret()
+        let publicSecretStub = SourceSpecification.Secret.StubFactory.makePublicSecret()
         var sourceSpecification = SourceSpecification.StubFactory.makeSpecification(
             secrets: [
-                .create(identifier: namespaceNameStub): [secretStub],
-                .extend(identifier: namespaceNameStub, moduleName: .none): [secretStub]
+                .create(identifier: namespaceNameStubs[0]): [publicSecretStub, internalSecretStub],
+                .create(identifier: namespaceNameStubs[1]): [internalSecretStub],
+                .extend(identifier: namespaceNameStubs[2], moduleName: .none): [internalSecretStub, publicSecretStub]
             ]
         )
 
@@ -61,13 +63,13 @@ final class NamespaceDeclParserTests: XCTestCase {
             .map { $0.createCodeBlockItem() }
             .map { $0.buildSyntax(format: .init(indentWidth: .zero)) }
             .map { String(describing: $0) }
-            .sorted()
+            .sorted { $0 > $1 }
 
         XCTAssertEqual(
             [
                 """
 
-                enum \(namespaceNameStub) {
+                public enum \(namespaceNameStubs[0]) {
 
                     static var \(memberNameStub): \(memberTypeNameStub) = false
 
@@ -77,7 +79,17 @@ final class NamespaceDeclParserTests: XCTestCase {
                 """,
                 """
 
-                extension \(namespaceNameStub) {
+                internal enum \(namespaceNameStubs[1]) {
+
+                    static var \(memberNameStub): \(memberTypeNameStub) = false
+
+                    static func \(deobfuscateDataFunctionNameStub)() {
+                    }
+                }
+                """,
+                """
+
+                extension \(namespaceNameStubs[2]) {
 
                     static var \(memberNameStub): \(memberTypeNameStub) = false
 
@@ -88,7 +100,10 @@ final class NamespaceDeclParserTests: XCTestCase {
             ],
             namespaceDeclarationsSyntax
         )
-        XCTAssertEqual([[secretStub], [secretStub]], membersParserSpy.parseRecordedInput)
+        XCTAssertEqual(3, membersParserSpy.parseRecordedInput.count)
+        XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([publicSecretStub, internalSecretStub]))
+        XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([internalSecretStub]))
+        XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([internalSecretStub, publicSecretStub]))
         XCTAssertEqual([[]], deobfuscateDataFunctionDeclParserSpy.parseRecordedInput)
         XCTAssertTrue(sourceSpecification.algorithm.isEmpty)
         XCTAssertTrue(sourceSpecification.secrets.isEmpty)

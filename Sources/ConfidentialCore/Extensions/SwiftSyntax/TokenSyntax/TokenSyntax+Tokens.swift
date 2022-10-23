@@ -46,18 +46,6 @@ extension TokenSyntax {
             followedByLeadingSpaces: leadingSpaces
         )
     }
-
-    static func `static`(
-        leadingNewlines: Int,
-        followedByLeadingSpaces leadingSpaces: Int = C.Code.Format.indentWidth,
-        trailingSpaces: Int = 1
-    ) -> Self {
-        makeToken(
-            .static.withoutTrivia().withTrailingTrivia(.spaces(trailingSpaces)),
-            withLeadingNewlines: leadingNewlines,
-            followedByLeadingSpaces: leadingSpaces
-        )
-    }
 }
 
 private extension TokenSyntax {

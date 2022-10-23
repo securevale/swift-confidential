@@ -15,7 +15,7 @@ final class SourceSpecificationParserTests: XCTestCase {
         .init(technique: .encryption(algorithm: .chaChaPoly))
     ]
     private let secretsStub: SourceSpecification.Secrets = [
-        .extend(identifier: "Secrets", moduleName: "SecretModule"): [.StubFactory.makeSecret()]
+        .extend(identifier: "Secrets", moduleName: "SecretModule"): [.StubFactory.makePublicSecret()]
     ]
 
     private var algorithmParserSpy: AlgorithmParserSpy!

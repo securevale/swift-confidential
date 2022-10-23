@@ -4,15 +4,19 @@ import SwiftSyntaxBuilder
 
 struct SecretDecl: DeclBuildable {
 
+    private let accessModifier: TokenSyntax
     private let name: TokenSyntax
     private let dataArgumentExpression: ExpressibleAsArrayExpr
     private let dataAccessWrapper: ExpressibleAsCustomAttribute
 
     init(
+        accessModifier: TokenSyntax,
         name: String,
         dataArgumentExpression: ExpressibleAsArrayExpr,
         dataAccessWrapper: ExpressibleAsCustomAttribute
     ) {
+        self.accessModifier = accessModifier
+        assert(["internal", "public"].contains(self.accessModifier.text))
         self.name = .identifier(name)
         self.dataArgumentExpression = dataArgumentExpression
         self.dataAccessWrapper = dataAccessWrapper
@@ -34,7 +38,16 @@ private extension SecretDecl {
                 dataAccessWrapper.createCustomAttribute()
             },
             modifiersBuilder: {
-                DeclModifier(name: .static(leadingNewlines: 1))
+                DeclModifier(
+                    name: accessModifier
+                        .withoutTrivia()
+                        .withLeadingTrivia(
+                            .newlines(1)
+                            .appending(.spaces(C.Code.Format.indentWidth))
+                        )
+                        .withTrailingTrivia(.spaces(1))
+                )
+                DeclModifier(name: .static)
             },
             bindingsBuilder: {
                 PatternBinding(

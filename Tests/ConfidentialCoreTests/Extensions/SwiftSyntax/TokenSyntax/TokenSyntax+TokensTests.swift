@@ -155,44 +155,4 @@ final class TokenSyntax_TokensTests: XCTestCase {
             )
         )
     }
-
-    func testStatic() {
-        XCTAssertEqual(
-            "static",
-            .init(
-                describing: TokenSyntax.static(
-                    leadingNewlines: .zero,
-                    followedByLeadingSpaces: .zero,
-                    trailingSpaces: .zero
-                )
-            )
-        )
-        XCTAssertEqual(
-            """
-
-              static\u{0020}
-            """,
-            .init(
-                describing: TokenSyntax.static(
-                    leadingNewlines: 1,
-                    followedByLeadingSpaces: 2,
-                    trailingSpaces: 1
-                )
-            )
-        )
-        XCTAssertEqual(
-            """
-
-
-                static\u{0020}\u{0020}\u{0020}\u{0020}
-            """,
-            .init(
-                describing: TokenSyntax.static(
-                    leadingNewlines: 2,
-                    followedByLeadingSpaces: 4,
-                    trailingSpaces: 4
-                )
-            )
-        )
-    }
 }

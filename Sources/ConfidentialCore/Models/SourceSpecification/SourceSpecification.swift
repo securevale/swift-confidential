@@ -15,6 +15,7 @@ public extension SourceSpecification {
     }
 
     struct Secret {
+        let accessModifier: AccessModifier
         let name: String
         var data: Data
         let dataAccessWrapperInfo: DataAccessWrapperInfo
@@ -53,16 +54,24 @@ public extension SourceSpecification.ObfuscationStep {
 extension SourceSpecification.Secret: Equatable, Hashable {
 
     public static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.name == rhs.name && lhs.data == rhs.data
+        lhs.accessModifier == rhs.accessModifier &&
+        lhs.name == rhs.name &&
+        lhs.data == rhs.data
     }
 
     public func hash(into hasher: inout Hasher) {
+        hasher.combine(accessModifier)
         hasher.combine(name)
         hasher.combine(data)
     }
 }
 
 extension SourceSpecification.Secret {
+
+    enum AccessModifier: String, CaseIterable {
+        case `internal`
+        case `public`
+    }
 
     struct DataAccessWrapperInfo {
 

@@ -9,6 +9,7 @@ final class NamespaceMembersParserTests: XCTestCase {
     private typealias SecretDeclParserSpy = ParserSpy<Secret, ExpressibleAsSecretDecl>
 
     private let secretDeclStub = SecretDecl(
+        accessModifier: .internal,
         name: "secret",
         dataArgumentExpression: ArrayExpr {
             ArrayElement(expression: IntegerLiteralExpr(digits: "0x20"), trailingComma: .comma)
@@ -20,8 +21,8 @@ final class NamespaceMembersParserTests: XCTestCase {
         )
     )
     private let secretsStub: ArraySlice<Secret> = [
-        .StubFactory.makeSecret(),
-        .StubFactory.makeSecret()
+        .StubFactory.makeInternalSecret(),
+        .StubFactory.makeInternalSecret()
     ]
 
     private var secretDeclParserSpy: SecretDeclParserSpy!

@@ -34,7 +34,7 @@ final class SourceObfuscatorTests: XCTestCase {
                 .init(technique: compressionTechnique)
             ],
             secrets: [
-                .create(identifier: "Secrets"): [.StubFactory.makeSecret()]
+                .create(identifier: "Secrets"): [.StubFactory.makeInternalSecret()]
             ]
         )
 
@@ -60,7 +60,7 @@ final class SourceObfuscatorTests: XCTestCase {
                 .init(technique: .encryption(algorithm: .aes128GCM))
             ],
             secrets: [
-                createNamespaceKey: [.StubFactory.makeSecret(with: plainData)]
+                createNamespaceKey: [.StubFactory.makeInternalSecret(with: plainData)]
             ]
         )
 
