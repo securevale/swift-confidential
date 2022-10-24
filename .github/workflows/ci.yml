@@ -35,6 +35,15 @@ jobs:
       - name: Lint Swift Code
         run: swiftlint lint --strict --reporter github-actions-logging
 
+      - name: Lint Bash Code
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './Scripts'
+          ignore_paths: Templates
+          version: v0.8.0
+        env:
+          SHELLCHECK_OPTS: -e SC1009 -e SC1072 -e SC1073 -e SC1090 -e SC1091
+
   tests:
     name: Tests
     runs-on: macos-12
