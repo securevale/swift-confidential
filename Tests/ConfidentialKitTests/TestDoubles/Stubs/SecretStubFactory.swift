@@ -5,8 +5,11 @@ extension Obfuscation.Secret {
 
     enum StubFactory {
 
-        static func makeJSONEncodedSecret(with singleValue: SingleValue) -> Obfuscation.Secret {
-            .init(data: try! JSONEncoder().encode(singleValue).map { $0 })
+        static func makeJSONEncodedSecret(
+            with singleValue: SingleValue,
+            nonce: Obfuscation.Nonce
+        ) -> Obfuscation.Secret {
+            .init(data: try! JSONEncoder().encode(singleValue).map { $0 }, nonce: nonce)
         }
     }
 }

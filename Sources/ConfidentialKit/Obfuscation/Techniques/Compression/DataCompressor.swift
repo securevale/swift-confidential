@@ -22,10 +22,11 @@ public extension Obfuscation.Compression {
         /// Decompresses the given data using preset ``algorithm``.
         ///
         /// - Parameter data: A compressed input data.
+        /// - Parameter nonce: Reserved for future use.
         /// - Returns: A decompressed output data.
         @inlinable
         @inline(__always)
-        public func deobfuscate(_ data: Data) throws -> Data {
+        public func deobfuscate(_ data: Data, nonce: Obfuscation.Nonce) throws -> Data {
             let decompressedData = try NSData(data: data).decompressed(using: algorithm)
             return .init(referencing: decompressedData)
         }

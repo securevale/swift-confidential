@@ -20,7 +20,7 @@ final class DataCrypter_DataObfuscationStepTests: XCTestCase {
 
         // when
         let encryptedData = try encryptionAlgorithms.map {
-            try DataCrypter(algorithm: $0).obfuscate(plainData)
+            try DataCrypter(algorithm: $0).obfuscate(plainData, nonce: .zero)
         }
 
         // then
@@ -36,12 +36,12 @@ final class DataCrypter_DataObfuscationStepTests: XCTestCase {
             [0xdf, 0xc8, 0x72, 0x04, 0x6b, 0xbf, 0xe5, 0x54, 0x33, 0x0e, 0xc2, 0x4f]
         )
         let encryptedData = try encryptionAlgorithms.map {
-            ($0, try DataCrypter(algorithm: $0).obfuscate(plainData))
+            ($0, try DataCrypter(algorithm: $0).obfuscate(plainData, nonce: .zero))
         }
 
         // when
         let decryptedData = try encryptedData.map {
-            try DataCrypter(algorithm: $0.0).deobfuscate($0.1)
+            try DataCrypter(algorithm: $0.0).deobfuscate($0.1, nonce: .zero)
         }
 
         // then

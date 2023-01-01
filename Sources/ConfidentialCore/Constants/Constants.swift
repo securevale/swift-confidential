@@ -8,7 +8,8 @@ enum C {
 
         enum Generation {
             static let deobfuscateDataFuncName: String = "deobfuscateData"
-            static let deobfuscateDataFuncParamName: String = "data"
+            static let deobfuscateDataFuncDataParamName: String = "data"
+            static let deobfuscateDataFuncNonceParamName: String = "nonce"
         }
     }
 

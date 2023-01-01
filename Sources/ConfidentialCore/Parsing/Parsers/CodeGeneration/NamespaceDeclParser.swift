@@ -32,25 +32,16 @@ where
                 let decl: ExpressibleAsCodeBlockItem
                 switch namespace {
                 case let .create(identifier):
-                    let accessModifier: TokenSyntax = secrets
-                        .map(\.accessModifier)
-                        .contains(.public)
-                    ? .public
-                    : .internal
-                    decl = EnumDecl(
-                        enumKeyword: .enum,
+                    decl = try enumDecl(
                         identifier: identifier,
-                        members: try members(from: &secrets, with: deobfuscateDataFunctionDecl),
-                        modifiersBuilder: {
-                            DeclModifier(name: accessModifier.withLeadingTrivia(.newlines(1)))
-                        }
+                        secrets: &secrets,
+                        deobfuscateDataFunctionDecl: deobfuscateDataFunctionDecl
                     )
                 case let .extend(identifier, _):
-                    decl = ExtensionDecl(
-                        modifiers: .none,
-                        extensionKeyword: .extension.withLeadingTrivia(.newlines(1)),
-                        extendedType: SimpleTypeIdentifier(identifier),
-                        members: try members(from: &secrets, with: deobfuscateDataFunctionDecl)
+                    decl = try extensionDecl(
+                        extendedTypeIdentifier: identifier,
+                        secrets: &secrets,
+                        deobfuscateDataFunctionDecl: deobfuscateDataFunctionDecl
                     )
                 }
                 input.secrets[namespace] = secrets.isEmpty ? nil : secrets
@@ -63,6 +54,40 @@ where
 }
 
 private extension NamespaceDeclParser {
+
+    func enumDecl(
+        identifier: String,
+        secrets: inout ArraySlice<SourceSpecification.Secret>,
+        deobfuscateDataFunctionDecl: ExpressibleAsMemberDeclListItem
+    ) throws -> EnumDecl {
+        let accessModifier: TokenSyntax = secrets
+            .map(\.accessModifier)
+            .contains(.public)
+        ? .public
+        : .internal
+
+        return .init(
+            enumKeyword: .enum,
+            identifier: identifier,
+            members: try members(from: &secrets, with: deobfuscateDataFunctionDecl),
+            modifiersBuilder: {
+                DeclModifier(name: accessModifier.withLeadingTrivia(.newlines(1)))
+            }
+        )
+    }
+
+    func extensionDecl(
+        extendedTypeIdentifier: String,
+        secrets: inout ArraySlice<SourceSpecification.Secret>,
+        deobfuscateDataFunctionDecl: ExpressibleAsMemberDeclListItem
+    ) throws -> ExtensionDecl {
+        .init(
+            modifiers: .none,
+            extensionKeyword: .extension.withLeadingTrivia(.newlines(1)),
+            extendedType: SimpleTypeIdentifier(extendedTypeIdentifier),
+            members: try members(from: &secrets, with: deobfuscateDataFunctionDecl)
+        )
+    }
 
     func members(
         from secrets: inout ArraySlice<SourceSpecification.Secret>,

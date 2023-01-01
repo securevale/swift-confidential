@@ -6,12 +6,16 @@ public extension Obfuscation {
         /// The obfuscated secret's bytes.
         public let data: [UInt8]
 
+        /// The nonce used during the obfuscation process of this secret.
+        public let nonce: Nonce
+
         /// Creates a new instance of a sequence containing obfuscated secret's bytes.
         ///
         /// - Parameter data: The sequence of obfuscated secret's bytes.
         @inlinable
-        public init<Data: Sequence>(data: Data) where Data.Element == UInt8 {
+        public init<Data: Sequence>(data: Data, nonce: Nonce) where Data.Element == UInt8 {
             self.data = .init(data)
+            self.nonce = nonce
         }
     }
 }

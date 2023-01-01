@@ -15,25 +15,19 @@ public extension Obfuscation.Randomization {
     ///         input data is larger than 65 536 bytes.
     struct DataShuffler: DataDeobfuscationStep {
 
-        /// The nonce used to obfuscate the data.
-        public let nonce: UInt64
-
-        /// Creates a new instance with the specified cryptographic nonce.
-        ///
-        /// - Parameter nonce: The nonce.
+        /// Creates a new instance.
         @inlinable
         @inline(__always)
-        public init(nonce: UInt64) {
-            self.nonce = nonce
-        }
+        public init() {}
 
-        /// Deshuffles the given data using preset ``nonce``.
+        /// Deshuffles the given data.
         ///
         /// - Parameter data: A shuffled input data.
+        /// - Parameter nonce: A nonce used to deobfuscate the shuffling parameters.
         /// - Returns: A deshuffled output data.
         @inlinable
         @inline(__always)
-        public func deobfuscate(_ data: Data) throws -> Data {
+        public func deobfuscate(_ data: Data, nonce: Obfuscation.Nonce) throws -> Data {
             let countByteWidth = Int.byteWidth
             let nonceBytes = nonce.bytes
             let count = data

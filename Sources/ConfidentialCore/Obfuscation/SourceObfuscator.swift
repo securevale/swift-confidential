@@ -1,3 +1,4 @@
+import ConfidentialKit
 import Foundation
 
 public struct SourceObfuscator {
@@ -21,7 +22,7 @@ public struct SourceObfuscator {
 
             source.secrets[namespace] = try secrets.map { secret in
                 var secret = secret
-                secret.data = try obfuscateData(secret.data)
+                secret.data = try obfuscateData(secret.data, secret.nonce)
                 return secret
             }[...]
         }
@@ -31,16 +32,17 @@ public struct SourceObfuscator {
 private extension SourceObfuscator {
 
     typealias Algorithm = SourceSpecification.Algorithm
-    typealias ObfuscationFunc = (Data) throws -> Data
+    typealias Nonce = Obfuscation.Nonce
+    typealias ObfuscationFunc = (Data, Nonce) throws -> Data
 
     @inline(__always)
     func obfuscationFunc(given algorithm: Algorithm) -> ObfuscationFunc {
         algorithm
             .map(\.technique)
             .map(obfuscationStepResolver.obfuscationStep(for:))
-            .reduce({ $0 }, { partialFunc, step in
+            .reduce({ data, _ in data }, { partialFunc, step in
                 return {
-                    try step.obfuscate(partialFunc($0))
+                    try step.obfuscate(partialFunc($0, $1), nonce: $1)
                 }
             })
     }

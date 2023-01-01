@@ -21,7 +21,7 @@ final class DataCrypterTests: XCTestCase {
         // when
         let decryptedData = try encryptedData
             .map { algorithm, data in
-                try DataCrypter(algorithm: algorithm).deobfuscate(data)
+                try DataCrypter(algorithm: algorithm).deobfuscate(data, nonce: .zero)
             }
 
         // then

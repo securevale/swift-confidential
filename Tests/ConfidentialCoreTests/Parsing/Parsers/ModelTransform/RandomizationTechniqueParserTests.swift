@@ -3,21 +3,15 @@ import XCTest
 
 final class RandomizationTechniqueParserTests: XCTestCase {
 
-    private let nonceStub: UInt64 = 123456789
-
-    private var generateNonceSpy: ParameterlessClosureSpy<UInt64>!
-
     private var sut: RandomizationTechniqueParser!
 
     override func setUp() {
         super.setUp()
-        generateNonceSpy = .init(result: nonceStub)
-        sut = .init(generateNonce: try self.generateNonceSpy.closureWithError())
+        sut = .init()
     }
 
     override func tearDown() {
         sut = nil
-        generateNonceSpy = nil
         super.tearDown()
     }
 
@@ -29,8 +23,7 @@ final class RandomizationTechniqueParserTests: XCTestCase {
         let technique = try sut.parse(&input)
 
         // then
-        XCTAssertEqual(.randomization(nonce: nonceStub), technique)
-        XCTAssertEqual(1, generateNonceSpy.callCount)
+        XCTAssertEqual(.randomization, technique)
         XCTAssertTrue(input.isEmpty)
     }
 
@@ -42,8 +35,7 @@ final class RandomizationTechniqueParserTests: XCTestCase {
         let technique = try sut.parse(&input)
 
         // then
-        XCTAssertEqual(.randomization(nonce: nonceStub), technique)
-        XCTAssertEqual(1, generateNonceSpy.callCount)
+        XCTAssertEqual(.randomization, technique)
         XCTAssertTrue(input.isEmpty)
     }
 
@@ -53,7 +45,6 @@ final class RandomizationTechniqueParserTests: XCTestCase {
 
         // when & then
         XCTAssertThrowsError(try sut.parse(&input))
-        XCTAssertEqual(.zero, generateNonceSpy.callCount)
         XCTAssertEqual("\(C.Parsing.Keywords.compress)", input)
     }
 
@@ -81,21 +72,6 @@ final class RandomizationTechniqueParserTests: XCTestCase {
 
         // when & then
         XCTAssertThrowsError(try sut.parse(&input))
-        XCTAssertEqual(.zero, generateNonceSpy.callCount)
         XCTAssertEqual(" Test", input)
-    }
-
-    func test_givenValidInputAndGenerateNonceError_whenParse_thenThrowsExpectedErrorAndInputIsEmpty() {
-        // given
-        var input = "\(C.Parsing.Keywords.shuffle)"[...]
-        let error = ErrorDummy()
-        generateNonceSpy.error = error
-
-        // when & then
-        XCTAssertThrowsError(try sut.parse(&input)) {
-            XCTAssertEqual(error, $0 as? ErrorDummy)
-        }
-        XCTAssertEqual(1, generateNonceSpy.callCount)
-        XCTAssertTrue(input.isEmpty)
     }
 }

@@ -8,7 +8,7 @@ public struct Obfuscated<PlainValue: Decodable> {
     public typealias Value = Obfuscation.Secret
 
     /// A type that represents a deobfuscation function.
-    public typealias DeobfuscateDataFunc = (Data) throws -> Data
+    public typealias DeobfuscateDataFunc = (Data, Obfuscation.Nonce) throws -> Data
 
     @usableFromInline
     let deobfuscateData: DeobfuscateDataFunc
@@ -23,10 +23,11 @@ public struct Obfuscated<PlainValue: Decodable> {
     @inlinable
     public var projectedValue: PlainValue {
         let secretData = Data(wrappedValue.data)
+        let nonce = wrappedValue.nonce
         let value: PlainValue
 
         do {
-            let deobfuscatedData = try deobfuscateData(secretData)
+            let deobfuscatedData = try deobfuscateData(secretData, nonce)
             value = try decoder.decode(PlainValue.self, from: deobfuscatedData)
         } catch {
             preconditionFailure("Unexpected error: \(error)")

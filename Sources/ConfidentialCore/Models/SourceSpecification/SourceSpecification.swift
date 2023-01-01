@@ -18,6 +18,7 @@ public extension SourceSpecification {
         let accessModifier: AccessModifier
         let name: String
         var data: Data
+        let nonce: Obfuscation.Nonce
         let dataAccessWrapperInfo: DataAccessWrapperInfo
     }
 
@@ -47,7 +48,7 @@ public extension SourceSpecification.ObfuscationStep {
     enum Technique: Equatable, Hashable {
         case compression(algorithm: Obfuscation.Compression.CompressionAlgorithm)
         case encryption(algorithm: Obfuscation.Encryption.SymmetricEncryptionAlgorithm)
-        case randomization(nonce: UInt64)
+        case randomization
     }
 }
 
@@ -56,13 +57,15 @@ extension SourceSpecification.Secret: Equatable, Hashable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.accessModifier == rhs.accessModifier &&
         lhs.name == rhs.name &&
-        lhs.data == rhs.data
+        lhs.data == rhs.data &&
+        lhs.nonce == rhs.nonce
     }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(accessModifier)
         hasher.combine(name)
         hasher.combine(data)
+        hasher.combine(nonce)
     }
 }
 

@@ -15,6 +15,7 @@ final class NamespaceMembersParserTests: XCTestCase {
             ArrayElement(expression: IntegerLiteralExpr(digits: "0x20"), trailingComma: .comma)
             ArrayElement(expression: IntegerLiteralExpr(digits: "0x20"))
         },
+        nonceArgumentExpression: IntegerLiteralExpr(digits: "123456789"),
         dataAccessWrapper: CustomAttribute(
             attributeName: SimpleTypeIdentifier("Test"),
             argumentList: .none

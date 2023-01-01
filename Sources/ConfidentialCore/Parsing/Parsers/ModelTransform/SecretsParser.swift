@@ -10,20 +10,24 @@ where
     AccessModifierParser.Output == SourceSpecification.Secret.AccessModifier
 { // swiftlint:disable:this opening_brace
 
+    typealias GenerateNonce = () throws -> Obfuscation.Nonce
     typealias Secrets = SourceSpecification.Secrets
 
     private let namespaceParser: NamespaceParser
     private let accessModifierParser: AccessModifierParser
     private let secretValueEncoder: DataEncoder
+    private let generateNonce: GenerateNonce
 
     init(
         namespaceParser: NamespaceParser,
         accessModifierParser: AccessModifierParser,
-        secretValueEncoder: DataEncoder = JSONEncoder()
+        secretValueEncoder: DataEncoder = JSONEncoder(),
+        generateNonce: @autoclosure @escaping GenerateNonce = try .secureRandom()
     ) {
         self.namespaceParser = namespaceParser
         self.accessModifierParser = accessModifierParser
         self.secretValueEncoder = secretValueEncoder
+        self.generateNonce = generateNonce
     }
 
     func parse(_ input: inout Configuration) throws -> Secrets {
@@ -44,6 +48,7 @@ where
                     ),
                     name: secret.name,
                     data: try secretValueEncoder.encode(secret.value.underlyingValue),
+                    nonce: try generateNonce(),
                     dataAccessWrapperInfo: dataAccessWrapperInfo(for: secret.value)
                 )
                 parsedSecretsCount += 1

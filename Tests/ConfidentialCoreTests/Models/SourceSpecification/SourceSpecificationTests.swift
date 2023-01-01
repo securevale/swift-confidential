@@ -24,7 +24,16 @@ final class SourceSpecificationTests: XCTestCase {
     func test_givenTwoSecretsWithDifferentData_whenComparedForEquality_thenTwoSecretsAreNotEqual() {
         // given
         let secret1 = SourceSpecification.Secret.StubFactory.makeInternalSecret()
-        let secret2 = SourceSpecification.Secret.StubFactory.makeInternalSecret(with: .init([0x20, 0x20]))
+        let secret2 = SourceSpecification.Secret.StubFactory.makeInternalSecret(data: .init([0x20, 0x20]))
+
+        // when & then
+        XCTAssertNotEqual(secret1, secret2)
+    }
+
+    func test_givenTwoSecretsWithDifferentNonce_whenComparedForEquality_thenTwoSecretsAreNotEqual() {
+        // given
+        let secret1 = SourceSpecification.Secret.StubFactory.makeInternalSecret()
+        let secret2 = SourceSpecification.Secret.StubFactory.makeInternalSecret(nonce: 123456789)
 
         // when & then
         XCTAssertNotEqual(secret1, secret2)

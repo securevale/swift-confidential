@@ -4,7 +4,7 @@ import Foundation
 
 extension Obfuscation.Encryption.DataCrypter: DataObfuscationStep {
 
-    func obfuscate(_ data: Data) throws -> Data {
+    func obfuscate(_ data: Data, nonce: Obfuscation.Nonce) throws -> Data {
         let key = SymmetricKey(size: algorithm.keySize)
 
         var obfuscatedData: Data
@@ -16,7 +16,7 @@ extension Obfuscation.Encryption.DataCrypter: DataObfuscationStep {
              default size of 12 bytes, the combined representation is available,
              hence the use of force unwrap.
              See https://developer.apple.com/documentation/cryptokit/aes/gcm/sealedbox
-             for more details
+             for more details.
              */
             obfuscatedData = sealedBox.combined! // swiftlint:disable:this force_unwrapping
         case .chaChaPoly:

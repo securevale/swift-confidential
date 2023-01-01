@@ -1,3 +1,4 @@
+import ConfidentialKit
 import Foundation
 import SwiftSyntax
 import SwiftSyntaxBuilder
@@ -21,6 +22,7 @@ private extension DeobfuscateDataFunctionDecl {
 
     func makeUnderlyingDecl() -> DeclBuildable {
         let dataTypeInfo = TypeInfo(of: Data.self)
+        let nonceTypeInfo = TypeInfo(of: Obfuscation.Nonce.self)
         let indentation = Int(declNestingLevel) * C.Code.Format.indentWidth
         return FunctionDecl(
             identifier: .identifier(C.Code.Generation.deobfuscateDataFuncName),
@@ -29,9 +31,16 @@ private extension DeobfuscateDataFunctionDecl {
                     FunctionParameter(
                         attributes: .none,
                         firstName: .wildcard,
-                        secondName: .identifier(C.Code.Generation.deobfuscateDataFuncParamName),
+                        secondName: .identifier(C.Code.Generation.deobfuscateDataFuncDataParamName),
                         colon: .colon,
-                        type: SimpleTypeIdentifier(dataTypeInfo.fullyQualifiedName)
+                        type: SimpleTypeIdentifier(dataTypeInfo.fullyQualifiedName),
+                        trailingComma: .comma
+                    )
+                    FunctionParameter(
+                        attributes: .none,
+                        firstName: .identifier(C.Code.Generation.deobfuscateDataFuncNonceParamName),
+                        colon: .colon,
+                        type: SimpleTypeIdentifier(nonceTypeInfo.fullyQualifiedName)
                     )
                 },
                 throwsOrRethrowsKeyword: .throws.withLeadingTrivia(.spaces(1)),

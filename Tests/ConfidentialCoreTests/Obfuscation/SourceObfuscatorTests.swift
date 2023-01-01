@@ -60,7 +60,7 @@ final class SourceObfuscatorTests: XCTestCase {
                 .init(technique: .encryption(algorithm: .aes128GCM))
             ],
             secrets: [
-                createNamespaceKey: [.StubFactory.makeInternalSecret(with: plainData)]
+                createNamespaceKey: [.StubFactory.makeInternalSecret(data: plainData)]
             ]
         )
 

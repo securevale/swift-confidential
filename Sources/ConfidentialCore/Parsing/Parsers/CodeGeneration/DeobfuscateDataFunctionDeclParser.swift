@@ -48,24 +48,32 @@ private extension DeobfuscateDataFunctionDeclParser {
 
     typealias ObfuscationStep = SourceSpecification.ObfuscationStep
 
+    static let nonceArgumentName: String = "nonce"
+
     func obfuscationStepExpr(
         for obfuscationStep: ObfuscationStep,
         indentWidthMultiplier: Int
     ) throws -> ExpressibleAsExprBuildable {
         let tryIndentWidth = try exprIndentWidth(with: indentWidthMultiplier)
-        let calledExprIndentWidth = tryIndentWidth + C.Code.Format.indentWidth
+        let functionCallExprIndentWidth = tryIndentWidth + C.Code.Format.indentWidth
         return TryExpr(
             tryKeyword: .try.withLeadingTrivia(.spaces(tryIndentWidth)),
             expression: FunctionCallExpr(
                 calledExpression: deobfuscateFunctionAccessExpr(
                     for: obfuscationStep.technique,
-                    indentWidth: calledExprIndentWidth
+                    indentWidth: functionCallExprIndentWidth
                 ),
                 leftParen: .leftParen,
                 rightParen: .rightParen,
                 argumentListBuilder: {
                     TupleExprElement(
-                        expression: IdentifierExpr(C.Code.Generation.deobfuscateDataFuncParamName)
+                        expression: IdentifierExpr(C.Code.Generation.deobfuscateDataFuncDataParamName),
+                        trailingComma: .comma
+                    )
+                    TupleExprElement(
+                        label: .identifier(Self.nonceArgumentName),
+                        colon: .colon,
+                        expression: IdentifierExpr(C.Code.Generation.deobfuscateDataFuncNonceParamName)
                     )
                 }
             )
@@ -78,21 +86,34 @@ private extension DeobfuscateDataFunctionDeclParser {
         indentWidthMultiplier: Int
     ) throws -> ExpressibleAsExprBuildable {
         let tryIndentWidth = try exprIndentWidth(with: indentWidthMultiplier)
-        let calledExprIndentWidth = tryIndentWidth + C.Code.Format.indentWidth
+        let functionCallExprIndentWidth = tryIndentWidth + C.Code.Format.indentWidth
+        let functionCallExprArgumentIndentWidth = functionCallExprIndentWidth + C.Code.Format.indentWidth
         return TryExpr(
             tryKeyword: .try.withLeadingTrivia(.spaces(tryIndentWidth)),
             expression: FunctionCallExpr(
                 calledExpression: deobfuscateFunctionAccessExpr(
                     for: obfuscationStep.technique,
-                    indentWidth: calledExprIndentWidth
+                    indentWidth: functionCallExprIndentWidth
                 ),
                 leftParen: .leftParen.withTrailingTrivia(.newlines(1)),
                 rightParen: .rightParen(
                     leadingNewlines: 1,
-                    followedByLeadingSpaces: calledExprIndentWidth
+                    followedByLeadingSpaces: functionCallExprIndentWidth
                 ),
                 argumentListBuilder: {
-                    TupleExprElement(expression: innerExpr)
+                    TupleExprElement(
+                        expression: innerExpr,
+                        trailingComma: .comma.withoutTrivia()
+                    )
+                    TupleExprElement(
+                        label: .identifier(Self.nonceArgumentName)
+                            .withLeadingTrivia(
+                                .newlines(1)
+                                .appending(.spaces(functionCallExprArgumentIndentWidth))
+                            ),
+                        colon: .colon,
+                        expression: IdentifierExpr(C.Code.Generation.deobfuscateDataFuncNonceParamName)
+                    )
                 }
             )
         )
@@ -108,8 +129,8 @@ private extension DeobfuscateDataFunctionDeclParser {
             initCallExpr = DataCompressorInitializerCallExpr(compressionAlgorithm: algorithm)
         case let .encryption(algorithm):
             initCallExpr = DataCrypterInitializerCallExpr(encryptionAlgorithm: algorithm)
-        case let .randomization(nonce):
-            initCallExpr = DataShufflerInitializerCallExpr(nonce: nonce)
+        case .randomization:
+            initCallExpr = DataShufflerInitializerCallExpr()
         }
 
         return DeobfuscateFunctionAccessExpr(initCallExpr, dotIndentWidth: indentWidth)

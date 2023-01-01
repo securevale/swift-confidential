@@ -17,7 +17,7 @@ final class ObfuscationStepParserTests: XCTestCase {
     override func setUp() {
         super.setUp()
         compressionTechniqueParserSpy = .init(result: .compression(algorithm: .lz4))
-        randomizationTechniqueParserSpy = .init(result: .randomization(nonce: 123456789))
+        randomizationTechniqueParserSpy = .init(result: .randomization)
         sut = ObfuscationStepParser {
             compressionTechniqueParserSpy!
             randomizationTechniqueParserSpy!

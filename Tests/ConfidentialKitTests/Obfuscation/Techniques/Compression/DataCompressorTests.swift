@@ -24,7 +24,7 @@ final class DataCompressorTests: XCTestCase {
         // when
         let decompressedData = try compressedData
             .map { algorithm, data in
-                try DataCompressor(algorithm: algorithm).deobfuscate(data)
+                try DataCompressor(algorithm: algorithm).deobfuscate(data, nonce: .zero)
             }
 
         // then

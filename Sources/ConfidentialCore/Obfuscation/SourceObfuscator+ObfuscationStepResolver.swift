@@ -18,8 +18,8 @@ extension SourceObfuscator {
                 return Obfuscation.Compression.DataCompressor(algorithm: algorithm)
             case let .encryption(algorithm):
                 return Obfuscation.Encryption.DataCrypter(algorithm: algorithm)
-            case let .randomization(nonce):
-                return Obfuscation.Randomization.DataShuffler(nonce: nonce)
+            case .randomization:
+                return Obfuscation.Randomization.DataShuffler()
             }
         }
     }

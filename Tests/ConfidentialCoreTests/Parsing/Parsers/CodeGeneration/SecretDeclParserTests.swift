@@ -23,7 +23,7 @@ final class SecretDeclParserTests: XCTestCase {
             """
 
                 @\(expectedAttributeName)(\(deobfuscateArgumentNameStub): \(deobfuscateDataFuncNameStub))
-                internal static var \(secret.name): \(expectedDeclTypeName) = .init(data: [0x20, 0x20])
+                internal static var \(secret.name): \(expectedDeclTypeName) = .init(data: [0x20, 0x20], nonce: 123456789)
             """,
             .init(describing: syntax(from: secretDecl))
         )
@@ -43,7 +43,7 @@ final class SecretDeclParserTests: XCTestCase {
             """
 
                 @\(expectedAttributeName)(\(deobfuscateArgumentNameStub): \(deobfuscateDataFuncNameStub))
-                public static var \(secret.name): \(expectedDeclTypeName) = .init(data: [0x20, 0x20])
+                public static var \(secret.name): \(expectedDeclTypeName) = .init(data: [0x20, 0x20], nonce: 123456789)
             """,
             .init(describing: syntax(from: secretDecl))
         )
@@ -59,6 +59,7 @@ private extension SecretDeclParserTests {
             accessModifier: accessModifier,
             name: "secret",
             data: .init([0x20, 0x20]),
+            nonce: 123456789,
             dataAccessWrapperInfo: .init(
                 typeInfo: .init(of: Obfuscated<String>.self),
                 arguments: [(label: deobfuscateArgumentNameStub, value: deobfuscateDataFuncNameStub)]

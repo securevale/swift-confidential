@@ -5,13 +5,13 @@ final class DataShufflerTests: XCTestCase {
 
     private typealias DataShuffler = Obfuscation.Randomization.DataShuffler
 
-    private let nonce: UInt64 = 4213634601671549038
+    private let nonce: Obfuscation.Nonce = .StubFactory.makeNonce()
 
     private var sut: DataShuffler!
 
     override func setUp() {
         super.setUp()
-        sut = .init(nonce: nonce)
+        sut = .init()
     }
 
     override func tearDown() {
@@ -41,7 +41,7 @@ final class DataShufflerTests: XCTestCase {
         }
 
         // when
-        let deshuffledData = try shuffledData.map { try sut.deobfuscate($0) }
+        let deshuffledData = try shuffledData.map { try sut.deobfuscate($0, nonce: nonce) }
 
         // then
         XCTAssertEqual(plainData, deshuffledData)

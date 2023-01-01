@@ -1,6 +1,8 @@
 @testable import ConfidentialCore
 import XCTest
 
+import ConfidentialKit
+
 final class SecretsParserTests: XCTestCase {
 
     private typealias Namespace = SourceSpecification.Secret.Namespace
@@ -15,10 +17,12 @@ final class SecretsParserTests: XCTestCase {
         .init(name: "secret1", value: .singleValue("message"), namespace: .none, accessModifier: .none),
         .init(name: "secret2", value: .array(["mess", "age"]), namespace: .none, accessModifier: .none)
     ]
+    private let nonceStub: Obfuscation.Nonce = 123456789
 
     private var namespaceParserSpy: NamespaceParserSpy!
     private var accessModifierParserSpy: AccessModifierSpy!
     private var secretValueEncoderSpy: DataEncoderSpy!
+    private var generateNonceSpy: ParameterlessClosureSpy<UInt64>!
 
     private var sut: SecretsParser<NamespaceParserSpy, AccessModifierSpy>!
 
@@ -29,15 +33,18 @@ final class SecretsParserTests: XCTestCase {
         accessModifierParserSpy = .init(result: secretsAccessModifierStub)
         accessModifierParserSpy.consumeInput = { $0 = "" }
         secretValueEncoderSpy = .init(underlyingEncoder: JSONEncoder())
+        generateNonceSpy = .init(result: nonceStub)
         sut = .init(
             namespaceParser: namespaceParserSpy,
             accessModifierParser: accessModifierParserSpy,
-            secretValueEncoder: secretValueEncoderSpy
+            secretValueEncoder: secretValueEncoderSpy,
+            generateNonce: try self.generateNonceSpy.closureWithError()
         )
     }
 
     override func tearDown() {
         sut = nil
+        generateNonceSpy = nil
         secretValueEncoderSpy = nil
         accessModifierParserSpy = nil
         namespaceParserSpy = nil
@@ -56,7 +63,8 @@ final class SecretsParserTests: XCTestCase {
             secretsNamespaceStub: try secretsStub.map {
                 try SourceSpecification.Secret.StubFactory.makeSecret(
                     from: $0,
-                    using: secretValueEncoderSpy.underlyingEncoder
+                    using: secretValueEncoderSpy.underlyingEncoder,
+                    nonce: nonceStub
                 )
             }[...]
         ]
@@ -68,6 +76,7 @@ final class SecretsParserTests: XCTestCase {
         XCTAssertEqual((0..<secretsStub.count).map { _ in "" }, namespaceParserSpy.parseRecordedInput)
         XCTAssertEqual((0..<secretsStub.count).map { _ in "" }, accessModifierParserSpy.parseRecordedInput)
         XCTAssertEqual(secretsStub.count, secretValueEncoderSpy.encodeRecordedValues.count)
+        XCTAssertEqual(secretsStub.count, generateNonceSpy.callCount)
         XCTAssertTrue(configuration.secrets.isEmpty)
     }
 
@@ -90,6 +99,7 @@ final class SecretsParserTests: XCTestCase {
         XCTAssertThrowsError(try sut.parse(&configuration))
         XCTAssertEqual([""], namespaceParserSpy.parseRecordedInput)
         XCTAssertEqual([], accessModifierParserSpy.parseRecordedInput)
+        XCTAssertEqual(.zero, generateNonceSpy.callCount)
         XCTAssertEqual(secretsStub[...], configuration.secrets)
     }
 
@@ -109,6 +119,7 @@ final class SecretsParserTests: XCTestCase {
         XCTAssertThrowsError(try sut.parse(&configuration))
         XCTAssertEqual(["", ""], namespaceParserSpy.parseRecordedInput)
         XCTAssertEqual([""], accessModifierParserSpy.parseRecordedInput)
+        XCTAssertEqual(1, generateNonceSpy.callCount)
         XCTAssertEqual(secretsStub.dropFirst()[...], configuration.secrets)
     }
 
@@ -121,6 +132,7 @@ final class SecretsParserTests: XCTestCase {
         XCTAssertThrowsError(try sut.parse(&configuration))
         XCTAssertEqual([""], namespaceParserSpy.parseRecordedInput)
         XCTAssertEqual([""], accessModifierParserSpy.parseRecordedInput)
+        XCTAssertEqual(.zero, generateNonceSpy.callCount)
         XCTAssertEqual(secretsStub[...], configuration.secrets)
     }
 
@@ -140,6 +152,7 @@ final class SecretsParserTests: XCTestCase {
         XCTAssertThrowsError(try sut.parse(&configuration))
         XCTAssertEqual(["", ""], namespaceParserSpy.parseRecordedInput)
         XCTAssertEqual(["", ""], accessModifierParserSpy.parseRecordedInput)
+        XCTAssertEqual(1, generateNonceSpy.callCount)
         XCTAssertEqual(secretsStub.dropFirst()[...], configuration.secrets)
     }
 }

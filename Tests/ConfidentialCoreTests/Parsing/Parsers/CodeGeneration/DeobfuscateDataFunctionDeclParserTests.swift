@@ -10,15 +10,16 @@ final class DeobfuscateDataFunctionDeclParserTests: XCTestCase {
     private typealias Algorithm = SourceSpecification.Algorithm
 
     private let compressionAlgorithmStub: CompressionAlgorithm = .lzfse
-    private let randomizationNonceStub: UInt64 = 123456789
     private let encryptionAlgorithmStub: EncryptionAlgorithm = .aes128GCM
     private lazy var algorithmStub: Algorithm = [
         .init(technique: .compression(algorithm: compressionAlgorithmStub)),
-        .init(technique: .randomization(nonce: randomizationNonceStub)),
+        .init(technique: .randomization),
         .init(technique: .encryption(algorithm: encryptionAlgorithmStub))
     ]
 
     private let dataFullyQualifiedName = TypeInfo(of: Data.self)
+        .fullyQualifiedName
+    private let nonceFullyQualifiedName = TypeInfo(of: Obfuscation.Nonce.self)
         .fullyQualifiedName
     private let dataCompressorFullyQualifiedName = TypeInfo(of: Obfuscation.Compression.DataCompressor.self)
         .fullyQualifiedName
@@ -40,21 +41,25 @@ final class DeobfuscateDataFunctionDeclParserTests: XCTestCase {
             .createMemberDeclListItem()
             .buildSyntax(format: .init(indentWidth: .zero))
         let expectedFuncName = C.Code.Generation.deobfuscateDataFuncName
-        let expectedFuncParamName = C.Code.Generation.deobfuscateDataFuncParamName
-        let expectedFuncParamTypeName = dataFullyQualifiedName
+        let expectedFuncDataParamName = C.Code.Generation.deobfuscateDataFuncDataParamName
+        let expectedFuncNonceParamName = C.Code.Generation.deobfuscateDataFuncNonceParamName
+        let expectedFuncDataParamTypeName = dataFullyQualifiedName
+        let expectedFuncNonceParamTypeName = nonceFullyQualifiedName
         let expectedFuncReturnTypeName = dataFullyQualifiedName
         XCTAssertEqual(
             """
 
                 @inline(__always)
-                private static func \(expectedFuncName)(_ \(expectedFuncParamName): \(expectedFuncParamTypeName)) throws -> \(expectedFuncReturnTypeName) {
+                private static func \(expectedFuncName)(_ \(expectedFuncDataParamName): \(expectedFuncDataParamTypeName), \(expectedFuncNonceParamName): \(expectedFuncNonceParamTypeName)) throws -> \(expectedFuncReturnTypeName) {
                     try \(dataCompressorFullyQualifiedName)(algorithm: .\(compressionAlgorithmStub.name))
                         .deobfuscate(
-                            try \(dataShufflerFullyQualifiedName)(nonce: \(randomizationNonceStub))
+                            try \(dataShufflerFullyQualifiedName)()
                                 .deobfuscate(
                                     try \(dataCrypterFullyQualifiedName)(algorithm: .\(encryptionAlgorithmStub.name))
-                                        .deobfuscate(\(expectedFuncParamName))
-                                )
+                                        .deobfuscate(\(expectedFuncDataParamName), nonce: \(expectedFuncNonceParamName)),
+                                    nonce: \(expectedFuncNonceParamName)
+                                ),
+                            nonce: \(expectedFuncNonceParamName)
                         )
                 }
             """,

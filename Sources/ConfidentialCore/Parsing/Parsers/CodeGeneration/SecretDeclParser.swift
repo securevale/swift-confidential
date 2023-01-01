@@ -21,6 +21,7 @@ struct SecretDeclParser: Parser {
             accessModifier: tokenSyntax(for: input.accessModifier),
             name: input.name,
             dataArgumentExpression: ArrayExpr(elements: ArrayElementList(dataArgumentElements)),
+            nonceArgumentExpression: IntegerLiteralExpr(digits: "\(input.nonce)"),
             dataAccessWrapper: dataAccessWrapper(with: input.dataAccessWrapperInfo)
         )
     }
