@@ -5,12 +5,7 @@ import ConfidentialKit
 
 final class DataCrypter_DataObfuscationStepTests: XCTestCase {
 
-    private typealias Algorithm = Obfuscation.Encryption.SymmetricEncryptionAlgorithm
-    private typealias DataCrypter = Obfuscation.Encryption.DataCrypter
-
-    private let encryptionAlgorithms: [Algorithm] = [
-        .aes128GCM, .aes192GCM, .aes256GCM, .chaChaPoly
-    ]
+    private typealias SUT = Obfuscation.Encryption.DataCrypter
 
     func test_givenPlainData_whenObfuscate_thenEncryptedDataNotEmptyAndNotEqualToPlainData() throws {
         // given
@@ -19,8 +14,9 @@ final class DataCrypter_DataObfuscationStepTests: XCTestCase {
         )
 
         // when
-        let encryptedData = try encryptionAlgorithms.map {
-            try DataCrypter(algorithm: $0).obfuscate(plainData, nonce: .zero)
+        let encryptedData = try encryptionParamsStub.map { params in
+            try SUT(algorithm: params.algorithm)
+                .obfuscate(plainData, nonce: params.nonce)
         }
 
         // then
@@ -35,16 +31,52 @@ final class DataCrypter_DataObfuscationStepTests: XCTestCase {
         let plainData: Data = .init(
             [0xdf, 0xc8, 0x72, 0x04, 0x6b, 0xbf, 0xe5, 0x54, 0x33, 0x0e, 0xc2, 0x4f]
         )
-        let encryptedData = try encryptionAlgorithms.map {
-            ($0, try DataCrypter(algorithm: $0).obfuscate(plainData, nonce: .zero))
+        let encryptedData = try encryptionParamsStub.map { params in
+            (
+                params,
+                try SUT(algorithm: params.algorithm)
+                    .obfuscate(plainData, nonce: params.nonce)
+            )
         }
 
         // when
-        let decryptedData = try encryptedData.map {
-            try DataCrypter(algorithm: $0.0).deobfuscate($0.1, nonce: .zero)
+        let decryptedData = try encryptedData.map { params, data in
+            try SUT(algorithm: params.algorithm)
+                .deobfuscate(data, nonce: params.nonce)
         }
 
         // then
         decryptedData.forEach { XCTAssertEqual(plainData, $0) }
+    }
+}
+
+private extension DataCrypter_DataObfuscationStepTests {
+
+    typealias Algorithm = Obfuscation.Encryption.SymmetricEncryptionAlgorithm
+
+    struct EncryptionParams {
+        let algorithm: Algorithm
+        let nonce: Obfuscation.Nonce
+    }
+
+    var encryptionParamsStub: [EncryptionParams] {
+        [
+            .init(
+                algorithm: .aes128GCM,
+                nonce: 3683273644876213525 // magic bit OFF
+            ),
+            .init(
+                algorithm: .aes192GCM,
+                nonce: 2467393122768582588 // magic bit ON
+            ),
+            .init(
+                algorithm: .aes256GCM,
+                nonce: 11699582232143540816 // magic bit OFF
+            ),
+            .init(
+                algorithm: .chaChaPoly,
+                nonce: 4110998048993541303 // magic bit ON
+            )
+        ]
     }
 }

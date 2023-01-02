@@ -23,26 +23,76 @@ public extension Obfuscation.Encryption {
         /// Decrypts the given data using preset ``algorithm``.
         ///
         /// - Parameter data: An encrypted input data.
-        /// - Parameter nonce: Reserved for future use.
+        /// - Parameter nonce: A nonce used to deobfuscate the encryption key data.
         /// - Returns: A decrypted output data.
         @inlinable
         @inline(__always)
         public func deobfuscate(_ data: Data, nonce: Obfuscation.Nonce) throws -> Data {
             var obfuscatedData = data
-            let keyData = obfuscatedData.suffix(algorithm.keySize.byteCount)
-            obfuscatedData.removeLast(algorithm.keySize.byteCount)
 
-            let deobfuscatedData: Data
-            switch algorithm {
-            case .aes128GCM, .aes192GCM, .aes256GCM:
-                let sealedBox = try AES.GCM.SealedBox(combined: obfuscatedData)
-                deobfuscatedData = try AES.GCM.open(sealedBox, using: .init(data: keyData))
-            case .chaChaPoly:
-                let sealedBox = try ChaChaPoly.SealedBox(combined: obfuscatedData)
-                deobfuscatedData = try ChaChaPoly.open(sealedBox, using: .init(data: keyData))
+            let obfuscatedKeyData: Data
+            let keySize = algorithm.keySize.byteCount
+            let magicBit: UInt64 = 1 << 7
+            if nonce & magicBit == 0 {
+                obfuscatedKeyData = obfuscatedData.prefix(keySize)
+                obfuscatedData.removeFirst(keySize)
+            } else {
+                obfuscatedKeyData = obfuscatedData.suffix(keySize)
+                obfuscatedData.removeLast(keySize)
             }
+            let keyData = Internal.deobfuscateKeyData(obfuscatedKeyData, nonce: nonce)
+
+            let deobfuscatedData = try Internal.decryptData(
+                obfuscatedData,
+                using: .init(data: keyData),
+                algorithm: algorithm
+            )
 
             return deobfuscatedData
+        }
+    }
+}
+
+extension Obfuscation.Encryption.DataCrypter {
+
+    @usableFromInline
+    enum Internal {
+
+        @usableFromInline
+        @inline(__always)
+        static func decryptData(
+            _ data: Data,
+            using key: SymmetricKey,
+            algorithm: Obfuscation.Encryption.SymmetricEncryptionAlgorithm
+        ) throws -> Data {
+            switch algorithm {
+            case .aes128GCM, .aes192GCM, .aes256GCM:
+                let sealedBox = try AES.GCM.SealedBox(combined: data)
+                return try AES.GCM.open(sealedBox, using: key)
+            case .chaChaPoly:
+                let sealedBox = try ChaChaPoly.SealedBox(combined: data)
+                return try ChaChaPoly.open(sealedBox, using: key)
+            }
+        }
+
+        @usableFromInline
+        @inline(__always)
+        static func deobfuscateKeyData(_ keyData: Data, nonce: Obfuscation.Nonce) -> Data {
+            let nonceByteWidth = Obfuscation.Nonce.byteWidth
+            let keyDataChunks = stride(from: .zero, to: keyData.count, by: nonceByteWidth)
+                .map { offset -> ArraySlice in
+                    let startIndex = keyData.startIndex + offset
+                    let endIndex = min(startIndex + nonceByteWidth, keyData.endIndex)
+                    return .init(keyData[startIndex..<endIndex])
+                }
+
+            let deobfuscatedKeyBytes = keyDataChunks
+                .map {
+                    $0.withUnsafeBytes { $0.load(as: Obfuscation.Nonce.self) } ^ nonce
+                }
+                .flatMap(\.bytes)
+
+            return .init(deobfuscatedKeyBytes)
         }
     }
 }
