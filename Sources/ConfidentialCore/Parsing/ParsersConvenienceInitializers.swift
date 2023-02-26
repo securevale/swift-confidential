@@ -10,9 +10,17 @@ where
     SecretsParser == AnySecretsParser
 { // swiftlint:disable:this opening_brace
 
+#if swift(>=5.7)
+    private typealias AnyTechniqueParser = AnyParser<Substring, SourceSpecification.ObfuscationStep.Technique>
+    private typealias OneOfManyTechniques = OneOfBuilder.OneOf2<
+        OneOfBuilder.OneOf2<AnyTechniqueParser, AnyTechniqueParser>,
+        AnyTechniqueParser
+    >
+#else
     private typealias OneOfManyTechniques = Parsers.OneOfMany<
         AnyParser<Substring, SourceSpecification.ObfuscationStep.Technique>
     >
+#endif
 
     init() {
         self.init(
