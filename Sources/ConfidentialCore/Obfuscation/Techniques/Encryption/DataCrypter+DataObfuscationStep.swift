@@ -49,7 +49,7 @@ private extension Obfuscation.Encryption.DataCrypter {
     func obfuscateKeyData(_ keyData: Data, nonce: Obfuscation.Nonce) -> Data {
         let nonceByteWidth = Obfuscation.Nonce.byteWidth
         let keyDataChunks = stride(from: .zero, to: keyData.count, by: nonceByteWidth)
-            .map { offset -> ArraySlice in
+            .map { offset -> ArraySlice<UInt8> in
                 let startIndex = keyData.startIndex + offset
                 let endIndex = min(startIndex + nonceByteWidth, keyData.endIndex)
                 return .init(keyData[startIndex..<endIndex])

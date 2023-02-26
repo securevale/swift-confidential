@@ -42,7 +42,7 @@ private extension Obfuscation.Compression.DataCompressor {
     ) -> Data where Bytes.Element == UInt8, Bytes.Index == Int {
         let nonceByteWidth = Obfuscation.Nonce.byteWidth
         let chunkedBytes = stride(from: .zero, to: magicBytes.count, by: nonceByteWidth)
-            .map { offset -> ArraySlice in
+            .map { offset -> ArraySlice<UInt8> in
                 let startIndex = magicBytes.startIndex + offset
                 let endIndex = min(startIndex + nonceByteWidth, magicBytes.endIndex)
                 return .init(magicBytes[startIndex..<endIndex])
