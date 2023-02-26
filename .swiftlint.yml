@@ -59,8 +59,6 @@ opt_in_rules:
   - toggle_bool
   - unavailable_function
   - untyped_error_in_catch
-  - unused_declaration
-  - unused_import
   - unneeded_parentheses_in_closure_argument
   - vertical_parameter_alignment_on_call
   - vertical_whitespace_closing_braces

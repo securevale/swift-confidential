@@ -23,6 +23,10 @@ on:
       - 'README.md'
   workflow_dispatch:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     name: Lint
@@ -46,9 +50,17 @@ jobs:
 
   tests:
     name: Tests
+    needs: [lint]
     runs-on: macos-12
     env:
-      DEVELOPER_DIR: "/Applications/Xcode_14.0.app/Contents/Developer"
+      DEVELOPER_DIR: "/Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer"
+    strategy:
+      matrix:
+        include:
+          - xcode: '13.4.1' # Swift 5.6
+            upload_coverage: false
+          - xcode: '14.2' # Swift 5.7
+            upload_coverage: true
 
     steps:
       - name: Runner Overview
@@ -64,6 +76,7 @@ jobs:
         run: make tests
 
       - name: Upload Code Coverage Report
+        if: ${{ matrix.upload_coverage }}
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
