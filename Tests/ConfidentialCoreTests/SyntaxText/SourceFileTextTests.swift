@@ -16,7 +16,7 @@ final class SourceFileTextTests: XCTestCase {
     override func tearDownWithError() throws {
         try FileManager.default.removeItem(at: temporaryFileURL)
         temporaryFileURL = nil
-        super.tearDown()
+        try super.tearDownWithError()
     }
 
     func test_givenSourceFileTextWithSourceFileSyntax_whenWriteToFile_thenFileContainsExpectedSyntaxText() throws {
