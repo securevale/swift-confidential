@@ -68,18 +68,11 @@ extension Obfuscation.Compression.DataCompressor {
             _ magicBytes: Bytes,
             nonce: Obfuscation.Nonce
         ) -> Data where Bytes.Element == UInt8, Bytes.Index == Int {
-            let nonceByteWidth = Obfuscation.Nonce.byteWidth
-            let chunkedBytes = stride(from: .zero, to: magicBytes.count, by: nonceByteWidth)
-                .map { offset -> ArraySlice<UInt8> in
-                    let startIndex = magicBytes.startIndex + offset
-                    let endIndex = min(startIndex + nonceByteWidth, magicBytes.endIndex)
-                    return .init(magicBytes[startIndex..<endIndex])
-                }
-
-            let deobfuscatedBytes = chunkedBytes
-                .map { .init(bytes: $0) ^ nonce }
-                .flatMap(\.bytes)
-                .prefix(magicBytes.count)
+            let nonceBytes = nonce.bytes
+            let nonceByteWidth = nonceBytes.count
+            let deobfuscatedBytes = magicBytes.enumerated().map { index, byte in
+                byte ^ nonceBytes[index % nonceByteWidth]
+            }
 
             return .init(deobfuscatedBytes)
         }
