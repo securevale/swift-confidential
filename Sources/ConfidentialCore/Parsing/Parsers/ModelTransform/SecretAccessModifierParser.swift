@@ -9,7 +9,7 @@ struct SecretAccessModifierParser: Parser {
             return .internal
         }
 
-        return try Parse {
+        return try Parse(input: Substring.self) {
             Whitespace(.horizontal)
             AccessModifier.parser()
             End()

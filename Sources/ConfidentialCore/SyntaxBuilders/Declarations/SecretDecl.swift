@@ -25,6 +25,10 @@ struct SecretDecl: DeclBuildable {
         self.dataAccessWrapper = dataAccessWrapper
     }
 
+    func createSyntaxBuildable() -> SyntaxBuildable {
+        self
+    }
+
     func buildDecl(format: Format, leadingTrivia: Trivia?) -> DeclSyntax {
         makeUnderlyingDecl().buildDecl(format: format, leadingTrivia: leadingTrivia)
     }

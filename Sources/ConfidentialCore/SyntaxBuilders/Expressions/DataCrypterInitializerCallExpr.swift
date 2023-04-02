@@ -12,6 +12,10 @@ struct DataCrypterInitializerCallExpr: ExprBuildable {
         self.encryptionAlgorithm = encryptionAlgorithm
     }
 
+    func createSyntaxBuildable() -> SyntaxBuildable {
+        self
+    }
+
     func buildExpr(format: Format, leadingTrivia: Trivia?) -> ExprSyntax {
         makeUnderlyingExpr().buildExpr(format: format, leadingTrivia: leadingTrivia)
     }

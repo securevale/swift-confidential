@@ -19,7 +19,7 @@ struct SecretNamespaceParser: Parser {
             )
         }
 
-        return try Parse {
+        return try Parse(input: Substring.self) {
             Whitespace(.horizontal)
             OneOf {
                 C.Parsing.Keywords.create.map { NamespaceKind.create }
@@ -32,7 +32,7 @@ struct SecretNamespaceParser: Parser {
             Prefix(1...) { !$0.isWhitespace }
             if case .extend = namespaceKind {
                 OneOf {
-                    Parse(Substring?.some) {
+                    Parse(input: Substring.self, Substring?.some) {
                         Whitespace(1..., .horizontal)
                         C.Parsing.Keywords.from
                         Whitespace(1..., .horizontal)

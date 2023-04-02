@@ -57,8 +57,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - xcode: '13.4.1' # Swift 5.6
-            upload_coverage: false
           - xcode: '14.2' # Swift 5.7
             upload_coverage: true
 

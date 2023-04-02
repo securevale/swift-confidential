@@ -7,10 +7,14 @@ struct InitializerCallExpr: ExprBuildable {
 
     init(
         @TupleExprElementListBuilder argumentListBuilder: () -> ExpressibleAsTupleExprElementList = {
-            TupleExprElementList.empty
+            TupleExprElementList([])
         }
     ) {
         self.argumentList = argumentListBuilder()
+    }
+
+    func createSyntaxBuildable() -> SyntaxBuildable {
+        self
     }
 
     func buildExpr(format: Format, leadingTrivia: Trivia?) -> ExprSyntax {

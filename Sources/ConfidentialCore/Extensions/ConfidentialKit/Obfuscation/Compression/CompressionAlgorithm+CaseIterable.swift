@@ -1,4 +1,5 @@
 import ConfidentialKit
+import Foundation
 
 extension Obfuscation.Compression.CompressionAlgorithm: CaseIterable {
 

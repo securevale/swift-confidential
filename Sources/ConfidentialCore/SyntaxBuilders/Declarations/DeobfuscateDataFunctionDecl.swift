@@ -13,6 +13,10 @@ struct DeobfuscateDataFunctionDecl: DeclBuildable {
         self.body = body
     }
 
+    func createSyntaxBuildable() -> SyntaxBuildable {
+        self
+    }
+
     func buildDecl(format: Format, leadingTrivia: Trivia?) -> DeclSyntax {
         makeUnderlyingDecl().buildDecl(format: format, leadingTrivia: leadingTrivia)
     }

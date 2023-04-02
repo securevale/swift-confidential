@@ -5,14 +5,17 @@ import Parsing
 
 final class ObfuscationStepParserTests: XCTestCase {
 
-    private typealias TechniqueParserSpy = ParserSpy<Substring, SourceSpecification.ObfuscationStep.Technique>
+    private typealias Technique = SourceSpecification.ObfuscationStep.Technique
+    private typealias TechniqueParserSpy = ParserSpy<Substring, Technique>
 
     private let inputStub = "test"[...]
 
     private var compressionTechniqueParserSpy: TechniqueParserSpy!
     private var randomizationTechniqueParserSpy: TechniqueParserSpy!
 
-    private var sut: ObfuscationStepParser<OneOfBuilder.OneOf2<TechniqueParserSpy, TechniqueParserSpy>>!
+    private var sut: ObfuscationStepParser<
+        OneOfBuilder<Substring, Technique>.OneOf2<TechniqueParserSpy, TechniqueParserSpy>
+    >!
 
     override func setUp() {
         super.setUp()

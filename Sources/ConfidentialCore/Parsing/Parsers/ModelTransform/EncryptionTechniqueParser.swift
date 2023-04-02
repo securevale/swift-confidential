@@ -8,8 +8,8 @@ struct EncryptionTechniqueParser: Parser {
     private typealias Algorithm = Obfuscation.Encryption.SymmetricEncryptionAlgorithm
 
     func parse(_ input: inout Substring) throws -> Technique {
-        try Parse(Technique.encryption(algorithm:)) {
-            Parse {
+        try Parse(input: Substring.self, Technique.encryption(algorithm:)) {
+            Parse(input: Substring.self) {
                 Whitespace(.horizontal)
                 C.Parsing.Keywords.encrypt
                 Whitespace(1..., .horizontal)

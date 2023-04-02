@@ -12,6 +12,10 @@ struct DataCompressorInitializerCallExpr: ExprBuildable {
         self.compressionAlgorithm = compressionAlgorithm
     }
 
+    func createSyntaxBuildable() -> SyntaxBuildable {
+        self
+    }
+
     func buildExpr(format: Format, leadingTrivia: Trivia?) -> ExprSyntax {
         makeUnderlyingExpr().buildExpr(format: format, leadingTrivia: leadingTrivia)
     }

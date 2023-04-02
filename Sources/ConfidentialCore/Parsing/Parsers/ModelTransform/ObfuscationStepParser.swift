@@ -10,7 +10,7 @@ where
 
     private let techniqueParsers: TechniqueParsers
 
-    init(@OneOfBuilder with build: () -> TechniqueParsers) {
+    init(@OneOfBuilder<Substring, ObfuscationStep.Technique> with build: () -> TechniqueParsers) {
         self.techniqueParsers = build()
     }
 

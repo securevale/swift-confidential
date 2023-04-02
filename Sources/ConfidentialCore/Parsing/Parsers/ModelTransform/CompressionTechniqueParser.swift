@@ -8,8 +8,8 @@ struct CompressionTechniqueParser: Parser {
     private typealias Algorithm = Obfuscation.Compression.CompressionAlgorithm
 
     func parse(_ input: inout Substring) throws -> Technique {
-        try Parse(Technique.compression(algorithm:)) {
-            Parse {
+        try Parse(input: Substring.self, Technique.compression(algorithm:)) {
+            Parse(input: Substring.self) {
                 Whitespace(.horizontal)
                 C.Parsing.Keywords.compress
                 Whitespace(1..., .horizontal)

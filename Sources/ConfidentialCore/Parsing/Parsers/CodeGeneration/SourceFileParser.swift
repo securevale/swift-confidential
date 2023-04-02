@@ -11,7 +11,7 @@ where
 
     private let codeBlockParsers: CodeBlockParsers
 
-    init(@ParserBuilder with build: () -> CodeBlockParsers) {
+    init(@ParserBuilder<SourceSpecification> with build: () -> CodeBlockParsers) {
         self.codeBlockParsers = build()
     }
 
