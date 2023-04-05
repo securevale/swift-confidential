@@ -13,7 +13,7 @@
 ///     implementations of technique involving data randomization.
 ///
 /// > Important: The ``ConfidentialKit`` library was designed to be used in
-///          conjunction with `confidential` CLI tool and, as such, it only ships
-///          with a subset of API needed for deobfuscating obfuscated secret data
-///          embedded in the application code.
+///          conjunction with `swift-confidential` CLI tool and, as such, it
+///          only ships with a subset of API needed for deobfuscating obfuscated
+///          secret data embedded in the application code.
 public enum Obfuscation {}
