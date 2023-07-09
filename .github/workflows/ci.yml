@@ -30,7 +30,7 @@ concurrency:
 jobs:
   lint:
     name: Lint
-    runs-on: macos-12
+    runs-on: macos-13
 
     steps:
       - name: Checkout
@@ -49,15 +49,17 @@ jobs:
           SHELLCHECK_OPTS: -e SC1009 -e SC1072 -e SC1073 -e SC1090 -e SC1091
 
   tests:
-    name: Tests
+    name: Tests (Xcode ${{ matrix.xcode }}${{ matrix.upload_coverage && ', Upload Coverage Report' || '' }})
     needs: [lint]
-    runs-on: macos-12
+    runs-on: macos-13
     env:
       DEVELOPER_DIR: "/Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer"
     strategy:
       matrix:
         include:
-          - xcode: '14.2' # Swift 5.7
+          - xcode: '14.2'  # Swift 5.7
+            upload_coverage: false
+          - xcode: '14.3.1'  # Swift 5.8
             upload_coverage: true
 
     steps:
