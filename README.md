@@ -22,7 +22,8 @@ Pretty much every single app has at least few literals embedded in code, those i
 
 This tool aims to provide an elegant and maintainable solution to the above problem by introducing the composable obfuscation techniques that can be freely combined to form an algorithm for obfuscating selected Swift literals. 
 
-> **NOTE:** While Swift Confidential certainly makes the static analysis of the code more challenging, **it is by no means the only code hardening technique that you should employ to protect your app against reverse engineering and tampering**. To achieve a decent level of security, we highly encourage you to supplement this tool's security measures with **runtime application self-protection (RASP) checks**, as well as **Swift code obfuscation**. With that said, no security measure can ever guarantee absolute security. Any motivated and skilled enough attacker will eventually bypass all security protections. For this reason, **always keep your threat models up to date**.
+> [!NOTE]  
+> While Swift Confidential certainly makes the static analysis of the code more challenging, **it is by no means the only code hardening technique that you should employ to protect your app against reverse engineering and tampering**. To achieve a decent level of security, we highly encourage you to supplement this tool's security measures with **runtime application self-protection (RASP) checks**, as well as **Swift code obfuscation**. With that said, no security measure can ever guarantee absolute security. Any motivated and skilled enough attacker will eventually bypass all security protections. For this reason, **always keep your threat models up to date**.
 
 ## Getting started
 
@@ -50,7 +51,8 @@ secrets:
       # ... other suspicious file paths
 ```
 
-> **WARNING:** The algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**. Instead, compose your own algorithm from the [obfuscation techniques](#obfuscation-techniques) described below and **don't share your algorithm with anyone**. Moreover, following the [secure SDLC](https://owasp.org/www-project-integration-standards/writeups/owasp_in_sdlc/) best practices, consider not to commit the production algorithm in your repository, but instead configure your CI/CD pipeline to run a custom script (ideally just before the build step), which will modify the configuration file by replacing the algorithm value with the one retrieved from the secrets vault.
+> [!WARNING]  
+> The algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**. Instead, compose your own algorithm from the [obfuscation techniques](#obfuscation-techniques) described below and **don't share your algorithm with anyone**. Moreover, following the [secure SDLC](https://owasp.org/www-project-integration-standards/writeups/owasp_in_sdlc/) best practices, consider not to commit the production algorithm in your repository, but instead configure your CI/CD pipeline to run a custom script (ideally just before the build step), which will modify the configuration file by replacing the algorithm value with the one retrieved from the secrets vault.
 
 Having created the configuration file, you can use the [Confidential build tool plugin](https://github.com/securevale/swift-confidential-plugin) (see [Installation section](#installation) below) to generate Swift code with obfuscated secret literals.
 
@@ -149,7 +151,8 @@ For convenience, you can also add the `confidential.yml` configuration file to y
 
 Once set up, build your target and the Confidential plugin will automatically generate a Swift source file with obfuscated secret literals. In addition, the plugin will regenerate the obfuscated secret literals every time it detects a change to `confidential.yml` configuration file or when you clean build your project.
 
-> **NOTE:** Make sure to use the same version requirements for both `swift-confidential` and `swift-confidential-plugin` packages. See [Versioning](#versioning) section for more information about API stability.
+> [!IMPORTANT]  
+> Make sure to use the same version requirements for both `swift-confidential` and `swift-confidential-plugin` packages. See [Versioning](#versioning) section for more information about API stability.
 
 ## Configuration
 
@@ -185,7 +188,8 @@ secrets:
     namespace: extend Pinning from Crypto
 ```
 
-> **WARNING:** The algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**.
+> [!WARNING]  
+> The algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**.
 </details>
 
 ### Obfuscation techniques
@@ -232,10 +236,8 @@ The supported algorithms are shown in the following table:
 
 This technique involves data randomization. The randomization technique is *polymorphic*, meaning that given the same input data, different output data is produced with each run.
 
-> **NOTE:**  Randomization technique is best suited for secrets of which size does not exceed 256 bytes. 
-> For larger secrets, the size of the obfuscated data will grow from 2N to 3N, where N is the input data size in bytes, 
-> or even 5N (32-bit platform) or 9N (64-bit platform) if the size of input data is larger than 65 536 bytes.
-> For this reason, the internal implementation of this technique is a subject to change in next releases.
+> [!NOTE]  
+> Randomization technique is best suited for secrets of which size does not exceed 256 bytes. For larger secrets, the size of the obfuscated data will grow from 2N to 3N, where N is the input data size in bytes, or even 5N (32-bit platform) or 9N (64-bit platform) if the size of input data is larger than 65 536 bytes. For this reason, the internal implementation of this technique is a subject to change in next releases.
 
 **Syntax**
 
@@ -341,7 +343,8 @@ internal enum Secrets {
 
 ```
 
-> **NOTE:** The creation of the nested namespaces is currently not supported.
+> [!NOTE]  
+> The creation of the nested namespaces is currently not supported.
 
 If, however, you would rather like to keep the generated secret literal declaration(s) in an existing namespace named `Pinning` and imported from `Crypto` module, use the following YAML code instead:
 
@@ -399,7 +402,8 @@ secrets:
       - c1a5d45809269301993d028313a5c4a5d8b2f56de9725d4d1af9da1ccf186f30
 ```
 
-> **WARNING:** The algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**.
+> [!WARNING]  
+> The algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**.
 
 With `defaultAccessModifier` set to `public`, all of the Swift properties generated based on the `secrets` list are accessible outside their defining module:
 
