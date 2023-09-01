@@ -30,11 +30,11 @@ extension SwiftConfidential {
         )
         var output: URL
 
-        private var fileManager: FileManager { FileManager.default }
+        private var fileManager: FileManager { .default }
 
         mutating func run() throws {
             guard fileManager.isReadableFile(atPath: configuration.path) else {
-                throw RuntimeError(description: #"Unable to read configuration file at \#(configuration.path)"#)
+                throw RuntimeError(description: #"Unable to read configuration file at "\#(configuration.path)""#)
             }
 
             let configurationYAML = try Data(contentsOf: configuration)

@@ -3,6 +3,7 @@ import Foundation
 
 public struct SourceSpecification: Equatable {
     var algorithm: Algorithm
+    var implementationOnlyImport: Bool
     var secrets: Secrets
 }
 

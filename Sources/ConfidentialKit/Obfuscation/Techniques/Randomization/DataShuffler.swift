@@ -16,8 +16,6 @@ public extension Obfuscation.Randomization {
     struct DataShuffler: DataDeobfuscationStep {
 
         /// Creates a new instance.
-        @inlinable
-        @inline(__always)
         public init() {}
 
         /// Deshuffles the given data.

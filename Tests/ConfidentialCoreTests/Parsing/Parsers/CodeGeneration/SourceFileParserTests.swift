@@ -7,8 +7,7 @@ final class SourceFileParserTests: XCTestCase {
 
     private typealias CodeBlockParserSpy = ParserSpy<SourceSpecification, [ExpressibleAsCodeBlockItem]>
 
-    private let moduleNameStub = "SecretModule"
-    private let enumNameStub = "Test"
+    private let enumNameStub = "Secrets"
 
     private var codeBlockParserSpy: CodeBlockParserSpy!
 
@@ -32,12 +31,11 @@ final class SourceFileParserTests: XCTestCase {
         super.tearDown()
     }
 
-    func test_givenSourceSpecification_whenParse_thenReturnsExpectedSourceFileTextAndSourceSpecificationIsEmpty() throws {
+    func test_givenSourceSpecification_whenParse_thenReturnsExpectedSourceFileTextAndInputIsConsumed() throws {
         // given
         var sourceSpecification = SourceSpecification.StubFactory.makeSpecification(
             secrets: [
-                .create(identifier: "Secrets"): [],
-                .extend(identifier: "Secret", moduleName: moduleNameStub): []
+                .create(identifier: enumNameStub): []
             ]
         )
 
@@ -47,10 +45,6 @@ final class SourceFileParserTests: XCTestCase {
         // then
         XCTAssertEqual(
             """
-            
-            import ConfidentialKit
-            import Foundation
-            import \(moduleNameStub)
 
             enum \(enumNameStub) {
             }
@@ -76,7 +70,7 @@ private extension SourceFileParserTests {
     var codeBlockStub: [ExpressibleAsCodeBlockItem] {
         [
             EnumDecl(
-                enumKeyword: .enum.withLeadingTrivia(.newlines(1)),
+                enumKeyword: .enum,
                 identifier: .identifier(enumNameStub),
                 members: MemberDeclBlock(
                     leftBrace: .leftBrace.withLeadingTrivia(.spaces(1)),

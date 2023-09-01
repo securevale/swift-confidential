@@ -14,8 +14,6 @@ public extension Obfuscation.Encryption {
         /// Creates a new instance with the specified symmetric encryption algorithm.
         ///
         /// - Parameter algorithm: An algorithm used to encrypt and decrypt the data.
-        @inlinable
-        @inline(__always)
         public init(algorithm: SymmetricEncryptionAlgorithm) {
             self.algorithm = algorithm
         }

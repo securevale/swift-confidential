@@ -13,8 +13,6 @@ public extension Obfuscation.Compression {
         /// Creates a new instance with the specified compression algorithm.
         ///
         /// - Parameter algorithm: An algorithm used to compress and decompress the data.
-        @inlinable
-        @inline(__always)
         public init(algorithm: CompressionAlgorithm) {
             self.algorithm = algorithm
         }

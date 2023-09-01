@@ -1,20 +1,24 @@
 import ConfidentialKit
 
+// swiftlint:disable discouraged_optional_boolean
 public struct Configuration: Equatable, Decodable {
     var algorithm: ArraySlice<String>
     var defaultAccessModifier: String?
     var defaultNamespace: String?
+    var implementationOnlyImport: Bool?
     var secrets: ArraySlice<Secret>
 
     init(
         algorithm: ArraySlice<String>,
         defaultAccessModifier: String?,
         defaultNamespace: String?,
+        implementationOnlyImport: Bool?,
         secrets: ArraySlice<Secret>
     ) {
         self.algorithm = algorithm
         self.defaultAccessModifier = defaultAccessModifier
         self.defaultNamespace = defaultNamespace
+        self.implementationOnlyImport = implementationOnlyImport
         self.secrets = secrets
     }
 
@@ -24,6 +28,7 @@ public struct Configuration: Equatable, Decodable {
             algorithm: try container.decode([String].self, forKey: .algorithm)[...],
             defaultAccessModifier: try? container.decodeIfPresent(String.self, forKey: .defaultAccessModifier),
             defaultNamespace: try? container.decodeIfPresent(String.self, forKey: .defaultNamespace),
+            implementationOnlyImport: try? container.decodeIfPresent(Bool.self, forKey: .implementationOnlyImport),
             secrets: try container.decode([Secret].self, forKey: .secrets)[...]
         )
     }
@@ -38,6 +43,7 @@ extension Configuration {
         let accessModifier: String?
     }
 }
+// swiftlint:enable discouraged_optional_boolean
 
 extension Configuration.Secret {
 
@@ -66,6 +72,7 @@ private extension Configuration {
         case algorithm
         case defaultAccessModifier
         case defaultNamespace
+        case implementationOnlyImport
         case secrets
     }
 }

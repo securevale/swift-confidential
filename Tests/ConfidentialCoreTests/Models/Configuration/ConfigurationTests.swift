@@ -8,6 +8,7 @@ final class ConfigurationTests: XCTestCase {
         let algorithm = ["compress using lz4", "encrypt using aes-128-gcm"]
         let defaultAccessModifier = "internal"
         let defaultNamespace = "create Secrets"
+        let implementationOnlyImport = false
         let secret1 = ("secret1", "value", "extend Obfuscation.Secret from ConfidentialKit", "public")
         let secret2 = ("secret2", ["value1", "value2"])
         let jsonConfiguration =
@@ -16,6 +17,7 @@ final class ConfigurationTests: XCTestCase {
           "algorithm": [\(algorithm.map { #""\#($0)""# }.joined(separator: ","))],
           "defaultAccessModifier": "\(defaultAccessModifier)",
           "defaultNamespace": "\(defaultNamespace)",
+          "implementationOnlyImport": \(implementationOnlyImport),
           "secrets": [
             { "name": "\(secret1.0)", "value": "\(secret1.1)", "namespace": "\(secret1.2)", "accessModifier": "\(secret1.3)" },
             { "name": "\(secret2.0)", "value": [\(secret2.1.map { #""\#($0)""# }.joined(separator: ","))] }
@@ -34,6 +36,7 @@ final class ConfigurationTests: XCTestCase {
                 algorithm: algorithm[...],
                 defaultAccessModifier: defaultAccessModifier,
                 defaultNamespace: defaultNamespace,
+                implementationOnlyImport: implementationOnlyImport,
                 secrets: [
                     .init(
                         name: secret1.0,

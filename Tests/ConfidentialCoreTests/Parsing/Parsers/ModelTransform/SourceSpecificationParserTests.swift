@@ -8,7 +8,9 @@ final class SourceSpecificationParserTests: XCTestCase {
 
     private let configurationStub: Configuration = {
         var configuration = Configuration.StubFactory.makeConfiguration()
+        configuration.defaultAccessModifier = "internal"
         configuration.defaultNamespace = "Secrets"
+        configuration.implementationOnlyImport = false
         return configuration
     }()
     private let algorithmStub: SourceSpecification.Algorithm = [
@@ -42,18 +44,27 @@ final class SourceSpecificationParserTests: XCTestCase {
         super.tearDown()
     }
 
-    func test_givenConfiguration_whenParse_thenReturnsExpectedValueAndConfigurationDefaultNamespaceIsNil() throws {
+    func test_givenConfiguration_whenParse_thenReturnsExpectedValueAndInputIsConsumed() throws {
         // given
         var configuration = configurationStub
 
         // when
-        let sourceSpecification: SourceSpecification = try sut.parse(&configuration)
+        let specification: SourceSpecification = try sut.parse(&configuration)
 
         // then
-        XCTAssertEqual(.init(algorithm: algorithmStub, secrets: secretsStub), sourceSpecification)
+        let expectedSpecification = SourceSpecification(
+            algorithm: algorithmStub,
+            implementationOnlyImport: false,
+            secrets: secretsStub
+        )
+        XCTAssertEqual(expectedSpecification, specification)
         XCTAssertEqual([configurationStub], algorithmParserSpy.parseRecordedInput)
         XCTAssertEqual([configurationStub], secretsParserSpy.parseRecordedInput)
+        XCTAssertTrue(configuration.algorithm.isEmpty)
+        XCTAssertNil(configuration.defaultAccessModifier)
         XCTAssertNil(configuration.defaultNamespace)
+        XCTAssertNil(configuration.implementationOnlyImport)
+        XCTAssertTrue(configuration.secrets.isEmpty)
     }
 
     func test_givenAlgorithmParserFails_whenParse_thenThrowsError() {

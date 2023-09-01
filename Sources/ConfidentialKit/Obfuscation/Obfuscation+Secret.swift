@@ -14,7 +14,6 @@ public extension Obfuscation {
         ///
         /// - Parameter data: The sequence of obfuscated secret's bytes.
         /// - Parameter nonce: The nonce associated with the obfuscated secret's bytes.
-        @inlinable
         public init<Data: Sequence>(data: Data, nonce: Nonce) where Data.Element == UInt8 {
             self.data = .init(data)
             self.nonce = nonce

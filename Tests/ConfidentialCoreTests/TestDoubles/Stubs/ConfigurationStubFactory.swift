@@ -12,6 +12,7 @@ extension Configuration {
                 algorithm: algorithm,
                 defaultAccessModifier: .none,
                 defaultNamespace: .none,
+                implementationOnlyImport: .none,
                 secrets: secrets
             )
         }

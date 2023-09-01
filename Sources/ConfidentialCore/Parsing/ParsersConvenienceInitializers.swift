@@ -45,12 +45,18 @@ where
 
     init() {
         self.init {
-            NamespaceDeclParser(
-                membersParser: NamespaceMembersParser(
-                    secretDeclParser: SecretDeclParser()
-                ),
-                deobfuscateDataFunctionDeclParser: DeobfuscateDataFunctionDeclParser(functionNestingLevel: 1)
-            )
+            Parse(input: SourceSpecification.self) {
+                ImportDeclParser()
+                NamespaceDeclParser(
+                    membersParser: NamespaceMembersParser(
+                        secretDeclParser: SecretDeclParser()
+                    ),
+                    deobfuscateDataFunctionDeclParser: DeobfuscateDataFunctionDeclParser(functionNestingLevel: 1)
+                )
+            }
+            .map { imports, namespaces in
+                imports + namespaces
+            }
             .eraseToAnyParser()
         }
     }

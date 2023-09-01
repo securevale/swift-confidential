@@ -1,7 +1,7 @@
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
-struct InlineAlwaysAttribute: SyntaxBuildable, ExpressibleAsAttribute {
+struct ImplementationOnlyAttribute: SyntaxBuildable, ExpressibleAsAttribute {
 
     private let leadingTrivia: Trivia?
 
@@ -16,10 +16,7 @@ struct InlineAlwaysAttribute: SyntaxBuildable, ExpressibleAsAttribute {
     func createAttribute() -> Attribute {
         .init(
             atSignToken: .atSign.withLeadingTrivia(leadingTrivia ?? .zero),
-            attributeName: .identifier("inline"),
-            leftParen: .leftParen,
-            argument: IdentifierExpr("__always"),
-            rightParen: .rightParen,
+            attributeName: .identifier("_implementationOnly"),
             tokenList: .none
         )
     }
