@@ -36,7 +36,7 @@ final class SecretNamespaceParserTests: XCTestCase {
 
         // then
         let expectedNamespaces: [Namespace] = [
-            .extend(identifier: "ConfidentialKit.Obfuscation.Secret", moduleName: "ConfidentialKit"),
+            .extend(identifier: "Obfuscation.Secret", moduleName: "ConfidentialKit"),
             .create(identifier: secretsNamespaceStub),
             .extend(identifier: secretsNamespaceStub, moduleName: .none),
             .extend(identifier: secretsNamespaceStub, moduleName: secretModuleStub)

@@ -37,9 +37,12 @@ where
                         secrets: &secrets,
                         deobfuscateDataFunctionDecl: deobfuscateDataFunctionDecl
                     )
-                case let .extend(identifier, _):
+                case let .extend(identifier, moduleName):
+                    let extendedTypeIdentifier = [moduleName, identifier]
+                        .compactMap { $0 }
+                        .joined(separator: ".")
                     decl = try extensionDecl(
-                        extendedTypeIdentifier: identifier,
+                        extendedTypeIdentifier: extendedTypeIdentifier,
                         secrets: &secrets,
                         deobfuscateDataFunctionDecl: deobfuscateDataFunctionDecl
                     )

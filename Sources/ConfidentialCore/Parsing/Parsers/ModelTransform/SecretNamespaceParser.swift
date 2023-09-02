@@ -14,7 +14,7 @@ struct SecretNamespaceParser: Parser {
         guard !input.isEmpty else {
             let defaultNamespaceInfo = TypeInfo(of: Obfuscation.Secret.self)
             return .extend(
-                identifier: defaultNamespaceInfo.fullyQualifiedName,
+                identifier: defaultNamespaceInfo.fullName,
                 moduleName: defaultNamespaceInfo.moduleName
             )
         }

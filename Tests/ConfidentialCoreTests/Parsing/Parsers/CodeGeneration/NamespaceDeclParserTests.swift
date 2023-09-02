@@ -42,16 +42,18 @@ final class NamespaceDeclParserTests: XCTestCase {
         super.tearDown()
     }
 
-    func test_givenSourceSpecification_whenParse_thenReturnsExpectedNamespaceDeclarationsAndSourceSpecificationIsEmpty() throws {
+    func test_givenSourceSpecification_whenParse_thenReturnsExpectedNamespaceDeclarationsAndInputIsConsumed() throws {
         // given
-        let namespaceNameStubs = ["A", "B", "C"].map { "Secrets" + $0 }
+        let customModuleNameStub = "Crypto"
+        let namespaceNameStubs = ["A", "B", "C", "D"].map { "Secrets" + $0 }
         let internalSecretStub = SourceSpecification.Secret.StubFactory.makeInternalSecret()
         let publicSecretStub = SourceSpecification.Secret.StubFactory.makePublicSecret()
         var sourceSpecification = SourceSpecification.StubFactory.makeSpecification(
             secrets: [
                 .create(identifier: namespaceNameStubs[0]): [publicSecretStub, internalSecretStub],
                 .create(identifier: namespaceNameStubs[1]): [internalSecretStub],
-                .extend(identifier: namespaceNameStubs[2], moduleName: .none): [internalSecretStub, publicSecretStub]
+                .extend(identifier: namespaceNameStubs[2], moduleName: .none): [internalSecretStub, publicSecretStub],
+                .extend(identifier: namespaceNameStubs[3], moduleName: customModuleNameStub): [publicSecretStub]
             ]
         )
 
@@ -96,16 +98,28 @@ final class NamespaceDeclParserTests: XCTestCase {
                     static func \(deobfuscateDataFunctionNameStub)() {
                     }
                 }
+                """,
+                """
+
+                extension \(customModuleNameStub).\(namespaceNameStubs[3]) {
+
+                    static var \(memberNameStub): \(memberTypeNameStub) = false
+
+                    static func \(deobfuscateDataFunctionNameStub)() {
+                    }
+                }
                 """
             ],
             namespaceDeclarationsSyntax
         )
-        XCTAssertEqual(3, membersParserSpy.parseRecordedInput.count)
+        XCTAssertEqual(4, membersParserSpy.parseRecordedInput.count)
         XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([publicSecretStub, internalSecretStub]))
         XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([internalSecretStub]))
         XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([internalSecretStub, publicSecretStub]))
+        XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([publicSecretStub]))
         XCTAssertEqual([[]], deobfuscateDataFunctionDeclParserSpy.parseRecordedInput)
         XCTAssertTrue(sourceSpecification.algorithm.isEmpty)
+        XCTAssertFalse(sourceSpecification.implementationOnlyImport)
         XCTAssertTrue(sourceSpecification.secrets.isEmpty)
     }
 }
