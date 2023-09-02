@@ -14,6 +14,9 @@ final class ImportDeclParserTests: XCTestCase {
     func test_givenImplementationOnlyImportDisabled_whenParse_thenReturnsExpectedImportDeclStatementsAndInputLeftIntact() throws {
         // given
         let secrets: SourceSpecification.Secrets = [
+            .extend(identifier: "Obfuscation.Secret", moduleName: C.Code.Generation.confidentialKitModuleName): [
+                .StubFactory.makeInternalSecret()
+            ],
             .extend(identifier: "Pinning", moduleName: customModuleNameStub): [
                 .StubFactory.makePublicSecret(named: "secret1"),
                 .StubFactory.makePublicSecret(named: "secret2")
@@ -46,6 +49,9 @@ final class ImportDeclParserTests: XCTestCase {
     func test_givenImplementationOnlyImportEnabled_whenParse_thenReturnsExpectedImportDeclStatementsAndInputLeftIntact() throws {
         // given
         let secrets: SourceSpecification.Secrets = [
+            .extend(identifier: "Obfuscation.Secret", moduleName: C.Code.Generation.confidentialKitModuleName): [
+                .StubFactory.makeInternalSecret()
+            ],
             .extend(identifier: "Pinning", moduleName: customModuleNameStub): [
                 .StubFactory.makeInternalSecret()
             ]

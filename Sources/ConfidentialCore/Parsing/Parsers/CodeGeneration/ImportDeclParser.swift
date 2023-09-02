@@ -54,7 +54,8 @@ private extension ImportDeclParser {
                 .compactMap { namespace -> String? in
                     guard
                         case let .extend(_, moduleName) = namespace,
-                        let moduleName = moduleName
+                        let moduleName = moduleName,
+                        moduleName != C.Code.Generation.confidentialKitModuleName
                     else {
                         return nil
                     }
