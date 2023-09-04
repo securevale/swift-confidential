@@ -2,8 +2,8 @@
 
 [![CI](https://github.com/securevale/swift-confidential/actions/workflows/ci.yml/badge.svg)](https://github.com/securevale/swift-confidential/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/securevale/swift-confidential/branch/master/graph/badge.svg)](https://codecov.io/gh/securevale/swift-confidential)
-[![Swift](https://img.shields.io/badge/Swift-5.8%20%7C%205.7-red)](https://www.swift.org/download)
-[![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS-red)]()
+[![Swift](https://img.shields.io/badge/Swift-5.9%20%7C%205.8%20%7C%205.7-red)](https://www.swift.org/download)
+[![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%20visionOS%20%7C%20watchOS%20%7C%20tvOS-red)]()
 
 A highly configurable and performant tool for obfuscating Swift literals embedded in the application code that you should protect from static code analysis, making the app more resistant to reverse engineering.
 
@@ -115,8 +115,8 @@ let package = Package(
     // name, platforms, products, etc.
     dependencies: [
         // other dependencies
-        .package(url: "https://github.com/securevale/swift-confidential.git", .upToNextMinor(from: "0.2.0")),
-        .package(url: "https://github.com/securevale/swift-confidential-plugin.git", .upToNextMinor(from: "0.2.0"))
+        .package(url: "https://github.com/securevale/swift-confidential.git", .upToNextMinor(from: "0.3.0")),
+        .package(url: "https://github.com/securevale/swift-confidential-plugin.git", .upToNextMinor(from: "0.3.0"))
     ],
     targets: [
         .target(
@@ -162,12 +162,13 @@ Swift Confidential supports a number of configuration options, all of which are 
 
 The table below lists the keys to include in the configuration file along with the type of information to include in each. Any other keys in the configuration file are ignored by the CLI tool.
 
-| Key                   | Value type          | Description                                                                       |
-|-----------------------|---------------------|-----------------------------------------------------------------------------------|
-| algorithm             | List of strings     | The list of obfuscation techniques representing individual steps that are composed together to form the obfuscation algorithm. See [Obfuscation techniques](#obfuscation-techniques) section for usage details.<br/><sub>**Required.**</sub> |
-| defaultAccessModifier | String              | The default access modifier applied to each generated secret literal, unless the secret definition states otherwise. The default value is `internal`. See [Access modifiers](#access-modifiers) section for usage details. |
-| defaultNamespace      | String              | The default namespace in which to enclose all the generated secret literals without explicitly assigned namespace. The default value is `extend Obfuscation.Secret from ConfidentialKit`. See [Namespaces](#namespaces) section for usage details. |
-| secrets               | List of objects     | The list of objects defining the secret literals to be obfuscated. See [Secrets](#secrets) section for usage details.<br/><sub>**Required.**</sub> |
+| Key                      | Value type          | Description                                                                       |
+|--------------------------|---------------------|-----------------------------------------------------------------------------------|
+| algorithm                | List of strings     | The list of obfuscation techniques representing individual steps that are composed together to form the obfuscation algorithm. See [Obfuscation techniques](#obfuscation-techniques) section for usage details.<br/><sub>**Required.**</sub> |
+| defaultAccessModifier    | String              | The default access modifier applied to each generated secret literal, unless the secret definition states otherwise. The default value is `internal`. See [Access modifiers](#access-modifiers) section for usage details. |
+| defaultNamespace         | String              | The default namespace in which to enclose all the generated secret literals without explicitly assigned namespace. The default value is `extend Obfuscation.Secret from ConfidentialKit`. See [Namespaces](#namespaces) section for usage details. |
+| implementationOnlyImport | Boolean             | Specifies whether to generate implementation-only `ConfidentialKit` import. The default value is `false`. See [Building libraries for distribution](#building-libraries-for-distribution) section for usage details. |
+| secrets                  | List of objects     | The list of objects defining the secret literals to be obfuscated. See [Secrets](#secrets) section for usage details.<br/><sub>**Required.**</sub> |
 
 <details>
 <summary><strong>Example configuration</strong></summary>
@@ -313,7 +314,7 @@ extension Crypto.Pinning {
 
 ### Namespaces
 
-In accordance with Swift programming best practices, Swift Confidential encapsulates generated secret literal declarations in namespaces (typically caseless enums). The namespaces syntax allows you to either create a new namespace or extend an existing one.
+In accordance with Swift programming best practices, Swift Confidential encapsulates generated secret literal declarations in namespaces (i.e. caseless enums). The namespaces syntax allows you to either create a new namespace or extend an existing one.
 
 **Syntax**
 
@@ -426,13 +427,20 @@ public enum Secrets {
 Additionally, if you need more fine-grained control, you can override `defaultAccessModifier` by specifying the access modifier in the secret definition as described in [Secrets](#secrets) section.
 </details>
 
+### Building libraries for distribution
+
+By default, Swift Confidential does not annotate the generated `ConfidentialKit` import with `@_implementationOnly` attribute. However, there are cases, such as when [creating an XCFramework bundle](https://developer.apple.com/documentation/xcode/creating-a-multi-platform-binary-framework-bundle), in which you should use implementation-only imports to avoid exposing internal symbols to your library consumers. To enable implementation-only `ConfidentialKit` import, set `implementationOnlyImport` configuration option to `true`.
+
+> [!IMPORTANT]  
+> The implementation-only imports are applicable for types used only internally, thus it is an error to enable `implementationOnlyImport` if either of the secrets has access modifier set to `public`. Also note that setting the `implementationOnlyImport` option to `true` does not imply implementation-only imports for extended namespaces.
+
 ### Additional considerations for Confidential Swift Package plugin
 
 The [Confidential plugin](https://github.com/securevale/swift-confidential-plugin) expects the configuration file to be named `confidential.yml` or `confidential.yaml`, and it assumes a single configuration file per SwiftPM target/Xcode project. If you use the plugin with SwiftPM target and you define multiple configuration files in different subdirectories, then the plugin will use the first one it finds, and which one is undefined. Whereas, if you apply the plugin to the Xcode project's target, the configuration file is expected to be located in the project's top-level directory (all other configuration files are ignored).
 
 ## Versioning
 
-This project follows [semantic versioning](https://semver.org/). While still in major version `0`, source-stability is only guaranteed within minor versions (e.g. between `0.2.0` and `0.2.1`). If you want to guard against potentially source-breaking package updates, you can specify your package dependency using source control requirement (e.g. `.upToNextMinor(from: "0.2.0")`).
+This project follows [semantic versioning](https://semver.org/). While still in major version `0`, source-stability is only guaranteed within minor versions (e.g. between `0.3.0` and `0.3.1`). If you want to guard against potentially source-breaking package updates, you can specify your package dependency using source control requirement (e.g. `.upToNextMinor(from: "0.3.0")`).
 
 ## License
 
