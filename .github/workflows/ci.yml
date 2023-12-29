@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Lint Swift Code
         run: swiftlint lint --strict --reporter github-actions-logging
@@ -44,7 +44,7 @@ jobs:
         with:
           scandir: './Scripts'
           ignore_paths: Templates
-          version: v0.8.0
+          version: v0.9.0
         env:
           SHELLCHECK_OPTS: -e SC1009 -e SC1072 -e SC1073 -e SC1090 -e SC1091
 
@@ -60,6 +60,8 @@ jobs:
           - xcode: '14.2'  # Swift 5.7
             upload_coverage: false
           - xcode: '14.3.1'  # Swift 5.8
+            upload_coverage: false
+          - xcode: '15.1'  # Swift 5.9
             upload_coverage: true
 
     steps:
@@ -67,7 +69,7 @@ jobs:
         run: system_profiler SPHardwareDataType SPSoftwareDataType SPDeveloperToolsDataType
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Upgrade Bash
         run: make bash
