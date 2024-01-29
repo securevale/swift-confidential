@@ -26,9 +26,9 @@ public struct Configuration: Equatable, Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self = .init(
             algorithm: try container.decode([String].self, forKey: .algorithm)[...],
-            defaultAccessModifier: try? container.decodeIfPresent(String.self, forKey: .defaultAccessModifier),
-            defaultNamespace: try? container.decodeIfPresent(String.self, forKey: .defaultNamespace),
-            implementationOnlyImport: try? container.decodeIfPresent(Bool.self, forKey: .implementationOnlyImport),
+            defaultAccessModifier: try container.decodeIfPresent(String.self, forKey: .defaultAccessModifier),
+            defaultNamespace: try container.decodeIfPresent(String.self, forKey: .defaultNamespace),
+            implementationOnlyImport: try container.decodeIfPresent(Bool.self, forKey: .implementationOnlyImport),
             secrets: try container.decode([Secret].self, forKey: .secrets)[...]
         )
     }

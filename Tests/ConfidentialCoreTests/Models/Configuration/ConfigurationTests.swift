@@ -56,6 +56,49 @@ final class ConfigurationTests: XCTestCase {
         )
     }
 
+    func test_givenInvalidJSONEncodedConfiguration_whenDecodeWithJSONDecoder_thenThrowsError() {
+        // given
+        let invalidConfigurations = [
+            """
+            {
+              "algorithm": ["compress using lz4"]
+            }
+            """,
+            """
+            {
+              "secrets": [{ "name": "secret", "value": "value" }]
+            }
+            """,
+            """
+            {
+              "algorithm": ["compress using lz4"],
+              "defaultAccessModifier": [],
+              "secrets": [{ "name": "secret", "value": "value" }]
+            }
+            """,
+            """
+            {
+              "algorithm": ["compress using lz4"],
+              "defaultNamespace": [],
+              "secrets": [{ "name": "secret", "value": "value" }]
+            }
+            """,
+            """
+            {
+              "algorithm": ["compress using lz4"],
+              "implementationOnlyImport": 1,
+              "secrets": [{ "name": "secret", "value": "value" }]
+            }
+            """
+        ].map { ($0, $0.data(using: .utf8)!) }
+        let decoder = JSONDecoder()
+
+        // when & then
+        for (json, jsonData) in invalidConfigurations {
+            XCTAssertThrowsError(try decoder.decode(Configuration.self, from: jsonData), json)
+        }
+    }
+
     func test_givenSecretSingleValue_whenJSONEncodeUnderlyingValue_thenResultEqualsJSONEncodedAssociatedValue() throws {
         // given
         let associatedValue = "test"
