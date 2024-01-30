@@ -7,22 +7,12 @@ public struct Configuration: Equatable, Decodable {
     var defaultNamespace: String?
     var implementationOnlyImport: Bool?
     var secrets: ArraySlice<Secret>
+}
+// swiftlint:enable discouraged_optional_boolean
 
-    init(
-        algorithm: ArraySlice<String>,
-        defaultAccessModifier: String?,
-        defaultNamespace: String?,
-        implementationOnlyImport: Bool?,
-        secrets: ArraySlice<Secret>
-    ) {
-        self.algorithm = algorithm
-        self.defaultAccessModifier = defaultAccessModifier
-        self.defaultNamespace = defaultNamespace
-        self.implementationOnlyImport = implementationOnlyImport
-        self.secrets = secrets
-    }
+public extension Configuration {
 
-    public init(from decoder: Decoder) throws {
+    init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self = .init(
             algorithm: try container.decode([String].self, forKey: .algorithm)[...],
@@ -36,18 +26,17 @@ public struct Configuration: Equatable, Decodable {
 
 extension Configuration {
 
-    struct Secret: Equatable, Hashable, Decodable {
+    struct Secret: Hashable, Decodable {
         let name: String
         let value: Value
         let namespace: String?
         let accessModifier: String?
     }
 }
-// swiftlint:enable discouraged_optional_boolean
 
 extension Configuration.Secret {
 
-    enum Value: Equatable, Hashable, Decodable {
+    enum Value: Hashable, Decodable {
 
         typealias DataTypes = Obfuscation.SupportedDataTypes
 

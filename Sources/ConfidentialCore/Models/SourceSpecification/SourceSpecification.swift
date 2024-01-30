@@ -23,7 +23,7 @@ public extension SourceSpecification {
         let dataAccessWrapperInfo: DataAccessWrapperInfo
     }
 
-    struct Secrets: Equatable, Hashable {
+    struct Secrets: Hashable {
 
         public typealias Secret = SourceSpecification.Secret
 
@@ -46,14 +46,14 @@ public extension SourceSpecification {
 
 public extension SourceSpecification.ObfuscationStep {
 
-    enum Technique: Equatable, Hashable {
+    enum Technique: Hashable {
         case compression(algorithm: Obfuscation.Compression.CompressionAlgorithm)
         case encryption(algorithm: Obfuscation.Encryption.SymmetricEncryptionAlgorithm)
         case randomization
     }
 }
 
-extension SourceSpecification.Secret: Equatable, Hashable {
+extension SourceSpecification.Secret: Hashable {
 
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.accessModifier == rhs.accessModifier &&
@@ -85,7 +85,7 @@ extension SourceSpecification.Secret {
         let arguments: [Argument]
     }
 
-    public enum Namespace: Equatable, Hashable {
+    public enum Namespace: Hashable {
         case create(identifier: String)
         case extend(identifier: String, moduleName: String? = nil)
     }
