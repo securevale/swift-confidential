@@ -40,10 +40,6 @@ extension SwiftConfidential {
             let configurationYAML = try Data(contentsOf: configuration)
             let configuration = try YAMLDecoder().decode(Configuration.self, from: configurationYAML)
 
-            guard fileManager.createFile(atPath: output.path, contents: .none) else {
-                throw RuntimeError(description: #"Failed to create output file at "\#(output.path)""#)
-            }
-
             var sourceSpecification = try Parsers.ModelTransform.SourceSpecification()
                 .parse(configuration)
 
@@ -51,6 +47,10 @@ extension SwiftConfidential {
 
             let sourceFileText = try Parsers.CodeGeneration.SourceFile()
                 .parse(&sourceSpecification)
+
+            guard fileManager.createFile(atPath: output.path, contents: .none) else {
+                throw RuntimeError(description: #"Failed to create output file at "\#(output.path)""#)
+            }
 
             try sourceFileText.write(to: output)
         }
