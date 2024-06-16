@@ -74,7 +74,7 @@ final class NamespaceMembersParserTests: XCTestCase {
         XCTAssertEqual(secretsStub, secrets)
     }
 
-    func test_givenSecretDeclParserFailsOnSecondSecret_whenParse_thenThrowsErrorAndSecretsContainAll() {
+    func test_givenSecretDeclParserFailsOnSecondSecret_whenParse_thenThrowsErrorAndSecretsContainsAllButFirstSecret() {
         // given
         var secrets = secretsStub
         var secretCount: Int = .zero

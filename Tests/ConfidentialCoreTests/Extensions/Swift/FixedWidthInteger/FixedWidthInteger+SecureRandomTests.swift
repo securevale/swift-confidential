@@ -44,7 +44,6 @@ final class FixedWidthInteger_SecureRandomTests: XCTestCase {
             XCTAssertEqual(NSOSStatusErrorDomain, error.domain)
             XCTAssertEqual(.init(status), error.code)
             XCTAssertFalse(error.description.isEmpty)
-            print(error.description)
         }
     }
 }
