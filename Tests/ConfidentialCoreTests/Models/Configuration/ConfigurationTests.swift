@@ -11,7 +11,7 @@ final class ConfigurationTests: XCTestCase {
         let implementationOnlyImport = false
         let secret1 = ("secret1", "value", "extend Obfuscation.Secret from ConfidentialKit", "public")
         let secret2 = ("secret2", ["value1", "value2"])
-        let jsonConfiguration =
+        let jsonConfiguration = Data(
         """
         {
           "algorithm": [\(algorithm.map { #""\#($0)""# }.joined(separator: ","))],
@@ -23,7 +23,8 @@ final class ConfigurationTests: XCTestCase {
             { "name": "\(secret2.0)", "value": [\(secret2.1.map { #""\#($0)""# }.joined(separator: ","))] }
           ]
         }
-        """.data(using: .utf8)!
+        """.utf8
+        )
         let decoder = JSONDecoder()
 
         // when & then
