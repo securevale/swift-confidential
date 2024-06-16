@@ -44,24 +44,30 @@ jobs:
         with:
           scandir: './Scripts'
           ignore_paths: Templates
-          version: v0.9.0
+          version: v0.10.0
         env:
           SHELLCHECK_OPTS: -e SC1009 -e SC1072 -e SC1073 -e SC1090 -e SC1091
 
   tests:
     name: Tests (Xcode ${{ matrix.xcode }}${{ matrix.upload_coverage && ', Upload Coverage Report' || '' }})
     needs: [lint]
-    runs-on: macos-13
+    runs-on: macos-${{ matrix.macos }}
     env:
       DEVELOPER_DIR: "/Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer"
     strategy:
       matrix:
         include:
-          - xcode: '14.2'  # Swift 5.7
+          - macos: 13
+            xcode: '14.2'  # Swift 5.7
             upload_coverage: false
-          - xcode: '14.3.1'  # Swift 5.8
+          - macos: 14
+            xcode: '14.3.1'  # Swift 5.8
             upload_coverage: false
-          - xcode: '15.1'  # Swift 5.9
+          - macos: 14
+            xcode: '15.2'  # Swift 5.9
+            upload_coverage: false
+          - macos: 14
+            xcode: '15.4'  # Swift 5.10
             upload_coverage: true
 
     steps:
@@ -79,7 +85,7 @@ jobs:
 
       - name: Upload Code Coverage Report
         if: ${{ matrix.upload_coverage }}
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./.coverage/
