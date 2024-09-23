@@ -26,7 +26,7 @@ public extension Configuration {
 
 extension Configuration {
 
-    struct Secret: Hashable, Decodable {
+    struct Secret: Hashable {
         let name: String
         let value: Value
         let namespace: String?
@@ -63,5 +63,54 @@ private extension Configuration {
         case defaultNamespace
         case implementationOnlyImport
         case secrets
+    }
+}
+
+extension Configuration.Secret: Decodable {
+    fileprivate enum CodingKeys: String, CodingKey {
+        case name
+        case value
+        case namespace
+        case accessModifier
+        case environmentKey
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        name = try container.decode(String.self, forKey: .name)
+        namespace = try container.decodeIfPresent(String.self, forKey: .namespace)
+        accessModifier = try container.decodeIfPresent(String.self, forKey: .accessModifier)
+        guard container.contains(.environmentKey) else {
+            value = try container.decode(Configuration.Secret.Value.self, forKey: .value)
+            return
+        }
+        
+        guard let environment = decoder.userInfo[.processInfoEnvironment] else {
+            throw DecodingError.dataCorrupted(
+                DecodingError.Context(
+                    codingPath: [CodingKeys.environmentKey],
+                    debugDescription: "userInfo[CodingUserInfoKey.processInfoEnvironment] not set"
+                )
+            )
+        }
+
+        guard let keyedVariables = environment as? [String: String] else {
+            throw DecodingError.typeMismatch([String: String].self, DecodingError.Context(codingPath: [CodingKeys.environmentKey], debugDescription: "processInfoEnvironment expected to be of [String: String] type"))
+        }
+
+        let key = try container.decode(String.self, forKey: CodingKeys.environmentKey)
+
+        guard let environmentValue = keyedVariables[key] else {
+            throw DecodingError.keyNotFound(
+                CodingKeys.environmentKey,
+                DecodingError.Context(
+                    codingPath: [CodingKeys.environmentKey],
+                    debugDescription: "environment must containn value for key `\(key)`"
+                )
+            )
+        }
+
+        value = .singleValue(environmentValue)
     }
 }

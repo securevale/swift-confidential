@@ -38,7 +38,13 @@ extension SwiftConfidential {
             }
 
             let configurationYAML = try Data(contentsOf: configuration)
-            let configuration = try YAMLDecoder().decode(Configuration.self, from: configurationYAML)
+            let configuration = try YAMLDecoder().decode(
+                Configuration.self,
+                from: configurationYAML,
+                userInfo: [
+                    CodingUserInfoKey.processInfoEnvironment:  ProcessInfo.processInfo.environment
+                ]
+            )
 
             var sourceSpecification = try Parsers.ModelTransform.SourceSpecification()
                 .parse(configuration)

@@ -26,6 +26,7 @@ final class ConfigurationTests: XCTestCase {
         """.utf8
         )
         let decoder = JSONDecoder()
+        decoder.userInfo[CodingUserInfoKey.processInfoEnvironment] = [:]
 
         // when & then
         var configuration: Configuration?
@@ -130,5 +131,52 @@ final class ConfigurationTests: XCTestCase {
             try encoder.encode(associatedValue),
             result
         )
+    }
+
+    func test_givenSecretSingleEnvironmentalValue_whenDecodeWithJSONDecoder_thenNoThrowAndReturnsExpectedValueInstance() throws {
+        // given
+        let environmentKey = "foo"
+        let environmentValue = "bar"
+        let environment = [environmentKey : environmentValue]
+        let secret = ("secret", environmentKey, environmentValue)
+        let jsonValue = try XCTUnwrap(
+        """
+        { "name": "\(secret.0)", "environmentKey": "\(secret.1)" }
+        """.data(using: .utf8)
+        )
+        let decoder = JSONDecoder()
+        decoder.userInfo[.processInfoEnvironment] = environment
+
+        // when
+        let decodedSecret = try decoder.decode(Configuration.Secret.self, from: jsonValue)
+
+        // then
+        XCTAssertEqual(
+            Configuration.Secret(
+                name: secret.0,
+                value: .singleValue(secret.2),
+                namespace: .none,
+                accessModifier: .none
+            ),
+            decodedSecret
+        )
+    }
+
+    func test_givenSecretSingleMissingEnvironmentalValue_whenDecodeWithJSONDecoder_thenThrowsError() throws {
+
+        // given
+        let environmentKey = "foo"
+        XCTAssertNil(ProcessInfo.processInfo.environment[environmentKey])
+        let secret = ("secret", environmentKey)
+        let jsonValue = try XCTUnwrap(
+        """
+        { "name": "\(secret.0)", "environmentKey": "\(secret.1)" }
+        """.data(using: .utf8)
+        )
+        let decoder = JSONDecoder()
+        decoder.userInfo[.processInfoEnvironment] = [:]
+
+        // when
+        XCTAssertThrowsError(try decoder.decode(Configuration.Secret.self, from: jsonValue))
     }
 }
