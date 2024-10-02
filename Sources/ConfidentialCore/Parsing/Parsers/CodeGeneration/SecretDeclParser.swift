@@ -1,27 +1,26 @@
 import Parsing
 import SwiftSyntax
-import SwiftSyntaxBuilder
 
 struct SecretDeclParser: Parser {
 
     typealias Secret = SourceSpecification.Secret
 
-    func parse(_ input: inout Secret) throws -> ExpressibleAsSecretDecl {
+    func parse(_ input: inout Secret) throws -> any DeclSyntaxProtocol {
         let valueHexComponents = input.data.hexEncodedStringComponents(options: .numericLiteral)
         let dataArgumentElements = valueHexComponents
             .enumerated()
             .map { idx, component in
-                ArrayElement(
-                    expression: IntegerLiteralExpr(digits: component),
-                    trailingComma: idx < valueHexComponents.endIndex - 1 ? .comma : .none
+                ArrayElementSyntax(
+                    expression: IntegerLiteralExprSyntax(literal: .identifier(component)),
+                    trailingComma: idx < valueHexComponents.endIndex - 1 ? .commaToken() : .none
                 )
             }
 
-        return SecretDecl(
-            accessModifier: tokenSyntax(for: input.accessModifier),
+        return VariableDeclSyntax.makeSecretDecl(
+            accessModifier: token(for: input.accessModifier),
             name: input.name,
-            dataArgumentExpression: ArrayExpr(elements: ArrayElementList(dataArgumentElements)),
-            nonceArgumentExpression: IntegerLiteralExpr(digits: "\(input.nonce)"),
+            dataArgumentExpression: ArrayExprSyntax(elements: .init(dataArgumentElements)),
+            nonceArgumentExpression: IntegerLiteralExprSyntax(literal: "\(raw: input.nonce)"),
             dataAccessWrapper: dataAccessWrapper(with: input.dataAccessWrapperInfo)
         )
     }
@@ -29,31 +28,35 @@ struct SecretDeclParser: Parser {
 
 private extension SecretDeclParser {
 
-    func tokenSyntax(for accessModifier: Secret.AccessModifier) -> TokenSyntax {
+    func token(for accessModifier: Secret.AccessModifier) -> TokenSyntax {
         switch accessModifier {
         case .internal:
-            return .internal
+            return .keyword(.internal)
         case .public:
-            return .public
+            return .keyword(.public)
         }
     }
 
-    func dataAccessWrapper(with wrapperInfo: Secret.DataAccessWrapperInfo) -> ExpressibleAsCustomAttribute {
-        CustomAttribute(
-            atSignToken: .atSign(leadingNewlines: 1),
-            attributeName: SimpleTypeIdentifier(wrapperInfo.typeInfo.fullyQualifiedName),
-            leftParen: .leftParen,
-            argumentList: TupleExprElementList(
-                wrapperInfo.arguments
-                    .map { argument in
-                        TupleExprElement(
-                            label: argument.label.map { .identifier($0) },
-                            colon: argument.label.map { _ in .colon },
-                            expression: IdentifierExpr(argument.value)
-                        )
-                    }
+    func dataAccessWrapper(with wrapperInfo: Secret.DataAccessWrapperInfo) -> AttributeSyntax {
+        .init(
+            atSign: .atSignToken(leadingNewlines: 1),
+            attributeName: IdentifierTypeSyntax(
+                name: .identifier(wrapperInfo.typeInfo.fullyQualifiedName)
             ),
-            rightParen: .rightParen
+            leftParen: .leftParenToken(),
+            arguments: .argumentList(
+                .init(
+                    wrapperInfo.arguments
+                        .map { argument in
+                            LabeledExprSyntax(
+                                label: argument.label.map { .identifier($0) },
+                                colon: argument.label.map { _ in .colonToken() },
+                                expression: DeclReferenceExprSyntax(baseName: .identifier(argument.value))
+                            )
+                        }
+                )
+            ),
+            rightParen: .rightParenToken()
         )
     }
 }

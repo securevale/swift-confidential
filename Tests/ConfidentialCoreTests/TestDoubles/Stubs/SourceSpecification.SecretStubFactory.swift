@@ -34,7 +34,7 @@ extension SourceSpecification.Secret {
 
         static func makeSecret(
             from secret: Configuration.Secret,
-            using encoder: DataEncoder,
+            using encoder: any DataEncoder,
             accessModifier: (String?) -> SourceSpecification.Secret.AccessModifier = {
                 .init(rawValue: $0 ?? "") ?? .internal
             },

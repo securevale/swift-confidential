@@ -1,30 +1,13 @@
 import SwiftSyntax
-import SwiftSyntaxBuilder
 
-struct InlineAlwaysAttribute: SyntaxBuildable, ExpressibleAsAttribute {
+extension AttributeSyntax {
 
-    private let leadingTrivia: Trivia?
-
-    init(leadingTrivia: Trivia? = .none) {
-        self.leadingTrivia = leadingTrivia
-    }
-
-    func buildSyntax(format: Format, leadingTrivia: Trivia?) -> Syntax {
-        createAttribute().buildSyntax(format: format, leadingTrivia: leadingTrivia)
-    }
-
-    func createAttribute() -> Attribute {
+    static var inlineAlways: Self {
         .init(
-            atSignToken: .atSign.withLeadingTrivia(leadingTrivia ?? .zero),
-            attributeName: .identifier("inline"),
-            leftParen: .leftParen,
-            argument: IdentifierExpr("__always"),
-            rightParen: .rightParen,
-            tokenList: .none
+            attributeName: TypeSyntax(stringLiteral: "inline"),
+            leftParen: .leftParenToken(),
+            arguments: .token(.identifier("__always")),
+            rightParen: .rightParenToken()
         )
-    }
-
-    func createSyntaxBuildable() -> SyntaxBuildable {
-        self
     }
 }

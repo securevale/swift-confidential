@@ -1,27 +1,11 @@
 import SwiftSyntax
-import SwiftSyntaxBuilder
 
-struct ImplementationOnlyAttribute: SyntaxBuildable, ExpressibleAsAttribute {
+extension AttributeSyntax {
 
-    private let leadingTrivia: Trivia?
-
-    init(leadingTrivia: Trivia? = .none) {
-        self.leadingTrivia = leadingTrivia
-    }
-
-    func buildSyntax(format: Format, leadingTrivia: Trivia?) -> Syntax {
-        createAttribute().buildSyntax(format: format, leadingTrivia: leadingTrivia)
-    }
-
-    func createAttribute() -> Attribute {
+    // swiftlint:disable:next identifier_name
+    static var _implementationOnly: Self {
         .init(
-            atSignToken: .atSign.withLeadingTrivia(leadingTrivia ?? .zero),
-            attributeName: .identifier("_implementationOnly"),
-            tokenList: .none
+            attributeName: TypeSyntax(stringLiteral: "_implementationOnly")
         )
-    }
-
-    func createSyntaxBuildable() -> SyntaxBuildable {
-        self
     }
 }

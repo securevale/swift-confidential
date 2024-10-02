@@ -2,7 +2,6 @@
 import XCTest
 
 import SwiftSyntax
-import SwiftSyntaxBuilder
 
 final class ImportDeclParserTests: XCTestCase {
 
@@ -34,7 +33,6 @@ final class ImportDeclParserTests: XCTestCase {
         // then
         XCTAssertEqual(
             """
-
             import \(C.Code.Generation.confidentialKitModuleName)
             import \(customModuleNameStub)
             import \(C.Code.Generation.foundationModuleName)
@@ -68,7 +66,6 @@ final class ImportDeclParserTests: XCTestCase {
         // then
         XCTAssertEqual(
             """
-
             @_implementationOnly import \(C.Code.Generation.confidentialKitModuleName)
             import \(customModuleNameStub)
             import \(C.Code.Generation.foundationModuleName)
@@ -114,9 +111,8 @@ final class ImportDeclParserTests: XCTestCase {
 
 private extension ImportDeclParserTests {
 
-    func syntax(from statements: [ExpressibleAsCodeBlockItem]) -> Syntax {
-        CodeBlockItemList(statements)
-            .createSyntaxBuildable()
-            .buildSyntax(format: .init(indentWidth: .zero), leadingTrivia: .zero)
+    func syntax(from statements: [CodeBlockItemSyntax]) -> Syntax {
+        CodeBlockItemListSyntax(statements)
+            .formatted(using: .init(indentationWidth: .spaces(0)))
     }
 }

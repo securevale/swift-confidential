@@ -1,94 +1,62 @@
 import ConfidentialKit
 import SwiftSyntax
-import SwiftSyntaxBuilder
 
-struct SecretDecl: DeclBuildable {
+extension VariableDeclSyntax {
 
-    private let accessModifier: TokenSyntax
-    private let name: TokenSyntax
-    private let dataArgumentExpression: ExpressibleAsArrayExpr
-    private let nonceArgumentExpression: ExpressibleAsIntegerLiteralExpr
-    private let dataAccessWrapper: ExpressibleAsCustomAttribute
+    private static let dataArgumentName: String = "data"
+    private static let nonceArgumentName: String = "nonce"
 
-    init(
+    static func makeSecretDecl(
         accessModifier: TokenSyntax,
         name: String,
-        dataArgumentExpression: ExpressibleAsArrayExpr,
-        nonceArgumentExpression: ExpressibleAsIntegerLiteralExpr,
-        dataAccessWrapper: ExpressibleAsCustomAttribute
-    ) {
-        self.accessModifier = accessModifier
-        assert(["internal", "public"].contains(self.accessModifier.text))
-        self.name = .identifier(name)
-        self.dataArgumentExpression = dataArgumentExpression
-        self.nonceArgumentExpression = nonceArgumentExpression
-        self.dataAccessWrapper = dataAccessWrapper
-    }
-
-    func createSyntaxBuildable() -> SyntaxBuildable {
-        self
-    }
-
-    func buildDecl(format: Format, leadingTrivia: Trivia?) -> DeclSyntax {
-        makeUnderlyingDecl().buildDecl(format: format, leadingTrivia: leadingTrivia)
-    }
-}
-
-private extension SecretDecl {
-
-    static let dataArgumentName: String = "data"
-    static let nonceArgumentName: String = "nonce"
-
-    func makeUnderlyingDecl() -> DeclBuildable {
-        VariableDecl(
-            letOrVarKeyword: .var,
-            attributesBuilder: {
-                dataAccessWrapper.createCustomAttribute()
+        dataArgumentExpression: ArrayExprSyntax,
+        nonceArgumentExpression: IntegerLiteralExprSyntax,
+        dataAccessWrapper: AttributeSyntax
+    ) -> Self {
+        assert(["internal", "public"].contains(accessModifier.text))
+        return .init(
+            attributes: .init {
+                dataAccessWrapper
             },
-            modifiersBuilder: {
-                DeclModifier(
+            modifiers: .init {
+                DeclModifierSyntax(
                     name: accessModifier
-                        .withoutTrivia()
-                        .withLeadingTrivia(
-                            .newlines(1)
-                            .appending(.spaces(C.Code.Format.indentWidth))
+                        .with(
+                            \.leadingTrivia, .newlines(1)
+                            .appending(Trivia.spaces(C.Code.Format.indentWidth))
                         )
-                        .withTrailingTrivia(.spaces(1))
+                        .with(\.trailingTrivia, .spaces(1))
                 )
-                DeclModifier(name: .static)
+                DeclModifierSyntax(name: .keyword(.static))
             },
-            bindingsBuilder: {
-                PatternBinding(
-                    pattern: IdentifierPattern(identifier: name),
-                    typeAnnotation: TypeAnnotation(
-                        TypeInfo(of: Obfuscation.Secret.self).fullyQualifiedName
-                    ),
-                    initializer: InitializerClause(
-                        value: InitializerCallExpr {
-                            TupleExprElement(
-                                label: .identifier(Self.dataArgumentName),
-                                colon: .colon,
-                                expression: dataArgumentExpression.createArrayExpr(),
-                                trailingComma: .comma
+            bindingSpecifier: .keyword(.var),
+            bindings: .init(
+                [
+                    PatternBindingSyntax(
+                        pattern: IdentifierPatternSyntax(identifier: .identifier(name)),
+                        typeAnnotation: TypeAnnotationSyntax(
+                            type: TypeSyntax(
+                                stringLiteral: TypeInfo(of: Obfuscation.Secret.self).fullyQualifiedName
                             )
-                            TupleExprElement(
-                                label: .identifier(Self.nonceArgumentName),
-                                colon: .colon,
-                                expression: nonceArgumentExpression.createIntegerLiteralExpr()
-                            )
-                        }
+                        ),
+                        initializer: InitializerClauseSyntax(
+                            value: FunctionCallExprSyntax.makeInitializerCallExpr {
+                                LabeledExprSyntax(
+                                    label: .identifier(Self.dataArgumentName),
+                                    colon: .colonToken(),
+                                    expression: dataArgumentExpression,
+                                    trailingComma: .commaToken()
+                                )
+                                LabeledExprSyntax(
+                                    label: .identifier(Self.nonceArgumentName),
+                                    colon: .colonToken(),
+                                    expression: nonceArgumentExpression
+                                )
+                            }
+                        )
                     )
-                )
-            }
+                ]
+            )
         )
     }
-}
-
-protocol ExpressibleAsSecretDecl {
-    func createSecretDecl() -> SecretDecl
-}
-
-extension SecretDecl: ExpressibleAsSecretDecl {
-
-    func createSecretDecl() -> SecretDecl { self }
 }

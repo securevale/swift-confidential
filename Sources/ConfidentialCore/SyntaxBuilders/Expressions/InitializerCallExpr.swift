@@ -1,35 +1,20 @@
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
-struct InitializerCallExpr: ExprBuildable {
+extension FunctionCallExprSyntax {
 
-    private let argumentList: ExpressibleAsTupleExprElementList
-
-    init(
-        @TupleExprElementListBuilder argumentListBuilder: () -> ExpressibleAsTupleExprElementList = {
-            TupleExprElementList([])
+    static func makeInitializerCallExpr(
+        @LabeledExprListBuilder argumentListBuilder: () -> LabeledExprListSyntax = {
+            LabeledExprListSyntax([])
         }
-    ) {
-        self.argumentList = argumentListBuilder()
-    }
-
-    func createSyntaxBuildable() -> SyntaxBuildable {
-        self
-    }
-
-    func buildExpr(format: Format, leadingTrivia: Trivia?) -> ExprSyntax {
-        makeUnderlyingExpr().buildExpr(format: format, leadingTrivia: leadingTrivia)
-    }
-}
-
-private extension InitializerCallExpr {
-
-    func makeUnderlyingExpr() -> ExprBuildable {
-        FunctionCallExpr(
-            calledExpression: MemberAccessExpr(dot: .period, name: .`init`.withoutTrivia()),
-            leftParen: .leftParen,
-            argumentList: argumentList,
-            rightParen: .rightParen
+    ) -> Self {
+        .init(
+            calledExpression: MemberAccessExprSyntax(
+                declName: .init(baseName: .keyword(.`init`))
+            ),
+            leftParen: .leftParenToken(),
+            arguments: argumentListBuilder(),
+            rightParen: .rightParenToken()
         )
     }
 }

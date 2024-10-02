@@ -21,7 +21,7 @@ readonly OPTION_HELP="--help"
 readonly PRODUCT_SWIFT_CONFIDENTIAL="swift-confidential"
 
 readonly SWIFT_BUILD_ARCH_X86="x86_64"
-readonly SWIFT_BUILD_ARCH_ARM="arm64" 
+readonly SWIFT_BUILD_ARCH_ARM="arm64"
 readonly SWIFT_BUILD_DIR_NAME=".build"
 
 readonly UNIVERSAL_BIN_DIR_ABS_PATH="$SCRIPT_ABS_PATH/../$SWIFT_BUILD_DIR_NAME/universal"
@@ -79,7 +79,7 @@ ${BOLD}DEPENDENCIES${NORMAL}
         • ${BOLD}macOS 12 or newer${NORMAL} - the script uses optimization options that are not
           available on older systems.
         • ${BOLD}Bash 4.2 or newer${NORMAL} - you can upgrade Bash with ${UNDERLINE}upgrade_bash.sh${NORMAL} script.
-        • ${BOLD}Swift 5.6${NORMAL} - Swift toolchain comes bundled with Xcode.
+        • ${BOLD}Swift 5.9${NORMAL} - Swift toolchain comes bundled with Xcode.
 
     Make sure that all dependencies are installed before you start using the script.
 

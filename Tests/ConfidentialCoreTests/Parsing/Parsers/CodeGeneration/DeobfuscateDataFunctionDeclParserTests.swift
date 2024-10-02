@@ -38,8 +38,7 @@ final class DeobfuscateDataFunctionDeclParserTests: XCTestCase {
 
         // then
         let functionDeclSyntax = functionDecl
-            .createMemberDeclListItem()
-            .buildSyntax(format: .init(indentWidth: .zero))
+            .formatted(using: .init(indentationWidth: .spaces(0)))
         let expectedFuncName = C.Code.Generation.deobfuscateDataFuncName
         let expectedFuncDataParamName = C.Code.Generation.deobfuscateDataFuncDataParamName
         let expectedFuncNonceParamName = C.Code.Generation.deobfuscateDataFuncNonceParamName

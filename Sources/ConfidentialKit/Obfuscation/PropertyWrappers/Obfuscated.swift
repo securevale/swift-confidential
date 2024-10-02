@@ -14,7 +14,7 @@ public struct Obfuscated<PlainValue: Decodable> {
     let deobfuscateData: DeobfuscateDataFunc
 
     @usableFromInline
-    let decoder: DataDecoder
+    let decoder: any DataDecoder
 
     /// The underlying secret value.
     public let wrappedValue: Value
@@ -40,7 +40,7 @@ public struct Obfuscated<PlainValue: Decodable> {
     init(
         wrappedValue: Value,
         deobfuscateData: @escaping DeobfuscateDataFunc,
-        decoder: DataDecoder
+        decoder: any DataDecoder
     ) {
         self.wrappedValue = wrappedValue
         self.deobfuscateData = deobfuscateData

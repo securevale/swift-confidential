@@ -1,37 +1,20 @@
 import SwiftSyntax
-import SwiftSyntaxBuilder
 
-struct DeobfuscateFunctionAccessExpr: ExprBuildable {
+extension MemberAccessExprSyntax {
 
-    private let deobfuscationStepInitializerExpr: ExpressibleAsExprBuildable
-    private let dotIndentWidth: Int
+    private static let deobfuscateFuncName: String = "deobfuscate"
 
-    init(_ deobfuscationStepInitializerExpr: ExpressibleAsExprBuildable, dotIndentWidth: Int) {
-        self.deobfuscationStepInitializerExpr = deobfuscationStepInitializerExpr
-        self.dotIndentWidth = dotIndentWidth
-    }
-
-    func createSyntaxBuildable() -> SyntaxBuildable {
-        self
-    }
-
-    func buildExpr(format: Format, leadingTrivia: Trivia?) -> ExprSyntax {
-        makeUnderlyingExpr().buildExpr(format: format, leadingTrivia: leadingTrivia)
-    }
-}
-
-private extension DeobfuscateFunctionAccessExpr {
-
-    static let deobfuscateFuncName: String = "deobfuscate"
-
-    func makeUnderlyingExpr() -> ExprBuildable {
-        MemberAccessExpr(
+    static func makeDeobfuscateFunctionAccessExpr(
+        _ deobfuscationStepInitializerExpr: some ExprSyntaxProtocol,
+        dotIndentWidth: Int
+    ) -> Self {
+        .init(
             base: deobfuscationStepInitializerExpr,
-            dot: .period(
+            period: .periodToken(
                 leadingNewlines: 1,
                 followedByLeadingSpaces: dotIndentWidth
             ),
-            name: .identifier(Self.deobfuscateFuncName)
+            declName: .init(baseName: .identifier(Self.deobfuscateFuncName))
         )
     }
 }

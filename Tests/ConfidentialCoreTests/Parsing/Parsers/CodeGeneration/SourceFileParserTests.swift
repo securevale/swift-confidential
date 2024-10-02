@@ -1,11 +1,11 @@
 @testable import ConfidentialCore
 import XCTest
 
-import SwiftSyntaxBuilder
+import SwiftSyntax
 
 final class SourceFileParserTests: XCTestCase {
 
-    private typealias CodeBlockParserSpy = ParserSpy<SourceSpecification, [ExpressibleAsCodeBlockItem]>
+    private typealias CodeBlockParserSpy = ParserSpy<SourceSpecification, [CodeBlockItemSyntax]>
 
     private let enumNameStub = "Secrets"
 
@@ -67,14 +67,18 @@ final class SourceFileParserTests: XCTestCase {
 
 private extension SourceFileParserTests {
 
-    var codeBlockStub: [ExpressibleAsCodeBlockItem] {
+    var codeBlockStub: [CodeBlockItemSyntax] {
         [
-            EnumDecl(
-                enumKeyword: .enum,
-                identifier: .identifier(enumNameStub),
-                members: MemberDeclBlock(
-                    leftBrace: .leftBrace.withLeadingTrivia(.spaces(1)),
-                    members: MemberDeclList([])
+            .init(
+                leadingTrivia: .newline,
+                item: .init(
+                    EnumDeclSyntax(
+                        name: .identifier(enumNameStub),
+                        memberBlock: MemberBlockSyntax(
+                            leftBrace: .leftBraceToken(leadingTrivia: .spaces(1)),
+                            members: []
+                        )
+                    )
                 )
             )
         ]

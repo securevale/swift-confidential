@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/securevale/swift-confidential/actions/workflows/ci.yml/badge.svg)](https://github.com/securevale/swift-confidential/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/securevale/swift-confidential/branch/master/graph/badge.svg)](https://codecov.io/gh/securevale/swift-confidential)
-[![Swift](https://img.shields.io/badge/Swift-5.10%20%7C%205.9%20%7C%205.8%20%7C%205.7-red)](https://www.swift.org/download)
+[![Swift](https://img.shields.io/badge/Swift-5.10%20%7C%205.9-red)](https://www.swift.org/download)
 [![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%20visionOS%20%7C%20watchOS%20%7C%20tvOS-red)]()
 
 A highly configurable and performant tool for obfuscating Swift literals embedded in the application code that you should protect from static code analysis, making the app more resistant to reverse engineering.
@@ -107,7 +107,7 @@ Swift Confidential can be used with both SwiftPM and Xcode targets, depending on
 To use Swift Confidential with your SwiftPM target, add the `ConfidentialKit` library along with `Confidential` plugin to the package's dependencies and then to your target's dependencies and plugins respectively:
 
 ```swift
-// swift-tools-version: 5.7
+// swift-tools-version: 5.9
 
 import PackageDescription
 

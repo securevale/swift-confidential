@@ -2,46 +2,34 @@ import SwiftSyntax
 
 extension TokenSyntax {
 
-    static func atSign(
+    static func atSignToken(
         leadingNewlines: Int,
         followedByLeadingSpaces leadingSpaces: Int = C.Code.Format.indentWidth
     ) -> Self {
         makeToken(
-            .atSign.withoutTrivia(),
+            .atSignToken(),
             withLeadingNewlines: leadingNewlines,
             followedByLeadingSpaces: leadingSpaces
         )
     }
 
-    static func period(
+    static func periodToken(
         leadingNewlines: Int,
         followedByLeadingSpaces leadingSpaces: Int = C.Code.Format.indentWidth
     ) -> Self {
         makeToken(
-            .period.withoutTrivia(),
+            .periodToken(),
             withLeadingNewlines: leadingNewlines,
             followedByLeadingSpaces: leadingSpaces
         )
     }
 
-    static func rightParen(
+    static func rightParenToken(
         leadingNewlines: Int,
         followedByLeadingSpaces leadingSpaces: Int = C.Code.Format.indentWidth
     ) -> Self {
         makeToken(
-            .rightParen.withoutTrivia(),
-            withLeadingNewlines: leadingNewlines,
-            followedByLeadingSpaces: leadingSpaces
-        )
-    }
-
-    static func `private`(
-        leadingNewlines: Int,
-        followedByLeadingSpaces leadingSpaces: Int = C.Code.Format.indentWidth,
-        trailingSpaces: Int = 1
-    ) -> Self {
-        makeToken(
-            .private.withoutTrivia().withTrailingTrivia(.spaces(trailingSpaces)),
+            .rightParenToken(),
             withLeadingNewlines: leadingNewlines,
             followedByLeadingSpaces: leadingSpaces
         )
@@ -59,9 +47,10 @@ private extension TokenSyntax {
             return token
         }
 
-        return token.withLeadingTrivia(
+        return token.with(
+            \.leadingTrivia,
             .newlines(leadingNewlines)
-            .appending(.spaces(leadingSpaces))
+            .appending(Trivia.spaces(leadingSpaces))
         )
     }
 }

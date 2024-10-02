@@ -1,13 +1,12 @@
 import Parsing
 import SwiftSyntax
-import SwiftSyntaxBuilder
 
 struct NamespaceDeclParser<MembersParser: Parser, DeobfuscateDataFunctionDeclParser: Parser>: Parser
 where
     MembersParser.Input == ArraySlice<SourceSpecification.Secret>,
-    MembersParser.Output == [ExpressibleAsMemberDeclListItem],
+    MembersParser.Output == [MemberBlockItemSyntax],
     DeobfuscateDataFunctionDeclParser.Input == SourceSpecification.Algorithm,
-    DeobfuscateDataFunctionDeclParser.Output == ExpressibleAsMemberDeclListItem
+    DeobfuscateDataFunctionDeclParser.Output == any DeclSyntaxProtocol
 { // swiftlint:disable:this opening_brace
 
     private let membersParser: MembersParser
@@ -21,15 +20,15 @@ where
         self.deobfuscateDataFunctionDeclParser = deobfuscateDataFunctionDeclParser
     }
 
-    func parse(_ input: inout SourceSpecification) throws -> [ExpressibleAsCodeBlockItem] {
+    func parse(_ input: inout SourceSpecification) throws -> [CodeBlockItemSyntax] {
         let deobfuscateDataFunctionDecl = try deobfuscateDataFunctionDeclParser.parse(&input.algorithm)
         let codeBlocks = try input.secrets.namespaces
-            .map { namespace -> ExpressibleAsCodeBlockItem in
+            .map { namespace -> CodeBlockItemSyntax in
                 guard var secrets = input.secrets[namespace] else {
                     fatalError("Unexpected source specification integrity violation")
                 }
 
-                let decl: ExpressibleAsCodeBlockItem
+                let decl: any DeclSyntaxProtocol
                 switch namespace {
                 case let .create(identifier):
                     decl = try enumDecl(
@@ -38,7 +37,7 @@ where
                         deobfuscateDataFunctionDecl: deobfuscateDataFunctionDecl
                     )
                 case let .extend(identifier, moduleName):
-                    let extendedTypeIdentifier = [moduleName, identifier]
+                    let extendedTypeIdentifier: String = [moduleName, identifier]
                         .compactMap { $0 }
                         .joined(separator: ".")
                     decl = try extensionDecl(
@@ -49,7 +48,7 @@ where
                 }
                 input.secrets[namespace] = secrets.isEmpty ? nil : secrets
 
-                return decl
+                return .init(leadingTrivia: .newline, item: .init(decl))
             }
 
         return codeBlocks
@@ -61,47 +60,49 @@ private extension NamespaceDeclParser {
     func enumDecl(
         identifier: String,
         secrets: inout ArraySlice<SourceSpecification.Secret>,
-        deobfuscateDataFunctionDecl: ExpressibleAsMemberDeclListItem
-    ) throws -> EnumDecl {
+        deobfuscateDataFunctionDecl: some DeclSyntaxProtocol
+    ) throws -> EnumDeclSyntax {
         let accessModifier: TokenSyntax = secrets
             .map(\.accessModifier)
             .contains(.public)
-        ? .public
-        : .internal
+        ? .keyword(.public)
+        : .keyword(.internal)
 
         return .init(
-            enumKeyword: .enum,
-            identifier: identifier,
-            members: try members(from: &secrets, with: deobfuscateDataFunctionDecl),
-            modifiersBuilder: {
-                DeclModifier(name: accessModifier.withLeadingTrivia(.newlines(1)))
-            }
+            modifiers: .init {
+                DeclModifierSyntax(name: accessModifier)
+            },
+            name: .identifier(identifier),
+            memberBlock: try memberBlock(from: &secrets, with: deobfuscateDataFunctionDecl)
         )
     }
 
     func extensionDecl(
         extendedTypeIdentifier: String,
         secrets: inout ArraySlice<SourceSpecification.Secret>,
-        deobfuscateDataFunctionDecl: ExpressibleAsMemberDeclListItem
-    ) throws -> ExtensionDecl {
+        deobfuscateDataFunctionDecl: some DeclSyntaxProtocol
+    ) throws -> ExtensionDeclSyntax {
         .init(
-            modifiers: .none,
-            extensionKeyword: .extension.withLeadingTrivia(.newlines(1)),
-            extendedType: SimpleTypeIdentifier(extendedTypeIdentifier),
-            members: try members(from: &secrets, with: deobfuscateDataFunctionDecl)
+            extendedType: IdentifierTypeSyntax(name: .identifier(extendedTypeIdentifier)),
+            memberBlock: try memberBlock(from: &secrets, with: deobfuscateDataFunctionDecl)
         )
     }
 
-    func members(
+    func memberBlock(
         from secrets: inout ArraySlice<SourceSpecification.Secret>,
-        with deobfuscateDataFunctionDecl: ExpressibleAsMemberDeclListItem
-    ) throws -> MemberDeclBlock {
+        with deobfuscateDataFunctionDecl: some DeclSyntaxProtocol
+    ) throws -> MemberBlockSyntax {
         var declarations = try membersParser.parse(&secrets)
-        declarations.append(deobfuscateDataFunctionDecl)
+        declarations.append(
+            .init(
+                leadingTrivia: .newline,
+                decl: deobfuscateDataFunctionDecl
+            )
+        )
 
         return .init(
-            leftBrace: .leftBrace.withLeadingTrivia(.spaces(1)),
-            members: MemberDeclList(declarations)
+            leftBrace: .leftBraceToken(leadingTrivia: .spaces(1)),
+            members: MemberBlockItemListSyntax(declarations)
         )
     }
 }

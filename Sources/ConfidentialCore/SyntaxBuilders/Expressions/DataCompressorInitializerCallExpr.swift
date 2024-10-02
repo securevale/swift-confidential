@@ -1,47 +1,30 @@
 import ConfidentialKit
 import SwiftSyntax
-import SwiftSyntaxBuilder
 
-struct DataCompressorInitializerCallExpr: ExprBuildable {
+extension FunctionCallExprSyntax {
 
-    typealias Algorithm = Obfuscation.Compression.CompressionAlgorithm
+    private static let algorithmArgumentName: String = "algorithm"
 
-    private let compressionAlgorithm: Algorithm
-
-    init(compressionAlgorithm: Algorithm) {
-        self.compressionAlgorithm = compressionAlgorithm
-    }
-
-    func createSyntaxBuildable() -> SyntaxBuildable {
-        self
-    }
-
-    func buildExpr(format: Format, leadingTrivia: Trivia?) -> ExprSyntax {
-        makeUnderlyingExpr().buildExpr(format: format, leadingTrivia: leadingTrivia)
-    }
-}
-
-private extension DataCompressorInitializerCallExpr {
-
-    static let algorithmArgumentName: String = "algorithm"
-
-    func makeUnderlyingExpr() -> ExprBuildable {
-        FunctionCallExpr(
-            IdentifierExpr(
-                TypeInfo(of: Obfuscation.Compression.DataCompressor.self).fullyQualifiedName
+    static func makeDataCompressorInitializerCallExpr(
+        algorithm: Obfuscation.Compression.CompressionAlgorithm
+    ) -> Self {
+        .init(
+            calledExpression: DeclReferenceExprSyntax(
+                baseName: .identifier(
+                    TypeInfo(of: Obfuscation.Compression.DataCompressor.self).fullyQualifiedName
+                )
             ),
-            leftParen: .leftParen,
-            rightParen: .rightParen,
-            argumentListBuilder: {
-                TupleExprElement(
+            leftParen: .leftParenToken(),
+            arguments: .init {
+                LabeledExprSyntax(
                     label: .identifier(Self.algorithmArgumentName),
-                    colon: .colon,
-                    expression: MemberAccessExpr(
-                        dot: .prefixPeriod,
-                        name: .identifier(compressionAlgorithm.name)
+                    colon: .colonToken(),
+                    expression: MemberAccessExprSyntax(
+                        name: .identifier(algorithm.name)
                     )
                 )
-            }
+            },
+            rightParen: .rightParenToken()
         )
     }
 }

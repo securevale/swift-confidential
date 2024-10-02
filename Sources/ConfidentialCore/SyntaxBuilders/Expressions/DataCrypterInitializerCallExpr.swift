@@ -1,47 +1,30 @@
 import ConfidentialKit
 import SwiftSyntax
-import SwiftSyntaxBuilder
 
-struct DataCrypterInitializerCallExpr: ExprBuildable {
+extension FunctionCallExprSyntax {
 
-    typealias Algorithm = Obfuscation.Encryption.SymmetricEncryptionAlgorithm
+    private static let algorithmArgumentName: String = "algorithm"
 
-    private let encryptionAlgorithm: Algorithm
-
-    init(encryptionAlgorithm: Algorithm) {
-        self.encryptionAlgorithm = encryptionAlgorithm
-    }
-
-    func createSyntaxBuildable() -> SyntaxBuildable {
-        self
-    }
-
-    func buildExpr(format: Format, leadingTrivia: Trivia?) -> ExprSyntax {
-        makeUnderlyingExpr().buildExpr(format: format, leadingTrivia: leadingTrivia)
-    }
-}
-
-private extension DataCrypterInitializerCallExpr {
-
-    static let algorithmArgumentName: String = "algorithm"
-
-    func makeUnderlyingExpr() -> ExprBuildable {
-        FunctionCallExpr(
-            IdentifierExpr(
-                TypeInfo(of: Obfuscation.Encryption.DataCrypter.self).fullyQualifiedName
+    static func makeDataCrypterInitializerCallExpr(
+        algorithm: Obfuscation.Encryption.SymmetricEncryptionAlgorithm
+    ) -> Self {
+        .init(
+            calledExpression: DeclReferenceExprSyntax(
+                baseName: .identifier(
+                    TypeInfo(of: Obfuscation.Encryption.DataCrypter.self).fullyQualifiedName
+                )
             ),
-            leftParen: .leftParen,
-            rightParen: .rightParen,
-            argumentListBuilder: {
-                TupleExprElement(
+            leftParen: .leftParenToken(),
+            arguments: .init {
+                LabeledExprSyntax(
                     label: .identifier(Self.algorithmArgumentName),
-                    colon: .colon,
-                    expression: MemberAccessExpr(
-                        dot: .prefixPeriod,
-                        name: .identifier(encryptionAlgorithm.name)
+                    colon: .colonToken(),
+                    expression: MemberAccessExprSyntax(
+                        name: .identifier(algorithm.name)
                     )
                 )
-            }
+            },
+            rightParen: .rightParenToken()
         )
     }
 }

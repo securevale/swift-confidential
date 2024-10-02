@@ -1,15 +1,13 @@
 import Foundation
 import SwiftSyntax
-import SwiftSyntaxBuilder
 
 public struct SourceFileText: Equatable {
 
     private let syntax: Syntax
 
-    init(from sourceFile: ExpressibleAsSourceFile) {
+    init(from sourceFile: SourceFileSyntax) {
         self.syntax = sourceFile
-            .createSourceFile()
-            .buildSyntax(format: .init(indentWidth: .zero))
+            .formatted(using: .init(indentationWidth: .spaces(0)))
     }
 
     public func write(to url: URL, encoding: String.Encoding = .utf8) throws {

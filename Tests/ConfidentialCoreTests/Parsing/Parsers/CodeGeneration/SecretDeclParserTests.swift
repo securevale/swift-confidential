@@ -70,9 +70,8 @@ private extension SecretDeclParserTests {
 
 private extension SecretDeclParserTests {
 
-    func syntax(from secretDecl: ExpressibleAsSecretDecl) -> Syntax {
+    func syntax(from secretDecl: any DeclSyntaxProtocol) -> Syntax {
         secretDecl
-            .createSecretDecl()
-            .buildSyntax(format: .init(indentWidth: .zero))
+            .formatted(using: .init(indentationWidth: .spaces(0)))
     }
 }

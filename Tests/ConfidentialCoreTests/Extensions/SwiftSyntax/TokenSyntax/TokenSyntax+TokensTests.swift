@@ -5,11 +5,11 @@ import SwiftSyntax
 
 final class TokenSyntax_TokensTests: XCTestCase {
 
-    func testAtSign() {
+    func testAtSignToken() {
         XCTAssertEqual(
             "@",
             .init(
-                describing: TokenSyntax.atSign(
+                describing: TokenSyntax.atSignToken(
                     leadingNewlines: .zero,
                     followedByLeadingSpaces: .zero
                 )
@@ -21,7 +21,7 @@ final class TokenSyntax_TokensTests: XCTestCase {
               @
             """,
             .init(
-                describing: TokenSyntax.atSign(
+                describing: TokenSyntax.atSignToken(
                     leadingNewlines: 1,
                     followedByLeadingSpaces: 2
                 )
@@ -34,7 +34,7 @@ final class TokenSyntax_TokensTests: XCTestCase {
                 @
             """,
             .init(
-                describing: TokenSyntax.atSign(
+                describing: TokenSyntax.atSignToken(
                     leadingNewlines: 2,
                     followedByLeadingSpaces: 4
                 )
@@ -42,11 +42,11 @@ final class TokenSyntax_TokensTests: XCTestCase {
         )
     }
 
-    func testPeriod() {
+    func testPeriodToken() {
         XCTAssertEqual(
             ".",
             .init(
-                describing: TokenSyntax.period(
+                describing: TokenSyntax.periodToken(
                     leadingNewlines: .zero,
                     followedByLeadingSpaces: .zero
                 )
@@ -58,7 +58,7 @@ final class TokenSyntax_TokensTests: XCTestCase {
               .
             """,
             .init(
-                describing: TokenSyntax.period(
+                describing: TokenSyntax.periodToken(
                     leadingNewlines: 1,
                     followedByLeadingSpaces: 2
                 )
@@ -71,7 +71,7 @@ final class TokenSyntax_TokensTests: XCTestCase {
                 .
             """,
             .init(
-                describing: TokenSyntax.period(
+                describing: TokenSyntax.periodToken(
                     leadingNewlines: 2,
                     followedByLeadingSpaces: 4
                 )
@@ -79,11 +79,11 @@ final class TokenSyntax_TokensTests: XCTestCase {
         )
     }
 
-    func testRightParen() {
+    func testRightParenToken() {
         XCTAssertEqual(
             ")",
             .init(
-                describing: TokenSyntax.rightParen(
+                describing: TokenSyntax.rightParenToken(
                     leadingNewlines: .zero,
                     followedByLeadingSpaces: .zero
                 )
@@ -95,7 +95,7 @@ final class TokenSyntax_TokensTests: XCTestCase {
               )
             """,
             .init(
-                describing: TokenSyntax.rightParen(
+                describing: TokenSyntax.rightParenToken(
                     leadingNewlines: 1,
                     followedByLeadingSpaces: 2
                 )
@@ -108,49 +108,9 @@ final class TokenSyntax_TokensTests: XCTestCase {
                 )
             """,
             .init(
-                describing: TokenSyntax.rightParen(
+                describing: TokenSyntax.rightParenToken(
                     leadingNewlines: 2,
                     followedByLeadingSpaces: 4
-                )
-            )
-        )
-    }
-
-    func testPrivate() {
-        XCTAssertEqual(
-            "private",
-            .init(
-                describing: TokenSyntax.private(
-                    leadingNewlines: .zero,
-                    followedByLeadingSpaces: .zero,
-                    trailingSpaces: .zero
-                )
-            )
-        )
-        XCTAssertEqual(
-            """
-
-              private\u{0020}
-            """,
-            .init(
-                describing: TokenSyntax.private(
-                    leadingNewlines: 1,
-                    followedByLeadingSpaces: 2,
-                    trailingSpaces: 1
-                )
-            )
-        )
-        XCTAssertEqual(
-            """
-
-
-                private\u{0020}\u{0020}\u{0020}\u{0020}
-            """,
-            .init(
-                describing: TokenSyntax.private(
-                    leadingNewlines: 2,
-                    followedByLeadingSpaces: 4,
-                    trailingSpaces: 4
                 )
             )
         )
