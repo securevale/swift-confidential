@@ -1,10 +1,10 @@
 import Parsing
-import SwiftSyntaxBuilder
+import SwiftSyntax
 
 struct NamespaceMembersParser<SecretDeclParser: Parser>: Parser
 where
     SecretDeclParser.Input == SourceSpecification.Secret,
-    SecretDeclParser.Output == ExpressibleAsSecretDecl
+    SecretDeclParser.Output == any DeclSyntaxProtocol
 { // swiftlint:disable:this opening_brace
 
     private let secretDeclParser: SecretDeclParser
@@ -13,12 +13,12 @@ where
         self.secretDeclParser = secretDeclParser
     }
 
-    func parse(_ input: inout ArraySlice<SourceSpecification.Secret>) throws -> [ExpressibleAsMemberDeclListItem] {
+    func parse(_ input: inout ArraySlice<SourceSpecification.Secret>) throws -> [MemberBlockItemSyntax] {
         var parsedSecretsCount: Int = .zero
-        let declarations: [SecretDecl]
+        let declarations: [any DeclSyntaxProtocol]
         do {
             declarations = try input.map { secret in
-                let decl = try secretDeclParser.parse(secret).createSecretDecl()
+                let decl = try secretDeclParser.parse(secret)
                 parsedSecretsCount += 1
 
                 return decl
@@ -29,6 +29,8 @@ where
             throw error
         }
 
-        return declarations
+        return declarations.map {
+            MemberBlockItemSyntax(leadingTrivia: .newline, decl: $0)
+        }
     }
 }

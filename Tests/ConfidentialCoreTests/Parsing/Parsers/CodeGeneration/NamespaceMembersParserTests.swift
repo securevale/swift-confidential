@@ -1,24 +1,29 @@
 @testable import ConfidentialCore
 import XCTest
 
-import SwiftSyntaxBuilder
+import SwiftBasicFormat
+import SwiftSyntax
 
 final class NamespaceMembersParserTests: XCTestCase {
 
     private typealias Secret = SourceSpecification.Secret
-    private typealias SecretDeclParserSpy = ParserSpy<Secret, ExpressibleAsSecretDecl>
+    private typealias SecretDeclParserSpy = ParserSpy<Secret, any DeclSyntaxProtocol>
 
-    private let secretDeclStub = SecretDecl(
-        accessModifier: .internal,
+    private let secretDeclStub = VariableDeclSyntax.makeSecretVariableDecl(
+        accessModifier: .keyword(.internal),
         name: "secret",
-        dataArgumentExpression: ArrayExpr {
-            ArrayElement(expression: IntegerLiteralExpr(digits: "0x20"), trailingComma: .comma)
-            ArrayElement(expression: IntegerLiteralExpr(digits: "0x20"))
+        dataArgumentExpression: ArrayExprSyntax {
+            ArrayElementSyntax(
+                expression: IntegerLiteralExprSyntax(literal: "0x20"),
+                trailingComma: .commaToken()
+            )
+            ArrayElementSyntax(
+                expression: IntegerLiteralExprSyntax(literal: "0x20")
+            )
         },
-        nonceArgumentExpression: IntegerLiteralExpr(digits: "123456789"),
-        dataAccessWrapper: CustomAttribute(
-            attributeName: SimpleTypeIdentifier("Test"),
-            argumentList: .none
+        nonceArgumentExpression: IntegerLiteralExprSyntax(literal: "123456789"),
+        dataAccessWrapper: AttributeSyntax(
+            attributeName: IdentifierTypeSyntax(name: .identifier("Test"))
         )
     )
     private let secretsStub: ArraySlice<Secret> = [
@@ -47,16 +52,16 @@ final class NamespaceMembersParserTests: XCTestCase {
         var secrets = secretsStub
 
         // when
-        let memberDeclarations: [ExpressibleAsMemberDeclListItem] = try sut.parse(&secrets)
+        let memberDeclarations: [MemberBlockItemSyntax] = try sut.parse(&secrets)
 
         // then
-        let format = Format(indentWidth: .zero)
+        let format: BasicFormat = .init(indentationWidth: .spaces(0))
         let membersSourceText = memberDeclarations
-            .map { $0.createMemberDeclListItem() }
-            .map { $0.buildSyntax(format: format) }
+            .map { $0.formatted(using: format) }
             .map { String(describing: $0) }
         let expectedMembersSourceText = secretsStub
-            .map { _ in secretDeclStub.buildSyntax(format: format) }
+            .map { _ in MemberBlockItemSyntax(leadingTrivia: .newline, decl: secretDeclStub) }
+            .map { $0.formatted(using: format) }
             .map { String(describing: $0) }
         XCTAssertEqual(expectedMembersSourceText, membersSourceText)
         XCTAssertEqual(secretsStub, secretDeclParserSpy.parseRecordedInput[...])

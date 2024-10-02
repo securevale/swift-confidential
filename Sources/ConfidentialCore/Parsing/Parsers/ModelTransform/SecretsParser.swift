@@ -15,13 +15,13 @@ where
 
     private let namespaceParser: NamespaceParser
     private let accessModifierParser: AccessModifierParser
-    private let secretValueEncoder: DataEncoder
+    private let secretValueEncoder: any DataEncoder
     private let generateNonce: GenerateNonce
 
     init(
         namespaceParser: NamespaceParser,
         accessModifierParser: AccessModifierParser,
-        secretValueEncoder: DataEncoder = JSONEncoder(),
+        secretValueEncoder: any DataEncoder = JSONEncoder(),
         generateNonce: @autoclosure @escaping GenerateNonce = try .secureRandom()
     ) {
         self.namespaceParser = namespaceParser

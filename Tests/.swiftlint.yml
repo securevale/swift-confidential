@@ -26,6 +26,8 @@ type_name:
 ### Metrics ###
 function_body_length:
   warning: 80
+closure_body_length:
+  warning: 50
 line_length:
   ignores_function_declarations: true
   ignores_interpolated_strings: true

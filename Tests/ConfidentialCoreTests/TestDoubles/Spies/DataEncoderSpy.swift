@@ -3,11 +3,11 @@ import Foundation
 
 final class DataEncoderSpy: DataEncoder {
 
-    var underlyingEncoder: DataEncoder
+    var underlyingEncoder: any DataEncoder
 
     private(set) var encodeRecordedValues: [any Encodable] = []
 
-    init(underlyingEncoder: DataEncoder) {
+    init(underlyingEncoder: any DataEncoder) {
         self.underlyingEncoder = underlyingEncoder
     }
 

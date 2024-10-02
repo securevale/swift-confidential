@@ -16,6 +16,6 @@ final class Encodable_TypeErasureTests: XCTestCase {
             result = try JSONEncoder().encode(anyEncodable)
         )
         XCTAssertEqual(1, encodableSpy.encodeCallCount)
-        XCTAssertEqual(#""\#(encodableValue)""#, String(decoding: result, as: UTF8.self))
+        XCTAssertEqual(#""\#(encodableValue)""#, String(data: result, encoding: .utf8))
     }
 }

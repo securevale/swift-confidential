@@ -1,10 +1,10 @@
 import Parsing
-import SwiftSyntaxBuilder
+import SwiftSyntax
 
 public struct SourceFileParser<CodeBlockParsers: Parser>: Parser
 where
     CodeBlockParsers.Input == SourceSpecification,
-    CodeBlockParsers.Output == [ExpressibleAsCodeBlockItem]
+    CodeBlockParsers.Output == [CodeBlockItemSyntax]
 { // swiftlint:disable:this opening_brace
 
     private let codeBlockParsers: CodeBlockParsers
@@ -17,9 +17,8 @@ where
         let statements = try codeBlockParsers.parse(&input)
 
         return .init(
-            from: SourceFile(
-                statements: CodeBlockItemList(statements),
-                eofToken: .eof
+            from: SourceFileSyntax(
+                statements: CodeBlockItemListSyntax(statements)
             )
         )
     }

@@ -1,17 +1,17 @@
 @testable import ConfidentialCore
 import XCTest
 
-import SwiftSyntaxBuilder
+import SwiftSyntax
 
 final class NamespaceDeclParserTests: XCTestCase {
 
     private typealias MembersParserSpy = ParserSpy<
         ArraySlice<SourceSpecification.Secret>,
-        [ExpressibleAsMemberDeclListItem]
+        [MemberBlockItemSyntax]
     >
     private typealias DeobfuscateDataFunctionDeclParserSpy = ParserSpy<
         SourceSpecification.Algorithm,
-        ExpressibleAsMemberDeclListItem
+        any DeclSyntaxProtocol
     >
 
     private let memberNameStub = "tested"
@@ -58,12 +58,11 @@ final class NamespaceDeclParserTests: XCTestCase {
         )
 
         // when
-        let namespaceDeclarations: [ExpressibleAsCodeBlockItem] = try sut.parse(&sourceSpecification)
+        let namespaceDeclarations: [CodeBlockItemSyntax] = try sut.parse(&sourceSpecification)
 
         // then
         let namespaceDeclarationsSyntax = namespaceDeclarations
-            .map { $0.createCodeBlockItem() }
-            .map { $0.buildSyntax(format: .init(indentWidth: .zero)) }
+            .map { $0.formatted(using: .init(indentationWidth: .spaces(0))) }
             .map { String(describing: $0) }
             .sorted { $0 > $1 }
 
@@ -126,37 +125,44 @@ final class NamespaceDeclParserTests: XCTestCase {
 
 private extension NamespaceDeclParserTests {
 
-    var membersStub: [ExpressibleAsMemberDeclListItem] {
+    var membersStub: [MemberBlockItemSyntax] {
         [
-            VariableDecl(
-                modifiers: ModifierList([
-                    DeclModifier(name: .static.withLeadingTrivia(.newlines(1).appending(.spaces(4))))
-                ]),
-                letOrVarKeyword: .var,
-                bindings: PatternBindingList([
-                    PatternBinding(
-                        pattern: IdentifierPattern(memberNameStub),
-                        typeAnnotation: TypeAnnotation(memberTypeNameStub),
-                        initializer: InitializerClause(
-                            value: BooleanLiteralExpr(booleanLiteral: .false.withoutTrivia())
+            .init(
+                leadingTrivia: .newline,
+                decl: VariableDeclSyntax(
+                    modifiers: DeclModifierListSyntax([
+                        DeclModifierSyntax(
+                            name: .keyword(.static, leadingTrivia: .newlines(1).appending(Trivia.spaces(4)))
                         )
-                    )
-                ])
+                    ]),
+                    bindingSpecifier: .keyword(.var),
+                    bindings: PatternBindingListSyntax([
+                        PatternBindingSyntax(
+                            pattern: IdentifierPatternSyntax(identifier: .identifier(memberNameStub)),
+                            typeAnnotation: TypeAnnotationSyntax(type: TypeSyntax(stringLiteral: memberTypeNameStub)),
+                            initializer: InitializerClauseSyntax(
+                                value: BooleanLiteralExprSyntax(literal: .keyword(.false))
+                            )
+                        )
+                    ])
+                )
             )
         ]
     }
 
-    var deobfuscateDataFunctionDeclStub: ExpressibleAsMemberDeclListItem {
-        FunctionDecl(
-            modifiers: ModifierList([
-                DeclModifier(name: .static.withLeadingTrivia(.newlines(1).appending(.spaces(4))))
+    var deobfuscateDataFunctionDeclStub: any DeclSyntaxProtocol {
+        FunctionDeclSyntax(
+            modifiers: DeclModifierListSyntax([
+                DeclModifierSyntax(
+                    name: .keyword(.static, leadingTrivia: .newlines(1).appending(Trivia.spaces(4)))
+                )
             ]),
-            identifier: .identifier(deobfuscateDataFunctionNameStub),
-            signature: FunctionSignature(input: ParameterClause()),
-            body: CodeBlock(
-                leftBrace: .leftBrace.withLeadingTrivia(.spaces(1)),
-                statements: CodeBlockItemList([]),
-                rightBrace: .rightBrace.withLeadingTrivia(.spaces(4))
+            name: .identifier(deobfuscateDataFunctionNameStub),
+            signature: FunctionSignatureSyntax(parameterClause: .init(parameters: [])),
+            body: CodeBlockSyntax(
+                leftBrace: .leftBraceToken(leadingTrivia: .spaces(1)),
+                statements: [],
+                rightBrace: .rightBraceToken(leadingTrivia: .spaces(4))
             )
         )
     }

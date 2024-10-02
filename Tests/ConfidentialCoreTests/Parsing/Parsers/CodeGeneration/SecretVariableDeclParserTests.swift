@@ -4,7 +4,7 @@ import XCTest
 import ConfidentialKit
 import SwiftSyntax
 
-final class SecretDeclParserTests: XCTestCase {
+final class SecretVariableDeclParserTests: XCTestCase {
 
     private let deobfuscateArgumentNameStub = "deobfuscate"
     private let deobfuscateDataFuncNameStub = "deobfuscateData"
@@ -14,7 +14,7 @@ final class SecretDeclParserTests: XCTestCase {
         let secret = makeSecretStub(accessModifier: .internal)
 
         // when
-        let secretDecl = try SecretDeclParser().parse(secret)
+        let secretDecl = try SecretVariableDeclParser().parse(secret)
 
         // then
         let expectedAttributeName = secret.dataAccessWrapperInfo.typeInfo.fullyQualifiedName
@@ -34,7 +34,7 @@ final class SecretDeclParserTests: XCTestCase {
         let secret = makeSecretStub(accessModifier: .public)
 
         // when
-        let secretDecl = try SecretDeclParser().parse(secret)
+        let secretDecl = try SecretVariableDeclParser().parse(secret)
 
         // then
         let expectedAttributeName = secret.dataAccessWrapperInfo.typeInfo.fullyQualifiedName
@@ -50,7 +50,7 @@ final class SecretDeclParserTests: XCTestCase {
     }
 }
 
-private extension SecretDeclParserTests {
+private extension SecretVariableDeclParserTests {
 
     typealias Secret = SourceSpecification.Secret
 
@@ -68,11 +68,10 @@ private extension SecretDeclParserTests {
     }
 }
 
-private extension SecretDeclParserTests {
+private extension SecretVariableDeclParserTests {
 
-    func syntax(from secretDecl: ExpressibleAsSecretDecl) -> Syntax {
+    func syntax(from secretDecl: any DeclSyntaxProtocol) -> Syntax {
         secretDecl
-            .createSecretDecl()
-            .buildSyntax(format: .init(indentWidth: .zero))
+            .formatted(using: .init(indentationWidth: .spaces(0)))
     }
 }

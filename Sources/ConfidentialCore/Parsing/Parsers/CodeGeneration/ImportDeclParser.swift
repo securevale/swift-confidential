@@ -1,10 +1,9 @@
 import Parsing
 import SwiftSyntax
-import SwiftSyntaxBuilder
 
 struct ImportDeclParser: Parser {
 
-    func parse(_ input: inout SourceSpecification) throws -> [ExpressibleAsCodeBlockItem] {
+    func parse(_ input: inout SourceSpecification) throws -> [CodeBlockItemSyntax] {
         guard
             !input.implementationOnlyImport || canUseImplementationOnlyImport(given: input.secrets)
         else {
@@ -22,6 +21,9 @@ struct ImportDeclParser: Parser {
             from: input.secrets.namespaces,
             implementationOnly: input.implementationOnlyImport
         )
+        .map {
+            .init(item: .init($0))
+        }
     }
 }
 
@@ -37,7 +39,7 @@ private extension ImportDeclParser {
     func makeImportDeclStatements<Namespaces: Collection>(
         from namespaces: Namespaces,
         implementationOnly: Bool
-    ) -> [ExpressibleAsImportDecl]
+    ) -> [ImportDeclSyntax]
     where
         Namespaces.Element == SourceSpecification.Secret.Namespace
     {
@@ -73,25 +75,19 @@ private extension ImportDeclParser {
     func makeImportDeclStatements(
         implementationOnlyModuleNames: [String],
         moduleNames: [String]
-    ) -> [ExpressibleAsImportDecl] {
+    ) -> [ImportDeclSyntax] {
         let implementationOnlyImports = implementationOnlyModuleNames
             .map { moduleName in
-                ImportDecl(
-                    importTok: .import.withLeadingTrivia(.spaces(1)),
-                    attributesBuilder: {
-                        ImplementationOnlyAttribute()
-                    },
-                    pathBuilder: {
-                        AccessPathComponent(name: .identifier(moduleName))
-                    }
+                ImportDeclSyntax(
+                    attributes: [.attribute(._implementationOnly)],
+                    importKeyword: .keyword(.import, leadingTrivia: .spaces(1)),
+                    path: [ImportPathComponentSyntax(name: .identifier(moduleName))]
                 )
             }
         let imports = moduleNames
             .map { moduleName in
-                ImportDecl(
-                    pathBuilder: {
-                        AccessPathComponent(name: .identifier(moduleName))
-                    }
+                ImportDeclSyntax(
+                    path: [ImportPathComponentSyntax(name: .identifier(moduleName))]
                 )
             }
 

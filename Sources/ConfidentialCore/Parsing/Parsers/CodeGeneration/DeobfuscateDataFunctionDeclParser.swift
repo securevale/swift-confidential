@@ -1,17 +1,17 @@
 import Parsing
-import SwiftSyntaxBuilder
+import SwiftSyntax
 
 struct DeobfuscateDataFunctionDeclParser: Parser {
 
     typealias Algorithm = SourceSpecification.Algorithm
 
-    private let functionNestingLevel: UInt8
+    private let functionNestingLevel: Int
 
-    init(functionNestingLevel: UInt8) {
+    init(functionNestingLevel: Int) {
         self.functionNestingLevel = functionNestingLevel
     }
 
-    func parse(_ input: inout Algorithm) throws -> ExpressibleAsMemberDeclListItem {
+    func parse(_ input: inout Algorithm) throws -> any DeclSyntaxProtocol {
         var obfuscationStepsCount = input.count
         guard obfuscationStepsCount > .zero else {
             throw ParsingError.assertionFailed(
@@ -37,8 +37,8 @@ struct DeobfuscateDataFunctionDeclParser: Parser {
 
         input.removeAll()
 
-        return DeobfuscateDataFunctionDecl(
-            declNestingLevel: functionNestingLevel,
+        return FunctionDeclSyntax.makeDeobfuscateDataFunctionDecl(
+            nestingLevel: functionNestingLevel,
             body: bodyExpr
         )
     }
@@ -53,68 +53,74 @@ private extension DeobfuscateDataFunctionDeclParser {
     func obfuscationStepExpr(
         for obfuscationStep: ObfuscationStep,
         indentWidthMultiplier: Int
-    ) throws -> ExpressibleAsExprBuildable {
+    ) throws -> TryExprSyntax {
         let tryIndentWidth = try exprIndentWidth(with: indentWidthMultiplier)
         let functionCallExprIndentWidth = tryIndentWidth + C.Code.Format.indentWidth
-        return TryExpr(
-            tryKeyword: .try.withLeadingTrivia(.spaces(tryIndentWidth)),
-            expression: FunctionCallExpr(
+        return TryExprSyntax(
+            tryKeyword: .keyword(.try, leadingTrivia: .spaces(tryIndentWidth)),
+            expression: FunctionCallExprSyntax(
                 calledExpression: deobfuscateFunctionAccessExpr(
                     for: obfuscationStep.technique,
                     indentWidth: functionCallExprIndentWidth
                 ),
-                leftParen: .leftParen,
-                rightParen: .rightParen,
-                argumentListBuilder: {
-                    TupleExprElement(
-                        expression: IdentifierExpr(C.Code.Generation.deobfuscateDataFuncDataParamName),
-                        trailingComma: .comma
+                leftParen: .leftParenToken(),
+                arguments: .init {
+                    LabeledExprSyntax(
+                        expression: DeclReferenceExprSyntax(
+                            baseName: .identifier(C.Code.Generation.deobfuscateDataFuncDataParamName)
+                        ),
+                        trailingComma: .commaToken()
                     )
-                    TupleExprElement(
+                    LabeledExprSyntax(
                         label: .identifier(Self.nonceArgumentName),
-                        colon: .colon,
-                        expression: IdentifierExpr(C.Code.Generation.deobfuscateDataFuncNonceParamName)
+                        colon: .colonToken(),
+                        expression: DeclReferenceExprSyntax(
+                            baseName: .identifier(C.Code.Generation.deobfuscateDataFuncNonceParamName)
+                        )
                     )
-                }
+                },
+                rightParen: .rightParenToken()
             )
         )
     }
 
     func obfuscationStepExpr(
         for obfuscationStep: ObfuscationStep,
-        withInnerExpr innerExpr: ExpressibleAsExprBuildable,
+        withInnerExpr innerExpr: some ExprSyntaxProtocol,
         indentWidthMultiplier: Int
-    ) throws -> ExpressibleAsExprBuildable {
+    ) throws -> TryExprSyntax {
         let tryIndentWidth = try exprIndentWidth(with: indentWidthMultiplier)
         let functionCallExprIndentWidth = tryIndentWidth + C.Code.Format.indentWidth
         let functionCallExprArgumentIndentWidth = functionCallExprIndentWidth + C.Code.Format.indentWidth
-        return TryExpr(
-            tryKeyword: .try.withLeadingTrivia(.spaces(tryIndentWidth)),
-            expression: FunctionCallExpr(
+        return TryExprSyntax(
+            tryKeyword: .keyword(.try, leadingTrivia: .spaces(tryIndentWidth)),
+            expression: FunctionCallExprSyntax(
                 calledExpression: deobfuscateFunctionAccessExpr(
                     for: obfuscationStep.technique,
                     indentWidth: functionCallExprIndentWidth
                 ),
-                leftParen: .leftParen.withTrailingTrivia(.newlines(1)),
-                rightParen: .rightParen(
+                leftParen: .leftParenToken(trailingTrivia: .newlines(1)),
+                arguments: .init {
+                    LabeledExprSyntax(
+                        expression: innerExpr,
+                        trailingComma: .commaToken()
+                    )
+                    LabeledExprSyntax(
+                        label: .identifier(Self.nonceArgumentName)
+                            .with(
+                                \.leadingTrivia,
+                                .newlines(1).appending(Trivia.spaces(functionCallExprArgumentIndentWidth))
+                            ),
+                        colon: .colonToken(),
+                        expression: DeclReferenceExprSyntax(
+                            baseName: .identifier(C.Code.Generation.deobfuscateDataFuncNonceParamName)
+                        )
+                    )
+                },
+                rightParen: .rightParenToken(
                     leadingNewlines: 1,
                     followedByLeadingSpaces: functionCallExprIndentWidth
-                ),
-                argumentListBuilder: {
-                    TupleExprElement(
-                        expression: innerExpr,
-                        trailingComma: .comma.withoutTrivia()
-                    )
-                    TupleExprElement(
-                        label: .identifier(Self.nonceArgumentName)
-                            .withLeadingTrivia(
-                                .newlines(1)
-                                .appending(.spaces(functionCallExprArgumentIndentWidth))
-                            ),
-                        colon: .colon,
-                        expression: IdentifierExpr(C.Code.Generation.deobfuscateDataFuncNonceParamName)
-                    )
-                }
+                )
             )
         )
     }
@@ -122,18 +128,21 @@ private extension DeobfuscateDataFunctionDeclParser {
     func deobfuscateFunctionAccessExpr(
         for technique: ObfuscationStep.Technique,
         indentWidth: Int
-    ) -> ExpressibleAsExprBuildable {
-        let initCallExpr: ExpressibleAsExprBuildable
+    ) -> some ExprSyntaxProtocol {
+        let initCallExpr: FunctionCallExprSyntax
         switch technique {
         case let .compression(algorithm):
-            initCallExpr = DataCompressorInitializerCallExpr(compressionAlgorithm: algorithm)
+            initCallExpr = FunctionCallExprSyntax.makeDataCompressorInitializerCallExpr(algorithm: algorithm)
         case let .encryption(algorithm):
-            initCallExpr = DataCrypterInitializerCallExpr(encryptionAlgorithm: algorithm)
+            initCallExpr = FunctionCallExprSyntax.makeDataCrypterInitializerCallExpr(algorithm: algorithm)
         case .randomization:
-            initCallExpr = DataShufflerInitializerCallExpr()
+            initCallExpr = FunctionCallExprSyntax.makeDataShufflerInitializerCallExpr()
         }
 
-        return DeobfuscateFunctionAccessExpr(initCallExpr, dotIndentWidth: indentWidth)
+        return MemberAccessExprSyntax.makeDeobfuscateFunctionAccessExpr(
+            initCallExpr,
+            dotIndentWidth: indentWidth
+        )
     }
 }
 

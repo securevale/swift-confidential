@@ -1,5 +1,5 @@
 import Parsing
-import SwiftSyntaxBuilder
+import SwiftSyntax
 
 public typealias AnyAlgorithmParser = AnyParser<Configuration, SourceSpecification.Algorithm>
 public typealias AnySecretsParser = AnyParser<Configuration, SourceSpecification.Secrets>
@@ -36,7 +36,7 @@ where
     }
 }
 
-public typealias AnyCodeBlockParser = AnyParser<SourceSpecification, [ExpressibleAsCodeBlockItem]>
+public typealias AnyCodeBlockParser = AnyParser<SourceSpecification, [CodeBlockItemSyntax]>
 
 public extension Parsers.CodeGeneration.SourceFile
 where
@@ -49,7 +49,7 @@ where
                 ImportDeclParser()
                 NamespaceDeclParser(
                     membersParser: NamespaceMembersParser(
-                        secretDeclParser: SecretDeclParser()
+                        secretDeclParser: SecretVariableDeclParser()
                     ),
                     deobfuscateDataFunctionDeclParser: DeobfuscateDataFunctionDeclParser(functionNestingLevel: 1)
                 )

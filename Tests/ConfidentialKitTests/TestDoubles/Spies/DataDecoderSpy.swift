@@ -3,11 +3,11 @@ import Foundation
 
 final class DataDecoderSpy: DataDecoder {
 
-    var underlyingDecoder: DataDecoder
+    var underlyingDecoder: any DataDecoder
 
     private(set) var decodeRecordedData: [Data] = []
 
-    init(underlyingDecoder: DataDecoder) {
+    init(underlyingDecoder: any DataDecoder) {
         self.underlyingDecoder = underlyingDecoder
     }
 

@@ -1,4 +1,4 @@
-// swift-tools-version: 5.7
+// swift-tools-version: 5.9
 
 import PackageDescription
 
@@ -33,7 +33,7 @@ var package = Package(
 #if os(macOS)
 package.dependencies.append(contentsOf: [
     .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.3"),
-    .package(url: "https://github.com/apple/swift-syntax.git", exact: "0.50700.1"),
+    .package(url: "https://github.com/apple/swift-syntax.git", exact: "509.1.1"),
     .package(url: "https://github.com/pointfreeco/swift-parsing.git", from: "0.13.0"),
     .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.6")
 ])

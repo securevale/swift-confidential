@@ -1,7 +1,7 @@
 @testable import ConfidentialCore
 import XCTest
 
-import SwiftSyntaxBuilder
+import SwiftSyntax
 
 final class SourceFileTextTests: XCTestCase {
 
@@ -21,30 +21,43 @@ final class SourceFileTextTests: XCTestCase {
 
     func test_givenSourceFileTextWithSourceFileSyntax_whenWriteToFile_thenFileContainsExpectedSyntaxText() throws {
         // given
-        let sourceFile = SourceFile(eofToken: .eof) {
-            ImportDecl(
-                path: AccessPath([AccessPathComponent(name: .identifier("Foundation"))])
-            )
-            StructDecl(
-                structKeyword: .struct.withLeadingTrivia(.newlines(1)),
-                identifier: "Test",
-                members: MemberDeclBlock(
-                    leftBrace: .leftBrace.withLeadingTrivia(.spaces(1)),
-                    rightBrace: .rightBrace
-                ) {
-                    VariableDecl(
-                        .let.withLeadingTrivia(.spaces(2)),
-                        name: IdentifierPattern("id"),
-                        type: TypeAnnotation("UUID")
+        let sourceFile = SourceFileSyntax(
+            statements: CodeBlockItemListSyntax(itemsBuilder: {
+                CodeBlockItemSyntax(
+                    item: .init(
+                        ImportDeclSyntax(
+                            path: [ImportPathComponentSyntax(name: .identifier("Foundation"))]
+                        )
+                    ),
+                    trailingTrivia: .newline
+                )
+                CodeBlockItemSyntax(
+                    item: .init(
+                        StructDeclSyntax(
+                            structKeyword: .keyword(.struct, leadingTrivia: .newlines(1)),
+                            name: "Test",
+                            memberBlock: .init(
+                                leftBrace: .leftBraceToken(leadingTrivia: .spaces(1)),
+                                rightBrace: .rightBraceToken()
+                            ) {
+                                VariableDeclSyntax(
+                                    leadingTrivia: .spaces(2),
+                                    .let,
+                                    name: PatternSyntax(stringLiteral: "id"),
+                                    type: TypeAnnotationSyntax(type: TypeSyntax(stringLiteral: "UUID"))
+                                )
+                                VariableDeclSyntax(
+                                    leadingTrivia: .spaces(2),
+                                    .var,
+                                    name: PatternSyntax(stringLiteral: "data"),
+                                    type: TypeAnnotationSyntax(type: TypeSyntax(stringLiteral: "Data"))
+                                )
+                            }
+                        )
                     )
-                    VariableDecl(
-                        .var.withLeadingTrivia(.spaces(2)),
-                        name: IdentifierPattern("data"),
-                        type: TypeAnnotation("Data")
-                    )
-                }
-            )
-        }
+                )
+            })
+        )
         let sourceFileText = SourceFileText(from: sourceFile)
         let encoding = String.Encoding.utf8
 

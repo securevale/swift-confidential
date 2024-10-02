@@ -1,7 +1,7 @@
 final class ParameterlessClosureSpy<Result> {
 
     var result: Result
-    var error: Error?
+    var error: (any Error)?
 
     private(set) var callCount: Int = .zero
 
