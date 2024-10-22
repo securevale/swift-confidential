@@ -25,7 +25,7 @@ extension SourceObfuscator {
     }
 }
 
-public extension SourceObfuscator {
+package extension SourceObfuscator {
 
     init() {
         self.init(obfuscationStepResolver: ObfuscationStepResolver())

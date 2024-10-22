@@ -1,7 +1,7 @@
 import ConfidentialKit
 
 // swiftlint:disable discouraged_optional_boolean
-public struct Configuration: Equatable, Decodable {
+package struct Configuration: Equatable, Decodable {
     var algorithm: ArraySlice<String>
     var defaultAccessModifier: String?
     var defaultNamespace: String?
@@ -10,7 +10,7 @@ public struct Configuration: Equatable, Decodable {
 }
 // swiftlint:enable discouraged_optional_boolean
 
-public extension Configuration {
+package extension Configuration {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)

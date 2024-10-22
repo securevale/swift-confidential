@@ -1,3 +1,3 @@
 import Parsing
 
-public typealias Parsers = Parsing.Parsers
+package typealias Parsers = Parsing.Parsers

@@ -1,10 +1,10 @@
 import Parsing
 import SwiftSyntax
 
-public typealias AnyAlgorithmParser = AnyParser<Configuration, SourceSpecification.Algorithm>
-public typealias AnySecretsParser = AnyParser<Configuration, SourceSpecification.Secrets>
+package typealias AnyAlgorithmParser = AnyParser<Configuration, SourceSpecification.Algorithm>
+package typealias AnySecretsParser = AnyParser<Configuration, SourceSpecification.Secrets>
 
-public extension Parsers.ModelTransform.SourceSpecification
+package extension Parsers.ModelTransform.SourceSpecification
 where
     AlgorithmParser == AnyAlgorithmParser,
     SecretsParser == AnySecretsParser
@@ -36,9 +36,9 @@ where
     }
 }
 
-public typealias AnyCodeBlockParser = AnyParser<SourceSpecification, [CodeBlockItemSyntax]>
+package typealias AnyCodeBlockParser = AnyParser<SourceSpecification, [CodeBlockItemSyntax]>
 
-public extension Parsers.CodeGeneration.SourceFile
+package extension Parsers.CodeGeneration.SourceFile
 where
     CodeBlockParsers == AnyCodeBlockParser
 { // swiftlint:disable:this opening_brace

@@ -1,6 +1,6 @@
 import Parsing
 
-public struct SourceSpecificationParser<AlgorithmParser: Parser, SecretsParser: Parser>: Parser
+package struct SourceSpecificationParser<AlgorithmParser: Parser, SecretsParser: Parser>: Parser
 where
     AlgorithmParser.Input == Configuration,
     AlgorithmParser.Output == SourceSpecification.Algorithm,
@@ -16,7 +16,7 @@ where
         self.secretsParser = secretsParser
     }
 
-    public func parse(_ input: inout Configuration) throws -> SourceSpecification {
+    package func parse(_ input: inout Configuration) throws -> SourceSpecification {
         let spec = SourceSpecification(
             algorithm: try algorithmParser.parse(&input),
             implementationOnlyImport: input.implementationOnlyImport ?? false,
@@ -30,7 +30,7 @@ where
     }
 }
 
-public extension Parsers.ModelTransform {
+package extension Parsers.ModelTransform {
 
     typealias SourceSpecification = SourceSpecificationParser
 }

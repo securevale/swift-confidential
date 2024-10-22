@@ -1,4 +1,4 @@
-public extension Parsers {
+package extension Parsers {
 
     enum CodeGeneration {}
 }

@@ -1,13 +1,13 @@
 import ConfidentialKit
 import Foundation
 
-public struct SourceSpecification: Equatable {
+package struct SourceSpecification: Equatable {
     var algorithm: Algorithm
     var implementationOnlyImport: Bool
     var secrets: Secrets
 }
 
-public extension SourceSpecification {
+package extension SourceSpecification {
 
     typealias Algorithm = ArraySlice<ObfuscationStep>
 
@@ -25,7 +25,7 @@ public extension SourceSpecification {
 
     struct Secrets: Hashable {
 
-        public typealias Secret = SourceSpecification.Secret
+        package typealias Secret = SourceSpecification.Secret
 
         private var secrets: [Secret.Namespace: ArraySlice<Secret>]
 
@@ -44,7 +44,7 @@ public extension SourceSpecification {
     }
 }
 
-public extension SourceSpecification.ObfuscationStep {
+package extension SourceSpecification.ObfuscationStep {
 
     enum Technique: Hashable {
         case compression(algorithm: Obfuscation.Compression.CompressionAlgorithm)
@@ -55,14 +55,14 @@ public extension SourceSpecification.ObfuscationStep {
 
 extension SourceSpecification.Secret: Hashable {
 
-    public static func == (lhs: Self, rhs: Self) -> Bool {
+    package static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.accessModifier == rhs.accessModifier &&
         lhs.name == rhs.name &&
         lhs.data == rhs.data &&
         lhs.nonce == rhs.nonce
     }
 
-    public func hash(into hasher: inout Hasher) {
+    package func hash(into hasher: inout Hasher) {
         hasher.combine(accessModifier)
         hasher.combine(name)
         hasher.combine(data)
@@ -85,7 +85,7 @@ extension SourceSpecification.Secret {
         let arguments: [Argument]
     }
 
-    public enum Namespace: Hashable {
+    package enum Namespace: Hashable {
         case create(identifier: String)
         case extend(identifier: String, moduleName: String? = nil)
     }
@@ -93,29 +93,29 @@ extension SourceSpecification.Secret {
 
 extension SourceSpecification.Secrets: Collection {
 
-    public typealias Element = Dictionary<Secret.Namespace, ArraySlice<Secret>>.Element
-    public typealias Index = Dictionary<Secret.Namespace, ArraySlice<Secret>>.Index
+    package typealias Element = Dictionary<Secret.Namespace, ArraySlice<Secret>>.Element
+    package typealias Index = Dictionary<Secret.Namespace, ArraySlice<Secret>>.Index
 
-    public var startIndex: Index {
+    package var startIndex: Index {
         secrets.startIndex
     }
 
-    public var endIndex: Index {
+    package var endIndex: Index {
         secrets.endIndex
     }
 
-    public subscript(position: Index) -> Element {
+    package subscript(position: Index) -> Element {
         secrets[position]
     }
 
-    public func index(after index: Index) -> Index {
+    package func index(after index: Index) -> Index {
         secrets.index(after: index)
     }
 }
 
 extension SourceSpecification.Secrets: ExpressibleByDictionaryLiteral {
 
-    public init(dictionaryLiteral elements: (Secret.Namespace, ArraySlice<Secret>)...) {
+    package init(dictionaryLiteral elements: (Secret.Namespace, ArraySlice<Secret>)...) {
         self.init(.init(uniqueKeysWithValues: elements))
     }
 }

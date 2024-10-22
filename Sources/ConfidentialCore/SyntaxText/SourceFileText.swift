@@ -1,7 +1,7 @@
 import Foundation
 import SwiftSyntax
 
-public struct SourceFileText: Equatable {
+package struct SourceFileText: Equatable {
 
     private let syntax: Syntax
 
@@ -10,7 +10,7 @@ public struct SourceFileText: Equatable {
             .formatted(using: .init(indentationWidth: .spaces(0)))
     }
 
-    public func write(to url: URL, encoding: String.Encoding = .utf8) throws {
+    package func write(to url: URL, encoding: String.Encoding = .utf8) throws {
         var text = ""
         syntax.write(to: &text)
 
@@ -22,5 +22,5 @@ public struct SourceFileText: Equatable {
 
 extension SourceFileText: CustomStringConvertible {
 
-    public var description: String { syntax.description }
+    package var description: String { syntax.description }
 }

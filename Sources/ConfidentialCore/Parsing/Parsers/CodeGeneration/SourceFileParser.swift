@@ -1,7 +1,7 @@
 import Parsing
 import SwiftSyntax
 
-public struct SourceFileParser<CodeBlockParsers: Parser>: Parser
+package struct SourceFileParser<CodeBlockParsers: Parser>: Parser
 where
     CodeBlockParsers.Input == SourceSpecification,
     CodeBlockParsers.Output == [CodeBlockItemSyntax]
@@ -13,7 +13,7 @@ where
         self.codeBlockParsers = build()
     }
 
-    public func parse(_ input: inout SourceSpecification) throws -> SourceFileText {
+    package func parse(_ input: inout SourceSpecification) throws -> SourceFileText {
         let statements = try codeBlockParsers.parse(&input)
 
         return .init(
@@ -24,7 +24,7 @@ where
     }
 }
 
-public extension Parsers.CodeGeneration {
+package extension Parsers.CodeGeneration {
 
     typealias SourceFile = SourceFileParser
 }

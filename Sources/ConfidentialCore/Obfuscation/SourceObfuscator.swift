@@ -1,7 +1,7 @@
 import ConfidentialKit
 import Foundation
 
-public struct SourceObfuscator {
+package struct SourceObfuscator {
 
     private let obfuscationStepResolver: DataObfuscationStepResolver
 
@@ -9,7 +9,7 @@ public struct SourceObfuscator {
         self.obfuscationStepResolver = obfuscationStepResolver
     }
 
-    public func obfuscate(_ source: inout SourceSpecification) throws {
+    package func obfuscate(_ source: inout SourceSpecification) throws {
         guard !source.secrets.isEmpty else {
             return
         }
