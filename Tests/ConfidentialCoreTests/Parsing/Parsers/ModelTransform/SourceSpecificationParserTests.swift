@@ -54,7 +54,7 @@ final class SourceSpecificationParserTests: XCTestCase {
         // then
         let expectedSpecification = SourceSpecification(
             algorithm: algorithmStub,
-            implementationOnlyImport: false,
+            importAttribute: .default,
             secrets: secretsStub
         )
         XCTAssertEqual(expectedSpecification, specification)

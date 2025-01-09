@@ -3,8 +3,14 @@ import Foundation
 
 public struct SourceSpecification: Equatable {
     var algorithm: Algorithm
-    var implementationOnlyImport: Bool
+    var importAttribute: ImportAttribute
     var secrets: Secrets
+
+    public enum ImportAttribute {
+        case `default`
+        case implementationOnly
+        case `internal`
+    }
 }
 
 public extension SourceSpecification {

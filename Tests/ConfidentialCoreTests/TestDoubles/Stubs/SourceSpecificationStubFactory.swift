@@ -6,12 +6,12 @@ extension SourceSpecification {
 
         static func makeSpecification(
             algorithm: SourceSpecification.Algorithm = [],
-            implementationOnlyImport: Bool = false,
+            importAttribute: SourceSpecification.ImportAttribute = .default,
             secrets: SourceSpecification.Secrets = [:]
         ) -> SourceSpecification {
             .init(
                 algorithm: algorithm,
-                implementationOnlyImport: implementationOnlyImport,
+                importAttribute: importAttribute,
                 secrets: secrets
             )
         }

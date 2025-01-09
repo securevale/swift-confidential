@@ -6,7 +6,7 @@ struct ImportDeclParser: Parser {
 
     func parse(_ input: inout SourceSpecification) throws -> [ExpressibleAsCodeBlockItem] {
         guard
-            !input.implementationOnlyImport || canUseImplementationOnlyImport(given: input.secrets)
+            !(input.importAttribute == .implementationOnly) || canUseNonPublicImport(given: input.secrets)
         else {
             throw ParsingError.assertionFailed(
                 description: """
@@ -18,16 +18,29 @@ struct ImportDeclParser: Parser {
             )
         }
 
+        guard
+            !(input.importAttribute == .internal) || canUseNonPublicImport(given: input.secrets)
+        else {
+            throw ParsingError.assertionFailed(
+                description: """
+                             Cannot use internal import when the secret(s) access \
+                             level is public.
+                             Either change the access level to internal, or disable \
+                             internal import.
+                             """
+            )
+        }
+
         return makeImportDeclStatements(
             from: input.secrets.namespaces,
-            implementationOnly: input.implementationOnlyImport
+            attribute: input.importAttribute
         )
     }
 }
 
 private extension ImportDeclParser {
 
-    func canUseImplementationOnlyImport(given secrets: SourceSpecification.Secrets) -> Bool {
+    func canUseNonPublicImport(given secrets: SourceSpecification.Secrets) -> Bool {
         !secrets
             .flatMap(\.value)
             .map(\.accessModifier)
@@ -36,17 +49,21 @@ private extension ImportDeclParser {
 
     func makeImportDeclStatements<Namespaces: Collection>(
         from namespaces: Namespaces,
-        implementationOnly: Bool
+        attribute: SourceSpecification.ImportAttribute
     ) -> [ExpressibleAsImportDecl]
     where
         Namespaces.Element == SourceSpecification.Secret.Namespace
     {
         var implementationOnlyModuleNames: Set<String> = []
+        var internalModuleNames: Set<String> = []
         var moduleNames: Set<String> = [C.Code.Generation.foundationModuleName]
-        if implementationOnly {
-            implementationOnlyModuleNames.insert(C.Code.Generation.confidentialKitModuleName)
-        } else {
+        switch attribute {
+        case .default:
             moduleNames.insert(C.Code.Generation.confidentialKitModuleName)
+        case .implementationOnly:
+            implementationOnlyModuleNames.insert(C.Code.Generation.confidentialKitModuleName)
+        case .internal:
+            internalModuleNames.insert(C.Code.Generation.confidentialKitModuleName)
         }
 
         moduleNames.formUnion(
@@ -66,12 +83,14 @@ private extension ImportDeclParser {
 
         return makeImportDeclStatements(
             implementationOnlyModuleNames: implementationOnlyModuleNames.sorted(),
+            internalModuleNames: internalModuleNames.sorted(),
             moduleNames: moduleNames.sorted()
         )
     }
 
     func makeImportDeclStatements(
         implementationOnlyModuleNames: [String],
+        internalModuleNames: [String],
         moduleNames: [String]
     ) -> [ExpressibleAsImportDecl] {
         let implementationOnlyImports = implementationOnlyModuleNames
@@ -80,6 +99,18 @@ private extension ImportDeclParser {
                     importTok: .import.withLeadingTrivia(.spaces(1)),
                     attributesBuilder: {
                         ImplementationOnlyAttribute()
+                    },
+                    pathBuilder: {
+                        AccessPathComponent(name: .identifier(moduleName))
+                    }
+                )
+            }
+        let internalImports = internalModuleNames
+            .map { moduleName in
+                ImportDecl(
+                    importTok: .import.withLeadingTrivia(.spaces(1)),
+                    modifiersBuilder: {
+                        TokenSyntax.internal.withTrailingTrivia(.spaces(0))
                     },
                     pathBuilder: {
                         AccessPathComponent(name: .identifier(moduleName))
@@ -95,6 +126,6 @@ private extension ImportDeclParser {
                 )
             }
 
-        return implementationOnlyImports + imports
+        return implementationOnlyImports + internalImports + imports
     }
 }

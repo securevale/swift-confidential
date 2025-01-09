@@ -19,7 +19,7 @@ where
     public func parse(_ input: inout Configuration) throws -> SourceSpecification {
         let spec = SourceSpecification(
             algorithm: try algorithmParser.parse(&input),
-            implementationOnlyImport: input.implementationOnlyImport ?? false,
+            importAttribute: input.importAttribute,
             secrets: try secretsParser.parse(&input)
         )
         input.defaultAccessModifier = nil
@@ -31,6 +31,13 @@ where
 }
 
 public extension Parsers.ModelTransform {
-
     typealias SourceSpecification = SourceSpecificationParser
+}
+
+extension Configuration {
+    var importAttribute: SourceSpecification.ImportAttribute {
+        if let internalImport, internalImport { return .internal }
+        if let implementationOnlyImport, implementationOnlyImport { return .implementationOnly }
+        return .default
+    }
 }

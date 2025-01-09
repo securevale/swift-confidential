@@ -168,6 +168,7 @@ The table below lists the keys to include in the configuration file along with t
 | defaultAccessModifier    | String              | The default access-level modifier applied to each generated secret literal, unless the secret definition states otherwise. The default value is `internal`. See [Access control](#access-control) section for usage details. |
 | defaultNamespace         | String              | The default namespace in which to enclose all the generated secret literals without explicitly assigned namespace. The default value is `extend Obfuscation.Secret from ConfidentialKit`. See [Namespaces](#namespaces) section for usage details. |
 | implementationOnlyImport | Boolean             | Specifies whether to generate implementation-only `ConfidentialKit` import. The default value is `false`. See [Building libraries for distribution](#building-libraries-for-distribution) section for usage details. |
+| internalImport           | Boolean             | Specifies whether to generate internal `ConfidentialKit` import. The default value is `false`. See [Building libraries for distribution](#building-libraries-for-distribution) section for usage details. |
 | secrets                  | List of objects     | The list of objects defining the secret literals to be obfuscated. See [Secrets](#secrets) section for usage details.<br/><sub>**Required.**</sub> |
 
 <details>
@@ -429,10 +430,12 @@ Additionally, if you need more fine-grained control, you can override `defaultAc
 
 ### Building libraries for distribution
 
-By default, Swift Confidential does not annotate the generated `ConfidentialKit` import with `@_implementationOnly` attribute. However, there are cases, such as when [creating an XCFramework bundle](https://developer.apple.com/documentation/xcode/creating-a-multi-platform-binary-framework-bundle), in which you should use implementation-only imports to avoid exposing internal symbols to your library consumers. To enable implementation-only `ConfidentialKit` import, set `implementationOnlyImport` configuration option to `true`.
+By default, Swift Confidential does not annotate the generated `ConfidentialKit` import with `@_implementationOnly` or `internal`. However, there are cases, such as when [creating an XCFramework bundle](https://developer.apple.com/documentation/xcode/creating-a-multi-platform-binary-framework-bundle), in which you should use this style of imports to avoid exposing internal symbols to consumers of your library. To enable this:
+- Swift 6: set the `internalImport` configuration option to `true`.
+- Swift 5 and earlier: set the `implementationOnlyImport` configuration option to `true`.
 
 > [!IMPORTANT]  
-> The implementation-only imports are applicable for types used only internally, thus it is an error to enable `implementationOnlyImport` if either of the secrets has access level set to `public`. Also note that setting the `implementationOnlyImport` option to `true` does not imply implementation-only imports for extended namespaces.
+> The implementation-only / internal imports are applicable for types used only internally, thus it is an error to enable `implementationOnlyImport` or `internalImport` if either of the secrets has access level set to `public`. Also note that setting either of these options to `true` does not affect imports for extended namespaces. Furthermore, note that only one of `implementationOnlyImport` and `internalImport` can take affect, and the `internalImport` will supercede the former, if they are both present.
 
 ### Additional considerations for Confidential Swift Package plugin
 

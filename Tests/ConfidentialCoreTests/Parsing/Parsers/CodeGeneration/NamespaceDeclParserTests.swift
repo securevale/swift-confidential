@@ -119,7 +119,7 @@ final class NamespaceDeclParserTests: XCTestCase {
         XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([publicSecretStub]))
         XCTAssertEqual([[]], deobfuscateDataFunctionDeclParserSpy.parseRecordedInput)
         XCTAssertTrue(sourceSpecification.algorithm.isEmpty)
-        XCTAssertFalse(sourceSpecification.implementationOnlyImport)
+        XCTAssertEqual(sourceSpecification.importAttribute, .default)
         XCTAssertTrue(sourceSpecification.secrets.isEmpty)
     }
 }

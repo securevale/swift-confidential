@@ -6,6 +6,7 @@ public struct Configuration: Equatable, Decodable {
     var defaultAccessModifier: String?
     var defaultNamespace: String?
     var implementationOnlyImport: Bool?
+    var internalImport: Bool?
     var secrets: ArraySlice<Secret>
 }
 // swiftlint:enable discouraged_optional_boolean
@@ -19,6 +20,7 @@ public extension Configuration {
             defaultAccessModifier: try container.decodeIfPresent(String.self, forKey: .defaultAccessModifier),
             defaultNamespace: try container.decodeIfPresent(String.self, forKey: .defaultNamespace),
             implementationOnlyImport: try container.decodeIfPresent(Bool.self, forKey: .implementationOnlyImport),
+            internalImport: try container.decodeIfPresent(Bool.self, forKey: .internalImport),
             secrets: try container.decode([Secret].self, forKey: .secrets)[...]
         )
     }
@@ -62,6 +64,7 @@ private extension Configuration {
         case defaultAccessModifier
         case defaultNamespace
         case implementationOnlyImport
+        case internalImport
         case secrets
     }
 }
