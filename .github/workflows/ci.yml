@@ -69,6 +69,9 @@ jobs:
           - macos: 14
             xcode: '15.4'  # Swift 5.10
             upload_coverage: true
+          - macos: 14
+            xcode: '16.0'  # Swift 6.0
+            upload_coverage: false
 
     steps:
       - name: Runner Overview
