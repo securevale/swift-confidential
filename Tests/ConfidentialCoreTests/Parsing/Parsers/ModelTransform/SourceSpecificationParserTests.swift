@@ -10,7 +10,8 @@ final class SourceSpecificationParserTests: XCTestCase {
         var configuration = Configuration.StubFactory.makeConfiguration()
         configuration.defaultAccessModifier = "internal"
         configuration.defaultNamespace = "Secrets"
-        configuration.implementationOnlyImport = false
+        configuration.experimentalMode = false
+        configuration.internalImport = false
         return configuration
     }()
     private let algorithmStub: SourceSpecification.Algorithm = [
@@ -54,7 +55,8 @@ final class SourceSpecificationParserTests: XCTestCase {
         // then
         let expectedSpecification = SourceSpecification(
             algorithm: algorithmStub,
-            implementationOnlyImport: false,
+            experimentalMode: false,
+            internalImport: false,
             secrets: secretsStub
         )
         XCTAssertEqual(expectedSpecification, specification)
@@ -63,7 +65,7 @@ final class SourceSpecificationParserTests: XCTestCase {
         XCTAssertTrue(configuration.algorithm.isEmpty)
         XCTAssertNil(configuration.defaultAccessModifier)
         XCTAssertNil(configuration.defaultNamespace)
-        XCTAssertNil(configuration.implementationOnlyImport)
+        XCTAssertNil(configuration.internalImport)
         XCTAssertTrue(configuration.secrets.isEmpty)
     }
 

@@ -19,12 +19,14 @@ where
     package func parse(_ input: inout Configuration) throws -> SourceSpecification {
         let spec = SourceSpecification(
             algorithm: try algorithmParser.parse(&input),
-            implementationOnlyImport: input.implementationOnlyImport ?? false,
+            experimentalMode: input.isExperimentalModeEnabled,
+            internalImport: input.isInternalImportEnabled,
             secrets: try secretsParser.parse(&input)
         )
         input.defaultAccessModifier = nil
         input.defaultNamespace = nil
-        input.implementationOnlyImport = nil
+        input.experimentalMode = nil
+        input.internalImport = nil
 
         return spec
     }

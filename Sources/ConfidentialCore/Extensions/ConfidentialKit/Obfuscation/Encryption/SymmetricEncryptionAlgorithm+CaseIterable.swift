@@ -1,6 +1,6 @@
 import ConfidentialKit
 
-extension Obfuscation.Encryption.SymmetricEncryptionAlgorithm: CaseIterable {
+extension Obfuscation.Encryption.SymmetricEncryptionAlgorithm: Swift.CaseIterable {
 
     public static var allCases: [Self] {
         [

@@ -2,7 +2,7 @@ import Foundation
 
 /// A property wrapper that can deobfuscate the wrapped secret value.
 @propertyWrapper
-public struct Obfuscated<PlainValue: Decodable> {
+public struct Obfuscated<PlainValue: Decodable & Sendable> {
 
     /// A type that represents a wrapped value.
     public typealias Value = Obfuscation.Secret
@@ -22,12 +22,12 @@ public struct Obfuscated<PlainValue: Decodable> {
     /// A plain secret value after transforming obfuscated secret's data with a deobfuscation function.
     @inlinable
     public var projectedValue: PlainValue {
-        let secretData = Data(wrappedValue.data)
+        let data = Data(wrappedValue.data)
         let nonce = wrappedValue.nonce
         let value: PlainValue
 
         do {
-            let deobfuscatedData = try deobfuscateData(secretData, nonce)
+            let deobfuscatedData = try deobfuscateData(data, nonce)
             value = try decoder.decode(PlainValue.self, from: deobfuscatedData)
         } catch {
             preconditionFailure("Unexpected error: \(error)")

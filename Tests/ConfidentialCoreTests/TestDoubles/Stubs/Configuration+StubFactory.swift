@@ -6,13 +6,15 @@ extension Configuration {
 
         static func makeConfiguration(
             algorithm: ArraySlice<String> = [],
+            experimentalMode: Bool = false,
             secrets: ArraySlice<Configuration.Secret> = []
         ) -> Configuration {
             .init(
                 algorithm: algorithm,
                 defaultAccessModifier: .none,
                 defaultNamespace: .none,
-                implementationOnlyImport: .none,
+                experimentalMode: experimentalMode,
+                internalImport: .none,
                 secrets: secrets
             )
         }

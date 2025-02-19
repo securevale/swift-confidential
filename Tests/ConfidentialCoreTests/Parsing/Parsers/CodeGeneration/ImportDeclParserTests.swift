@@ -10,7 +10,7 @@ final class ImportDeclParserTests: XCTestCase {
     private let algorithmStub: SourceSpecification.Algorithm = [.init(technique: .randomization)]
     private let customModuleNameStub = "Crypto"
 
-    func test_givenImplementationOnlyImportDisabled_whenParse_thenReturnsExpectedImportDeclStatementsAndInputLeftIntact() throws {
+    func test_givenInternalImportDisabled_whenParse_thenReturnsExpectedImportDeclStatementsAndInputLeftIntact() throws {
         // given
         let secrets: SourceSpecification.Secrets = [
             .extend(identifier: "Obfuscation.Secret", moduleName: C.Code.Generation.confidentialKitModuleName): [
@@ -21,30 +21,54 @@ final class ImportDeclParserTests: XCTestCase {
                 .StubFactory.makePublicSecret(named: "secret2")
             ]
         ]
-        var sourceSpecification = SourceSpecification.StubFactory.makeSpecification(
-            algorithm: algorithmStub,
-            implementationOnlyImport: false,
-            secrets: secrets
-        )
+        var sourceSpecifications: [SourceSpecification] = [
+            .StubFactory.makeSpecification(
+                algorithm: algorithmStub,
+                experimentalMode: false,
+                internalImport: false,
+                secrets: secrets
+            ),
+            .StubFactory.makeSpecification(
+                algorithm: algorithmStub,
+                experimentalMode: true,
+                internalImport: false,
+                secrets: secrets
+            )
+        ]
 
         // when
-        let statements = try SUT().parse(&sourceSpecification)
+        let statements = try sourceSpecifications
+            .enumerated()
+            .map { idx, spec in
+                var spec = spec
+                let statements = try SUT().parse(&spec)
+                sourceSpecifications[idx] = spec
+                return statements
+            }
 
         // then
         XCTAssertEqual(
-            """
-            import \(C.Code.Generation.confidentialKitModuleName)
-            import \(customModuleNameStub)
-            import \(C.Code.Generation.foundationModuleName)
-            """,
-            .init(describing: syntax(from: statements))
+            [
+                """
+                import \(C.Code.Generation.confidentialKitModuleName)
+                import \(customModuleNameStub)
+                import \(C.Code.Generation.foundationModuleName)
+                """,
+                """
+                import \(C.Code.Generation.confidentialKitModuleName)
+                import \(customModuleNameStub)
+                import \(C.Code.Generation.foundationModuleName)
+                import \(C.Code.Generation.Experimental.confidentialKitModuleName)
+                """
+            ],
+            statements.map { String(describing: syntax(from: $0)) }
         )
-        XCTAssertEqual(algorithmStub, sourceSpecification.algorithm)
-        XCTAssertFalse(sourceSpecification.implementationOnlyImport)
-        XCTAssertEqual(secrets, sourceSpecification.secrets)
+        XCTAssertEqual([algorithmStub, algorithmStub], sourceSpecifications.map(\.algorithm))
+        XCTAssertTrue(sourceSpecifications.map(\.internalImport).allSatisfy { $0 == false })
+        XCTAssertEqual([secrets, secrets], sourceSpecifications.map(\.secrets))
     }
 
-    func test_givenImplementationOnlyImportEnabled_whenParse_thenReturnsExpectedImportDeclStatementsAndInputLeftIntact() throws {
+    func test_givenInternalImportEnabled_whenParse_thenReturnsExpectedImportDeclStatementsAndInputLeftIntact() throws {
         // given
         let secrets: SourceSpecification.Secrets = [
             .extend(identifier: "Obfuscation.Secret", moduleName: C.Code.Generation.confidentialKitModuleName): [
@@ -54,30 +78,63 @@ final class ImportDeclParserTests: XCTestCase {
                 .StubFactory.makeInternalSecret()
             ]
         ]
-        var sourceSpecification = SourceSpecification.StubFactory.makeSpecification(
-            algorithm: algorithmStub,
-            implementationOnlyImport: true,
-            secrets: secrets
-        )
+        var sourceSpecifications: [SourceSpecification] = [
+            .StubFactory.makeSpecification(
+                algorithm: algorithmStub,
+                experimentalMode: false,
+                internalImport: true,
+                secrets: secrets
+            ),
+            .StubFactory.makeSpecification(
+                algorithm: algorithmStub,
+                experimentalMode: true,
+                internalImport: true,
+                secrets: secrets
+            )
+        ]
 
         // when
-        let statements = try SUT().parse(&sourceSpecification)
+        let statements = try sourceSpecifications
+            .enumerated()
+            .map { idx, spec in
+                var spec = spec
+                let statements = try SUT().parse(&spec)
+                sourceSpecifications[idx] = spec
+                return statements
+            }
 
         // then
         XCTAssertEqual(
-            """
-            @_implementationOnly import \(C.Code.Generation.confidentialKitModuleName)
-            import \(customModuleNameStub)
-            import \(C.Code.Generation.foundationModuleName)
-            """,
-            .init(describing: syntax(from: statements))
+            [
+                """
+                #if compiler(>=6.0) || hasFeature(AccessLevelOnImport)
+                internal import \(C.Code.Generation.confidentialKitModuleName)
+                #else
+                @_implementationOnly import \(C.Code.Generation.confidentialKitModuleName)
+                #endif
+                import \(customModuleNameStub)
+                import \(C.Code.Generation.foundationModuleName)
+                """,
+                """
+                #if compiler(>=6.0) || hasFeature(AccessLevelOnImport)
+                internal import \(C.Code.Generation.confidentialKitModuleName)
+                internal import \(C.Code.Generation.Experimental.confidentialKitModuleName)
+                #else
+                @_implementationOnly import \(C.Code.Generation.confidentialKitModuleName)
+                @_implementationOnly import \(C.Code.Generation.Experimental.confidentialKitModuleName)
+                #endif
+                import \(customModuleNameStub)
+                import \(C.Code.Generation.foundationModuleName)
+                """
+            ],
+            statements.map { String(describing: syntax(from: $0)) }
         )
-        XCTAssertEqual(algorithmStub, sourceSpecification.algorithm)
-        XCTAssertTrue(sourceSpecification.implementationOnlyImport)
-        XCTAssertEqual(secrets, sourceSpecification.secrets)
+        XCTAssertEqual([algorithmStub, algorithmStub], sourceSpecifications.map(\.algorithm))
+        XCTAssertTrue(sourceSpecifications.map(\.internalImport).allSatisfy { $0 == true })
+        XCTAssertEqual([secrets, secrets], sourceSpecifications.map(\.secrets))
     }
 
-    func test_givenImplementationOnlyImportEnabledAndPublicAccessLevel_whenParse_thenThrowsExpectedErrorAndInputLeftIntact() {
+    func test_givenInternalImportEnabledAndPublicAccessLevel_whenParse_thenThrowsExpectedErrorAndInputLeftIntact() {
         // given
         let secrets: SourceSpecification.Secrets = [
             .create(identifier: "Secrets"): [
@@ -87,7 +144,7 @@ final class ImportDeclParserTests: XCTestCase {
         ]
         var sourceSpecification = SourceSpecification.StubFactory.makeSpecification(
             algorithm: algorithmStub,
-            implementationOnlyImport: true,
+            internalImport: true,
             secrets: secrets
         )
 
@@ -95,16 +152,16 @@ final class ImportDeclParserTests: XCTestCase {
         XCTAssertThrowsError(try SUT().parse(&sourceSpecification)) { error in
             XCTAssertEqual(
                 """
-                Cannot use @_implementationOnly import when the secret(s) access \
+                Cannot use internal import when the secret(s) access \
                 level is public.
                 Either change the access level to internal, or disable \
-                @_implementationOnly import.
+                internal import.
                 """,
                 "\(error)"
             )
         }
         XCTAssertEqual(algorithmStub, sourceSpecification.algorithm)
-        XCTAssertTrue(sourceSpecification.implementationOnlyImport)
+        XCTAssertTrue(sourceSpecification.internalImport)
         XCTAssertEqual(secrets, sourceSpecification.secrets)
     }
 }

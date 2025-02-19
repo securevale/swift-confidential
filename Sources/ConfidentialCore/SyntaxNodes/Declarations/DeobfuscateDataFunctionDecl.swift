@@ -43,7 +43,7 @@ extension FunctionDeclSyntax {
                         )
                     }
                 ),
-                effectSpecifiers: .init(throwsSpecifier: .keyword(.throws, leadingTrivia: .spaces(1))),
+                effectSpecifiers: effectSpecifiersSyntax,
                 returnClause: ReturnClauseSyntax(
                     type: IdentifierTypeSyntax(name: .identifier(dataTypeInfo.fullyQualifiedName))
                 )
@@ -55,5 +55,17 @@ extension FunctionDeclSyntax {
                 CodeBlockItemSyntax(item: .init(body))
             }
         )
+    }
+}
+
+private extension FunctionDeclSyntax {
+
+    static var effectSpecifiersSyntax: FunctionEffectSpecifiersSyntax {
+        let throwsSpecifier: TokenSyntax = .keyword(.throws, leadingTrivia: .spaces(1))
+        #if canImport(SwiftSyntax600)
+        return .init(throwsClause: .init(throwsSpecifier: throwsSpecifier))
+        #else
+        return .init(throwsSpecifier: throwsSpecifier)
+        #endif
     }
 }

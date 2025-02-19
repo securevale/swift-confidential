@@ -6,44 +6,49 @@ import SwiftSyntax
 
 final class SecretVariableDeclParserTests: XCTestCase {
 
+    private let dataProjectionAttributeNameStub = "ConfidentialKit.Obfuscated<Swift.String>"
     private let deobfuscateArgumentNameStub = "deobfuscate"
     private let deobfuscateDataFuncNameStub = "deobfuscateData"
 
-    func test_givenInternalSecret_whenParse_thenReturnsExpectedSecretDecl() throws {
+    func test_givenInternalSecretWithPropertyWrapperAttribute_whenParse_thenReturnsExpectedSecretDecl() throws {
         // given
-        let secret = makeSecretStub(accessModifier: .internal)
+        let secret = makeSecretStub(
+            accessModifier: .internal,
+            attribute: dataProjectionAttribute(isPropertyWrapper: true)
+        )
 
         // when
         let secretDecl = try SecretVariableDeclParser().parse(secret)
 
         // then
-        let expectedAttributeName = secret.dataAccessWrapperInfo.typeInfo.fullyQualifiedName
         let expectedDeclTypeName = TypeInfo(of: Obfuscation.Secret.self).fullyQualifiedName
         XCTAssertEqual(
             """
 
-                @\(expectedAttributeName)(\(deobfuscateArgumentNameStub): \(deobfuscateDataFuncNameStub))
+                @\(dataProjectionAttributeNameStub)(\(deobfuscateArgumentNameStub): \(deobfuscateDataFuncNameStub))
                 internal static var \(secret.name): \(expectedDeclTypeName) = .init(data: [0x20, 0x20], nonce: 123456789)
             """,
             .init(describing: syntax(from: secretDecl))
         )
     }
 
-    func test_givenPublicSecret_whenParse_thenReturnsExpectedSecretDecl() throws {
+    func test_givenPublicSecretWithMacroAttribute_whenParse_thenReturnsExpectedSecretDecl() throws {
         // given
-        let secret = makeSecretStub(accessModifier: .public)
+        let secret = makeSecretStub(
+            accessModifier: .public,
+            attribute: dataProjectionAttribute(isPropertyWrapper: false)
+        )
 
         // when
         let secretDecl = try SecretVariableDeclParser().parse(secret)
 
         // then
-        let expectedAttributeName = secret.dataAccessWrapperInfo.typeInfo.fullyQualifiedName
         let expectedDeclTypeName = TypeInfo(of: Obfuscation.Secret.self).fullyQualifiedName
         XCTAssertEqual(
             """
 
-                @\(expectedAttributeName)(\(deobfuscateArgumentNameStub): \(deobfuscateDataFuncNameStub))
-                public static var \(secret.name): \(expectedDeclTypeName) = .init(data: [0x20, 0x20], nonce: 123456789)
+                @\(dataProjectionAttributeNameStub)(\(deobfuscateArgumentNameStub): \(deobfuscateDataFuncNameStub))
+                public static let \(secret.name): \(expectedDeclTypeName) = .init(data: [0x20, 0x20], nonce: 123456789)
             """,
             .init(describing: syntax(from: secretDecl))
         )
@@ -54,16 +59,24 @@ private extension SecretVariableDeclParserTests {
 
     typealias Secret = SourceSpecification.Secret
 
-    func makeSecretStub(accessModifier: Secret.AccessModifier) -> Secret {
+    func makeSecretStub(
+        accessModifier: Secret.AccessModifier,
+        attribute: Secret.DataProjectionAttribute
+    ) -> Secret {
         .init(
             accessModifier: accessModifier,
             name: "secret",
             data: .init([0x20, 0x20]),
             nonce: 123456789,
-            dataAccessWrapperInfo: .init(
-                typeInfo: .init(of: Obfuscated<String>.self),
-                arguments: [(label: deobfuscateArgumentNameStub, value: deobfuscateDataFuncNameStub)]
-            )
+            dataProjectionAttribute: attribute
+        )
+    }
+
+    func dataProjectionAttribute(isPropertyWrapper: Bool) -> Secret.DataProjectionAttribute {
+        .init(
+            name: dataProjectionAttributeNameStub,
+            arguments: [(label: deobfuscateArgumentNameStub, value: deobfuscateDataFuncNameStub)],
+            isPropertyWrapper: isPropertyWrapper
         )
     }
 }

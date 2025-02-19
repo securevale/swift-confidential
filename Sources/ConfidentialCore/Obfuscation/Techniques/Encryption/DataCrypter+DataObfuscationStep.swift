@@ -15,7 +15,7 @@ extension Obfuscation.Encryption.DataCrypter: DataObfuscationStep {
         )
         let magicBit: UInt64 = 1 << 7
         if nonce & magicBit == 0 {
-            obfuscatedData.insert(contentsOf: obfuscatedKeyData, at: 0)
+            obfuscatedData.insert(contentsOf: obfuscatedKeyData, at: .zero)
         } else {
             obfuscatedData.append(contentsOf: obfuscatedKeyData)
         }

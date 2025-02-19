@@ -84,10 +84,10 @@ file_length:
 line_length:
   ignores_comments: true
 nesting:
-  type_level: 2
+  type_level: 3
 
 ### Style ###
 opening_brace:
-  allow_multiline_func: true
+  ignore_multiline_function_signatures: true
 trailing_whitespace:
   ignores_empty_lines: true

@@ -1,7 +1,7 @@
 public extension Obfuscation {
 
     /// A model representing an obfuscated secret.
-    struct Secret: Equatable {
+    struct Secret: Equatable, Sendable {
 
         /// The obfuscated secret's bytes.
         public let data: [UInt8]

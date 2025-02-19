@@ -1,6 +1,6 @@
 import ConfidentialKit
 
-extension Obfuscation.Compression.CompressionAlgorithm: CustomStringConvertible {
+extension Obfuscation.Compression.CompressionAlgorithm: Swift.CustomStringConvertible {
 
     public var description: String {
         switch self {

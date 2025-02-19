@@ -69,15 +69,41 @@ final class SecretsParserTests: XCTestCase {
             }[...]
         ]
         XCTAssertEqual(expectedSecrets, secrets)
+        typealias DataTypes = Configuration.Secret.Value.DataTypes
+        let expectedDataProjectionAttributeNames = [
+            TypeInfo(of: Obfuscated<DataTypes.SingleValue>.self).fullyQualifiedName,
+            TypeInfo(of: Obfuscated<DataTypes.Array>.self).fullyQualifiedName
+        ]
         XCTAssertEqual(
-            ["Obfuscated<String>", "Obfuscated<Array<String>>"],
-            secrets[secretsNamespaceStub]?.map { $0.dataAccessWrapperInfo.typeInfo.name }
+            expectedDataProjectionAttributeNames,
+            secrets[secretsNamespaceStub]?.map { $0.dataProjectionAttribute.name }
         )
         XCTAssertEqual((0..<secretsStub.count).map { _ in "" }, namespaceParserSpy.parseRecordedInput)
         XCTAssertEqual((0..<secretsStub.count).map { _ in "" }, accessModifierParserSpy.parseRecordedInput)
         XCTAssertEqual(secretsStub.count, secretValueEncoderSpy.encodeRecordedValues.count)
         XCTAssertEqual(secretsStub.count, generateNonceSpy.callCount)
         XCTAssertTrue(configuration.secrets.isEmpty)
+    }
+
+    func test_givenConfigurationWithExperimentalModeEnabled_whenParse_thenReturnsExpectedDataProjectionAttributeNames() throws {
+        // given
+        var configuration = Configuration.StubFactory.makeConfiguration(
+            experimentalMode: true,
+            secrets: secretsStub
+        )
+
+        // when
+        let secrets: Secrets = try sut.parse(&configuration)
+
+        // then
+        let expectedDataProjectionAttributeNames = [
+            "\(C.Code.Generation.Experimental.obfuscatedMacroFullyQualifiedName)<Swift.String>",
+            "\(C.Code.Generation.Experimental.obfuscatedMacroFullyQualifiedName)<Swift.Array<Swift.String>>"
+        ]
+        XCTAssertEqual(
+            expectedDataProjectionAttributeNames,
+            secrets[secretsNamespaceStub]?.map { $0.dataProjectionAttribute.name }
+        )
     }
 
     func test_givenConfigurationWithEmptySecrets_whenParse_thenThrowsExpectedError() throws {

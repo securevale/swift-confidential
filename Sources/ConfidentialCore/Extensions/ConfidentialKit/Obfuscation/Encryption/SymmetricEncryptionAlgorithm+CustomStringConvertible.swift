@@ -1,6 +1,6 @@
 import ConfidentialKit
 
-extension Obfuscation.Encryption.SymmetricEncryptionAlgorithm: CustomStringConvertible {
+extension Obfuscation.Encryption.SymmetricEncryptionAlgorithm: Swift.CustomStringConvertible {
 
     public var description: String {
         switch self {

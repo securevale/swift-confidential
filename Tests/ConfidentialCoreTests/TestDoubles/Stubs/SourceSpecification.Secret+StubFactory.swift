@@ -59,7 +59,11 @@ extension SourceSpecification.Secret {
                 name: name,
                 data: data,
                 nonce: nonce,
-                dataAccessWrapperInfo: .init(typeInfo: TypeInfo(of: Any.self), arguments: [])
+                dataProjectionAttribute: .init(
+                    name: "Test",
+                    arguments: [],
+                    isPropertyWrapper: true
+                )
             )
         }
     }

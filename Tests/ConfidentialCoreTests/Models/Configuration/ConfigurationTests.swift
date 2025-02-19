@@ -8,53 +8,57 @@ final class ConfigurationTests: XCTestCase {
         let algorithm = ["compress using lz4", "encrypt using aes-128-gcm"]
         let defaultAccessModifier = "internal"
         let defaultNamespace = "create Secrets"
-        let implementationOnlyImport = false
+        let internalImport = false
         let secret1 = ("secret1", "value", "extend Obfuscation.Secret from ConfidentialKit", "public")
         let secret2 = ("secret2", ["value1", "value2"])
-        let jsonConfiguration = Data(
-        """
-        {
-          "algorithm": [\(algorithm.map { #""\#($0)""# }.joined(separator: ","))],
-          "defaultAccessModifier": "\(defaultAccessModifier)",
-          "defaultNamespace": "\(defaultNamespace)",
-          "implementationOnlyImport": \(implementationOnlyImport),
-          "secrets": [
-            { "name": "\(secret1.0)", "value": "\(secret1.1)", "namespace": "\(secret1.2)", "accessModifier": "\(secret1.3)" },
-            { "name": "\(secret2.0)", "value": [\(secret2.1.map { #""\#($0)""# }.joined(separator: ","))] }
-          ]
+        let jsonConfiguration: (String) -> Data = { internalImportLabel in
+            .init(
+                """
+                {
+                  "algorithm": [\(algorithm.map { #""\#($0)""# }.joined(separator: ","))],
+                  "defaultAccessModifier": "\(defaultAccessModifier)",
+                  "defaultNamespace": "\(defaultNamespace)",
+                  "\(internalImportLabel)": \(internalImport),
+                  "secrets": [
+                    { "name": "\(secret1.0)", "value": "\(secret1.1)", "namespace": "\(secret1.2)", "accessModifier": "\(secret1.3)" },
+                    { "name": "\(secret2.0)", "value": [\(secret2.1.map { #""\#($0)""# }.joined(separator: ","))] }
+                  ]
+                }
+                """.utf8
+            )
         }
-        """.utf8
-        )
+        let jsonConfigurations = [
+            jsonConfiguration("internalImport"),
+            jsonConfiguration("implementationOnlyImport")
+        ]
         let decoder = JSONDecoder()
 
         // when & then
-        var configuration: Configuration?
+        var configurations: [Configuration] = []
         XCTAssertNoThrow(
-            configuration = try decoder.decode(Configuration.self, from: jsonConfiguration)
+            configurations = try jsonConfigurations.map { try decoder.decode(Configuration.self, from: $0) }
         )
-        XCTAssertEqual(
-            Configuration(
-                algorithm: algorithm[...],
-                defaultAccessModifier: defaultAccessModifier,
-                defaultNamespace: defaultNamespace,
-                implementationOnlyImport: implementationOnlyImport,
-                secrets: [
-                    .init(
-                        name: secret1.0,
-                        value: .singleValue(secret1.1),
-                        namespace: secret1.2,
-                        accessModifier: secret1.3
-                    ),
-                    .init(
-                        name: secret2.0,
-                        value: .array(secret2.1),
-                        namespace: .none,
-                        accessModifier: .none
-                    )
-                ][...]
-            ),
-            configuration
+        let expectedConfiguration = Configuration(
+            algorithm: algorithm[...],
+            defaultAccessModifier: defaultAccessModifier,
+            defaultNamespace: defaultNamespace,
+            internalImport: internalImport,
+            secrets: [
+                .init(
+                    name: secret1.0,
+                    value: .singleValue(secret1.1),
+                    namespace: secret1.2,
+                    accessModifier: secret1.3
+                ),
+                .init(
+                    name: secret2.0,
+                    value: .array(secret2.1),
+                    namespace: .none,
+                    accessModifier: .none
+                )
+            ][...]
         )
+        XCTAssertEqual([expectedConfiguration, expectedConfiguration], configurations)
     }
 
     func test_givenInvalidJSONEncodedConfiguration_whenDecodeWithJSONDecoder_thenThrowsError() {
@@ -87,7 +91,7 @@ final class ConfigurationTests: XCTestCase {
             """
             {
               "algorithm": ["compress using lz4"],
-              "implementationOnlyImport": 1,
+              "internalImport": 1,
               "secrets": [{ "name": "secret", "value": "value" }]
             }
             """

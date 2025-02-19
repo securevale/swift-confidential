@@ -1,7 +1,7 @@
 import ConfidentialKit
 import Foundation
 
-extension Obfuscation.Compression.CompressionAlgorithm: CaseIterable {
+extension Obfuscation.Compression.CompressionAlgorithm: Swift.CaseIterable {
 
     public static var allCases: [Self] {
         [

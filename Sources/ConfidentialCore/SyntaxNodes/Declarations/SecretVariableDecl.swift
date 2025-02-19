@@ -6,21 +6,24 @@ extension VariableDeclSyntax {
     private static let dataArgumentName: String = "data"
     private static let nonceArgumentName: String = "nonce"
 
+    // swiftlint:disable:next function_parameter_count
     static func makeSecretVariableDecl(
-        accessModifier: TokenSyntax,
+        dataProjectionAttribute: AttributeSyntax,
+        accessModifier: Keyword,
+        bindingSpecifier: Keyword,
         name: String,
         dataArgumentExpression: ArrayExprSyntax,
-        nonceArgumentExpression: IntegerLiteralExprSyntax,
-        dataAccessWrapper: AttributeSyntax
+        nonceArgumentExpression: IntegerLiteralExprSyntax
     ) -> Self {
-        assert(["internal", "public"].contains(accessModifier.text))
+        assert([.internal, .public].contains(accessModifier))
+        assert([.let, .var].contains(bindingSpecifier))
         return .init(
             attributes: .init {
-                dataAccessWrapper
+                dataProjectionAttribute
             },
             modifiers: .init {
                 DeclModifierSyntax(
-                    name: accessModifier
+                    name: .keyword(accessModifier)
                         .with(
                             \.leadingTrivia, .newlines(1)
                             .appending(Trivia.spaces(C.Code.Format.indentWidth))
@@ -29,33 +32,29 @@ extension VariableDeclSyntax {
                 )
                 DeclModifierSyntax(name: .keyword(.static))
             },
-            bindingSpecifier: .keyword(.var),
-            bindings: .init(
-                [
-                    PatternBindingSyntax(
-                        pattern: IdentifierPatternSyntax(identifier: .identifier(name)),
-                        typeAnnotation: TypeAnnotationSyntax(
-                            type: TypeSyntax(
-                                stringLiteral: TypeInfo(of: Obfuscation.Secret.self).fullyQualifiedName
-                            )
-                        ),
-                        initializer: InitializerClauseSyntax(
-                            value: FunctionCallExprSyntax.makeInitializerCallExpr {
-                                LabeledExprSyntax(
-                                    label: .identifier(Self.dataArgumentName),
-                                    colon: .colonToken(),
-                                    expression: dataArgumentExpression,
-                                    trailingComma: .commaToken()
-                                )
-                                LabeledExprSyntax(
-                                    label: .identifier(Self.nonceArgumentName),
-                                    colon: .colonToken(),
-                                    expression: nonceArgumentExpression
-                                )
-                            }
-                        )
+            bindingSpecifier,
+            name: PatternSyntax(IdentifierPatternSyntax(identifier: .identifier(name))),
+            type: TypeAnnotationSyntax(
+                type: IdentifierTypeSyntax(
+                    name: .identifier(
+                        TypeInfo(of: Obfuscation.Secret.self).fullyQualifiedName
                     )
-                ]
+                )
+            ),
+            initializer: InitializerClauseSyntax(
+                value: FunctionCallExprSyntax.makeInitializerCallExpr {
+                    LabeledExprSyntax(
+                        label: .identifier(Self.dataArgumentName),
+                        colon: .colonToken(),
+                        expression: dataArgumentExpression,
+                        trailingComma: .commaToken()
+                    )
+                    LabeledExprSyntax(
+                        label: .identifier(Self.nonceArgumentName),
+                        colon: .colonToken(),
+                        expression: nonceArgumentExpression
+                    )
+                }
             )
         )
     }

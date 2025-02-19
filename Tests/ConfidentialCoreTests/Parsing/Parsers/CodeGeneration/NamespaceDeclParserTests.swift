@@ -70,6 +70,7 @@ final class NamespaceDeclParserTests: XCTestCase {
             [
                 """
 
+                
                 public enum \(namespaceNameStubs[0]) {
 
                     static var \(memberNameStub): \(memberTypeNameStub) = false
@@ -80,6 +81,7 @@ final class NamespaceDeclParserTests: XCTestCase {
                 """,
                 """
 
+                
                 internal enum \(namespaceNameStubs[1]) {
 
                     static var \(memberNameStub): \(memberTypeNameStub) = false
@@ -90,6 +92,7 @@ final class NamespaceDeclParserTests: XCTestCase {
                 """,
                 """
 
+                
                 extension \(namespaceNameStubs[2]) {
 
                     static var \(memberNameStub): \(memberTypeNameStub) = false
@@ -100,6 +103,7 @@ final class NamespaceDeclParserTests: XCTestCase {
                 """,
                 """
 
+                
                 extension \(customModuleNameStub).\(namespaceNameStubs[3]) {
 
                     static var \(memberNameStub): \(memberTypeNameStub) = false
@@ -118,7 +122,7 @@ final class NamespaceDeclParserTests: XCTestCase {
         XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([publicSecretStub]))
         XCTAssertEqual([[]], deobfuscateDataFunctionDeclParserSpy.parseRecordedInput)
         XCTAssertTrue(sourceSpecification.algorithm.isEmpty)
-        XCTAssertFalse(sourceSpecification.implementationOnlyImport)
+        XCTAssertFalse(sourceSpecification.internalImport)
         XCTAssertTrue(sourceSpecification.secrets.isEmpty)
     }
 }

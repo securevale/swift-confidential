@@ -10,7 +10,11 @@ final class NamespaceMembersParserTests: XCTestCase {
     private typealias SecretDeclParserSpy = ParserSpy<Secret, any DeclSyntaxProtocol>
 
     private let secretDeclStub = VariableDeclSyntax.makeSecretVariableDecl(
-        accessModifier: .keyword(.internal),
+        dataProjectionAttribute: AttributeSyntax(
+            attributeName: IdentifierTypeSyntax(name: .identifier("Test"))
+        ),
+        accessModifier: .internal,
+        bindingSpecifier: .let,
         name: "secret",
         dataArgumentExpression: ArrayExprSyntax {
             ArrayElementSyntax(
@@ -21,10 +25,7 @@ final class NamespaceMembersParserTests: XCTestCase {
                 expression: IntegerLiteralExprSyntax(literal: "0x20")
             )
         },
-        nonceArgumentExpression: IntegerLiteralExprSyntax(literal: "123456789"),
-        dataAccessWrapper: AttributeSyntax(
-            attributeName: IdentifierTypeSyntax(name: .identifier("Test"))
-        )
+        nonceArgumentExpression: IntegerLiteralExprSyntax(literal: "123456789")
     )
     private let secretsStub: ArraySlice<Secret> = [
         .StubFactory.makeInternalSecret(),

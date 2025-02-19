@@ -69,6 +69,7 @@ private extension NamespaceDeclParser {
         : .keyword(.internal)
 
         return .init(
+            leadingTrivia: .newline,
             modifiers: .init {
                 DeclModifierSyntax(name: accessModifier)
             },
@@ -83,6 +84,7 @@ private extension NamespaceDeclParser {
         deobfuscateDataFunctionDecl: some DeclSyntaxProtocol
     ) throws -> ExtensionDeclSyntax {
         .init(
+            leadingTrivia: .newline,
             extendedType: IdentifierTypeSyntax(name: .identifier(extendedTypeIdentifier)),
             memberBlock: try memberBlock(from: &secrets, with: deobfuscateDataFunctionDecl)
         )

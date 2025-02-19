@@ -3,7 +3,8 @@ import Foundation
 
 package struct SourceSpecification: Equatable {
     var algorithm: Algorithm
-    var implementationOnlyImport: Bool
+    var experimentalMode: Bool
+    var internalImport: Bool
     var secrets: Secrets
 }
 
@@ -20,7 +21,7 @@ package extension SourceSpecification {
         let name: String
         var data: Data
         let nonce: Obfuscation.Nonce
-        let dataAccessWrapperInfo: DataAccessWrapperInfo
+        let dataProjectionAttribute: DataProjectionAttribute
     }
 
     struct Secrets: Hashable {
@@ -77,12 +78,13 @@ extension SourceSpecification.Secret {
         case `public`
     }
 
-    struct DataAccessWrapperInfo {
+    struct DataProjectionAttribute {
 
         typealias Argument = (label: String?, value: String)
 
-        let typeInfo: TypeInfo
+        let name: String
         let arguments: [Argument]
+        let isPropertyWrapper: Bool
     }
 
     package enum Namespace: Hashable {

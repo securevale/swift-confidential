@@ -5,31 +5,29 @@ struct ImportDeclParser: Parser {
 
     func parse(_ input: inout SourceSpecification) throws -> [CodeBlockItemSyntax] {
         guard
-            !input.implementationOnlyImport || canUseImplementationOnlyImport(given: input.secrets)
+            !input.internalImport || canUseInternalImport(given: input.secrets)
         else {
             throw ParsingError.assertionFailed(
                 description: """
-                             Cannot use @_implementationOnly import when the secret(s) access \
+                             Cannot use internal import when the secret(s) access \
                              level is public.
                              Either change the access level to internal, or disable \
-                             @_implementationOnly import.
+                             internal import.
                              """
             )
         }
 
         return makeImportDeclStatements(
             from: input.secrets.namespaces,
-            implementationOnly: input.implementationOnlyImport
+            experimentalMode: input.experimentalMode,
+            implementationOnly: input.internalImport
         )
-        .map {
-            .init(item: .init($0))
-        }
     }
 }
 
 private extension ImportDeclParser {
 
-    func canUseImplementationOnlyImport(given secrets: SourceSpecification.Secrets) -> Bool {
+    func canUseInternalImport(given secrets: SourceSpecification.Secrets) -> Bool {
         !secrets
             .flatMap(\.value)
             .map(\.accessModifier)
@@ -38,17 +36,22 @@ private extension ImportDeclParser {
 
     func makeImportDeclStatements<Namespaces: Collection>(
         from namespaces: Namespaces,
+        experimentalMode: Bool,
         implementationOnly: Bool
-    ) -> [ImportDeclSyntax]
+    ) -> [CodeBlockItemSyntax]
     where
         Namespaces.Element == SourceSpecification.Secret.Namespace
     {
         var implementationOnlyModuleNames: Set<String> = []
         var moduleNames: Set<String> = [C.Code.Generation.foundationModuleName]
+        var confidentialKitModuleNames: Set<String> = [C.Code.Generation.confidentialKitModuleName]
+        if experimentalMode {
+            confidentialKitModuleNames.insert(C.Code.Generation.Experimental.confidentialKitModuleName)
+        }
         if implementationOnly {
-            implementationOnlyModuleNames.insert(C.Code.Generation.confidentialKitModuleName)
+            implementationOnlyModuleNames.formUnion(confidentialKitModuleNames)
         } else {
-            moduleNames.insert(C.Code.Generation.confidentialKitModuleName)
+            moduleNames.formUnion(confidentialKitModuleNames)
         }
 
         moduleNames.formUnion(
@@ -67,30 +70,66 @@ private extension ImportDeclParser {
         )
 
         return makeImportDeclStatements(
-            implementationOnlyModuleNames: implementationOnlyModuleNames.sorted(),
-            moduleNames: moduleNames.sorted()
+            moduleNames: moduleNames.sorted(),
+            implementationOnlyModuleNames: implementationOnlyModuleNames.sorted()
         )
     }
 
     func makeImportDeclStatements(
-        implementationOnlyModuleNames: [String],
-        moduleNames: [String]
-    ) -> [ImportDeclSyntax] {
-        let implementationOnlyImports = implementationOnlyModuleNames
+        moduleNames: [String],
+        implementationOnlyModuleNames: [String]
+    ) -> [CodeBlockItemSyntax] {
+        var imports = moduleNames
             .map { moduleName in
-                ImportDeclSyntax(
-                    attributes: [.attribute(._implementationOnly)],
-                    importKeyword: .keyword(.import, leadingTrivia: .spaces(1)),
-                    path: [ImportPathComponentSyntax(name: .identifier(moduleName))]
-                )
-            }
-        let imports = moduleNames
-            .map { moduleName in
-                ImportDeclSyntax(
-                    path: [ImportPathComponentSyntax(name: .identifier(moduleName))]
+                CodeBlockItemSyntax(
+                    item: .init(makeImportDecl(moduleName: moduleName))
                 )
             }
 
-        return implementationOnlyImports + imports
+        guard !implementationOnlyModuleNames.isEmpty else { return imports }
+
+        let internalImports = implementationOnlyModuleNames
+            .map { moduleName in
+                CodeBlockItemSyntax(
+                    item: .init(
+                        makeImportDecl(modifiers: .internal, moduleName: moduleName)
+                    )
+                )
+            }
+        let implementationOnlyImports = implementationOnlyModuleNames
+            .map { moduleName in
+                CodeBlockItemSyntax(
+                    item: .init(
+                        makeImportDecl(attributes: ._implementationOnly, moduleName: moduleName)
+                    )
+                )
+            }
+        imports.insert(
+            CodeBlockItemSyntax(
+                item: .init(
+                    IfConfigDeclSyntax.makeIfSwiftVersionOrFeatureDecl(
+                        swiftVersion: 6.0,
+                        featureFlag: "AccessLevelOnImport",
+                        ifElements: .statements(CodeBlockItemListSyntax(internalImports)),
+                        elseElements: .statements(CodeBlockItemListSyntax(implementationOnlyImports))
+                    )
+                )
+            ),
+            at: .zero
+        )
+
+        return imports
+    }
+
+    func makeImportDecl(
+        attributes: AttributeSyntax...,
+        modifiers: Keyword...,
+        moduleName: String
+    ) -> ImportDeclSyntax {
+        ImportDeclSyntax(
+            attributes: AttributeListSyntax(attributes.map { .attribute($0) }),
+            modifiers: DeclModifierListSyntax(modifiers.map { DeclModifierSyntax(name: .keyword($0)) }),
+            path: [ImportPathComponentSyntax(name: .identifier(moduleName))]
+        )
     }
 }

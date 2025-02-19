@@ -49,7 +49,10 @@ where
                     name: secret.name,
                     data: try secretValueEncoder.encode(secret.value.underlyingValue),
                     nonce: try generateNonce(),
-                    dataAccessWrapperInfo: dataAccessWrapperInfo(for: secret.value)
+                    dataProjectionAttribute: dataProjectionAttribute(
+                        for: secret.value,
+                        experimentalMode: input.isExperimentalModeEnabled
+                    )
                 )
                 parsedSecretsCount += 1
 
@@ -72,24 +75,44 @@ where
 
 private extension SecretsParser {
 
-    func dataAccessWrapperInfo(for value: Configuration.Secret.Value)
-        -> SourceSpecification.Secret.DataAccessWrapperInfo
+    func dataProjectionAttribute(
+        for value: Configuration.Secret.Value,
+        experimentalMode: Bool
+    ) -> SourceSpecification.Secret.DataProjectionAttribute
     {
         typealias DataTypes = Configuration.Secret.Value.DataTypes
 
-        let typeInfo: TypeInfo
-        switch value {
-        case .array:
-            typeInfo = .init(of: Obfuscated<DataTypes.Array>.self)
-        case .singleValue:
-            typeInfo = .init(of: Obfuscated<DataTypes.SingleValue>.self)
+        let name: String
+        let isPropertyWrapper: Bool
+        if experimentalMode {
+            let baseName = C.Code.Generation.Experimental.obfuscatedMacroFullyQualifiedName
+            let genericArgumentTypeInfo: TypeInfo
+            switch value {
+            case .array:
+                genericArgumentTypeInfo = .init(of: DataTypes.Array.self)
+            case .singleValue:
+                genericArgumentTypeInfo = .init(of: DataTypes.SingleValue.self)
+            }
+            name = "\(baseName)<\(genericArgumentTypeInfo.fullyQualifiedName)>"
+            isPropertyWrapper = false
+        } else {
+            let typeInfo: TypeInfo
+            switch value {
+            case .array:
+                typeInfo = .init(of: Obfuscated<DataTypes.Array>.self)
+            case .singleValue:
+                typeInfo = .init(of: Obfuscated<DataTypes.SingleValue>.self)
+            }
+            name = typeInfo.fullyQualifiedName
+            isPropertyWrapper = true
         }
 
         return .init(
-            typeInfo: typeInfo,
+            name: name,
             arguments: [
                 (label: .none, value: C.Code.Generation.deobfuscateDataFuncName)
-            ]
+            ],
+            isPropertyWrapper: isPropertyWrapper
         )
     }
 }

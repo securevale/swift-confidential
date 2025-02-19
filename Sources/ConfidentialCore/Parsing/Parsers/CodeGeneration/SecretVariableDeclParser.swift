@@ -17,41 +17,42 @@ struct SecretVariableDeclParser: Parser {
             }
 
         return VariableDeclSyntax.makeSecretVariableDecl(
-            accessModifier: token(for: input.accessModifier),
+            dataProjectionAttribute: attribute(from: input.dataProjectionAttribute),
+            accessModifier: keyword(for: input.accessModifier),
+            bindingSpecifier: input.dataProjectionAttribute.isPropertyWrapper ? .var : .let,
             name: input.name,
             dataArgumentExpression: ArrayExprSyntax(elements: .init(dataArgumentElements)),
-            nonceArgumentExpression: IntegerLiteralExprSyntax(literal: "\(raw: input.nonce)"),
-            dataAccessWrapper: dataAccessWrapper(with: input.dataAccessWrapperInfo)
+            nonceArgumentExpression: IntegerLiteralExprSyntax(literal: "\(raw: input.nonce)")
         )
     }
 }
 
 private extension SecretVariableDeclParser {
 
-    func token(for accessModifier: Secret.AccessModifier) -> TokenSyntax {
+    func keyword(for accessModifier: Secret.AccessModifier) -> Keyword {
         switch accessModifier {
-        case .internal:
-            return .keyword(.internal)
-        case .public:
-            return .keyword(.public)
+        case .internal: .internal
+        case .public: .public
         }
     }
 
-    func dataAccessWrapper(with wrapperInfo: Secret.DataAccessWrapperInfo) -> AttributeSyntax {
+    func attribute(from attribute: Secret.DataProjectionAttribute) -> AttributeSyntax {
         .init(
             atSign: .atSignToken(leadingNewlines: 1),
             attributeName: IdentifierTypeSyntax(
-                name: .identifier(wrapperInfo.typeInfo.fullyQualifiedName)
+                name: .identifier(attribute.name)
             ),
             leftParen: .leftParenToken(),
             arguments: .argumentList(
                 .init(
-                    wrapperInfo.arguments
+                    attribute.arguments
                         .map { argument in
                             LabeledExprSyntax(
                                 label: argument.label.map { .identifier($0) },
                                 colon: argument.label.map { _ in .colonToken() },
-                                expression: DeclReferenceExprSyntax(baseName: .identifier(argument.value))
+                                expression: DeclReferenceExprSyntax(
+                                    baseName: .identifier(argument.value)
+                                )
                             )
                         }
                 )
