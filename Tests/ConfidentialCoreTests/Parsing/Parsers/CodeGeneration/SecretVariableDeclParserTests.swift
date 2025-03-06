@@ -2,6 +2,7 @@
 import XCTest
 
 import ConfidentialKit
+import ConfidentialUtils
 import SwiftSyntax
 
 final class SecretVariableDeclParserTests: XCTestCase {

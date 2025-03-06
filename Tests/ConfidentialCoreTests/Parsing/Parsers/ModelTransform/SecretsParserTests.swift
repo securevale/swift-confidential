@@ -2,6 +2,7 @@
 import XCTest
 
 import ConfidentialKit
+import ConfidentialUtils
 
 final class SecretsParserTests: XCTestCase {
 

@@ -1,4 +1,5 @@
 import ConfidentialKit
+import ConfidentialUtils
 import Parsing
 
 struct SecretNamespaceParser: Parser {

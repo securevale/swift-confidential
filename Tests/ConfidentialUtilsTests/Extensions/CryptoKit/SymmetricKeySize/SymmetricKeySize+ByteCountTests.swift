@@ -1,4 +1,4 @@
-@testable import ConfidentialKit
+@testable import ConfidentialUtils
 import XCTest
 
 import CryptoKit

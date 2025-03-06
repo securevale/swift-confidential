@@ -1,4 +1,5 @@
 import ConfidentialKit
+import ConfidentialUtils
 import Foundation
 import SwiftSyntax
 

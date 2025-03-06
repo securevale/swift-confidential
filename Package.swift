@@ -19,12 +19,22 @@ var package = Package(
     ],
     targets: [
         // Client Library
-        .target(name: "ConfidentialKit"),
+        .target(
+            name: "ConfidentialKit",
+            dependencies: ["ConfidentialUtils"]
+        ),
+
+        // Utils
+        .target(name: "ConfidentialUtils"),
 
         // Tests
         .testTarget(
             name: "ConfidentialKitTests",
             dependencies: ["ConfidentialKit"]
+        ),
+        .testTarget(
+            name: "ConfidentialUtilsTests",
+            dependencies: ["ConfidentialUtils"]
         )
     ],
     swiftLanguageVersions: [.v5]
@@ -43,6 +53,7 @@ package.targets.append(contentsOf: [
         name: "ConfidentialCore",
         dependencies: [
             "ConfidentialKit",
+            "ConfidentialUtils",
             .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
             .product(name: "Parsing", package: "swift-parsing")
         ]

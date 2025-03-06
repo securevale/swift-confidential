@@ -1,4 +1,4 @@
-@testable import ConfidentialCore
+@testable import ConfidentialUtils
 import XCTest
 
 final class TypeInfoTests: XCTestCase {

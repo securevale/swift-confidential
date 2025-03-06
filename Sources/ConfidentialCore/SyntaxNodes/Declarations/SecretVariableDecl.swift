@@ -1,4 +1,5 @@
 import ConfidentialKit
+import ConfidentialUtils
 import SwiftSyntax
 
 extension VariableDeclSyntax {

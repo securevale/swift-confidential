@@ -1,4 +1,4 @@
-@testable import ConfidentialKit
+@testable import ConfidentialUtils
 import XCTest
 
 final class BinaryInteger_BytesTests: XCTestCase {

@@ -1,4 +1,4 @@
-public extension BinaryInteger {
+package extension BinaryInteger {
 
     /// This value's binary representation, as a sequence of contiguous bytes.
     @inlinable

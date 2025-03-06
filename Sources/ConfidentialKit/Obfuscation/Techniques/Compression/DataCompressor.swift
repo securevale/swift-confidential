@@ -1,3 +1,4 @@
+import ConfidentialUtils
 import Foundation
 
 public extension Obfuscation.Compression {
