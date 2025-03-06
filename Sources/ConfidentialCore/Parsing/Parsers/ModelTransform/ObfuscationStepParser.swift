@@ -3,10 +3,10 @@ import Parsing
 struct ObfuscationStepParser<TechniqueParsers: Parser>: Parser
 where
     TechniqueParsers.Input == Substring,
-    TechniqueParsers.Output == SourceSpecification.ObfuscationStep.Technique
+    TechniqueParsers.Output == SourceFileSpec.ObfuscationStep.Technique
 { // swiftlint:disable:this opening_brace
 
-    typealias ObfuscationStep = SourceSpecification.ObfuscationStep
+    typealias ObfuscationStep = SourceFileSpec.ObfuscationStep
 
     private let techniqueParsers: TechniqueParsers
 

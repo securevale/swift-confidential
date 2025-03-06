@@ -8,7 +8,7 @@ final class DeobfuscateDataFunctionDeclParserTests: XCTestCase {
 
     private typealias CompressionAlgorithm = Obfuscation.Compression.CompressionAlgorithm
     private typealias EncryptionAlgorithm = Obfuscation.Encryption.SymmetricEncryptionAlgorithm
-    private typealias Algorithm = SourceSpecification.Algorithm
+    private typealias Algorithm = SourceFileSpec.Algorithm
 
     private let compressionAlgorithmStub: CompressionAlgorithm = .lzfse
     private let encryptionAlgorithmStub: EncryptionAlgorithm = .aes128GCM

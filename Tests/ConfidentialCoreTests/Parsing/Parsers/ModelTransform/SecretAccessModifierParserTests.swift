@@ -3,7 +3,7 @@ import XCTest
 
 final class SecretAccessModifierParserTests: XCTestCase {
 
-    private typealias AccessModifier = SourceSpecification.Secret.AccessModifier
+    private typealias AccessModifier = SourceFileSpec.Secret.AccessModifier
 
     private var sut: SecretAccessModifierParser!
 

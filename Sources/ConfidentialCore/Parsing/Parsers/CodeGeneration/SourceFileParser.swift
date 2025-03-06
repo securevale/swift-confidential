@@ -3,17 +3,17 @@ import SwiftSyntax
 
 package struct SourceFileParser<CodeBlockParsers: Parser>: Parser
 where
-    CodeBlockParsers.Input == SourceSpecification,
+    CodeBlockParsers.Input == SourceFileSpec,
     CodeBlockParsers.Output == [CodeBlockItemSyntax]
 { // swiftlint:disable:this opening_brace
 
     private let codeBlockParsers: CodeBlockParsers
 
-    init(@ParserBuilder<SourceSpecification> with build: () -> CodeBlockParsers) {
+    init(@ParserBuilder<SourceFileSpec> with build: () -> CodeBlockParsers) {
         self.codeBlockParsers = build()
     }
 
-    package func parse(_ input: inout SourceSpecification) throws -> SourceFileText {
+    package func parse(_ input: inout SourceFileSpec) throws -> SourceFileText {
         let statements = try codeBlockParsers.parse(&input)
 
         return .init(

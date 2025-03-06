@@ -1,10 +1,10 @@
 @testable import ConfidentialCore
 import XCTest
 
-final class SourceSpecificationParserTests: XCTestCase {
+final class SourceFileSpecParserTests: XCTestCase {
 
-    private typealias AlgorithmParserSpy = ParserSpy<Configuration, SourceSpecification.Algorithm>
-    private typealias SecretsParserSpy = ParserSpy<Configuration, SourceSpecification.Secrets>
+    private typealias AlgorithmParserSpy = ParserSpy<Configuration, SourceFileSpec.Algorithm>
+    private typealias SecretsParserSpy = ParserSpy<Configuration, SourceFileSpec.Secrets>
 
     private let configurationStub: Configuration = {
         var configuration = Configuration.StubFactory.makeConfiguration()
@@ -14,17 +14,17 @@ final class SourceSpecificationParserTests: XCTestCase {
         configuration.internalImport = false
         return configuration
     }()
-    private let algorithmStub: SourceSpecification.Algorithm = [
+    private let algorithmStub: SourceFileSpec.Algorithm = [
         .init(technique: .encryption(algorithm: .chaChaPoly))
     ]
-    private let secretsStub: SourceSpecification.Secrets = [
+    private let secretsStub: SourceFileSpec.Secrets = [
         .extend(identifier: "Secrets", moduleName: "SecretModule"): [.StubFactory.makePublicSecret()]
     ]
 
     private var algorithmParserSpy: AlgorithmParserSpy!
     private var secretsParserSpy: SecretsParserSpy!
 
-    private var sut: SourceSpecificationParser<AlgorithmParserSpy, SecretsParserSpy>!
+    private var sut: SourceFileSpecParser<AlgorithmParserSpy, SecretsParserSpy>!
 
     override func setUp() {
         super.setUp()
@@ -50,21 +50,22 @@ final class SourceSpecificationParserTests: XCTestCase {
         var configuration = configurationStub
 
         // when
-        let specification: SourceSpecification = try sut.parse(&configuration)
+        let spec: SourceFileSpec = try sut.parse(&configuration)
 
         // then
-        let expectedSpecification = SourceSpecification(
+        let expectedSpec = SourceFileSpec(
             algorithm: algorithmStub,
             experimentalMode: false,
             internalImport: false,
             secrets: secretsStub
         )
-        XCTAssertEqual(expectedSpecification, specification)
+        XCTAssertEqual(expectedSpec, spec)
         XCTAssertEqual([configurationStub], algorithmParserSpy.parseRecordedInput)
         XCTAssertEqual([configurationStub], secretsParserSpy.parseRecordedInput)
         XCTAssertTrue(configuration.algorithm.isEmpty)
         XCTAssertNil(configuration.defaultAccessModifier)
         XCTAssertNil(configuration.defaultNamespace)
+        XCTAssertNil(configuration.experimentalMode)
         XCTAssertNil(configuration.internalImport)
         XCTAssertTrue(configuration.secrets.isEmpty)
     }

@@ -58,7 +58,7 @@ final class SecretVariableDeclParserTests: XCTestCase {
 
 private extension SecretVariableDeclParserTests {
 
-    typealias Secret = SourceSpecification.Secret
+    typealias Secret = SourceFileSpec.Secret
 
     func makeSecretStub(
         accessModifier: Secret.AccessModifier,

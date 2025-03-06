@@ -3,7 +3,7 @@ import SwiftSyntax
 
 struct NamespaceMembersParser<SecretDeclParser: Parser>: Parser
 where
-    SecretDeclParser.Input == SourceSpecification.Secret,
+    SecretDeclParser.Input == SourceFileSpec.Secret,
     SecretDeclParser.Output == any DeclSyntaxProtocol
 { // swiftlint:disable:this opening_brace
 
@@ -13,7 +13,7 @@ where
         self.secretDeclParser = secretDeclParser
     }
 
-    func parse(_ input: inout ArraySlice<SourceSpecification.Secret>) throws -> [MemberBlockItemSyntax] {
+    func parse(_ input: inout ArraySlice<SourceFileSpec.Secret>) throws -> [MemberBlockItemSyntax] {
         var parsedSecretsCount: Int = .zero
         let declarations: [any DeclSyntaxProtocol]
         do {

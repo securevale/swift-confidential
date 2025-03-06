@@ -3,7 +3,7 @@ import SwiftSyntax
 
 struct DeobfuscateDataFunctionDeclParser: Parser {
 
-    typealias Algorithm = SourceSpecification.Algorithm
+    typealias Algorithm = SourceFileSpec.Algorithm
 
     private let functionNestingLevel: Int
 
@@ -46,7 +46,7 @@ struct DeobfuscateDataFunctionDeclParser: Parser {
 
 private extension DeobfuscateDataFunctionDeclParser {
 
-    typealias ObfuscationStep = SourceSpecification.ObfuscationStep
+    typealias ObfuscationStep = SourceFileSpec.ObfuscationStep
 
     static let nonceArgumentName: String = "nonce"
 

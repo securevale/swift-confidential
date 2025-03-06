@@ -1,15 +1,15 @@
 @testable import ConfidentialCore
 
-extension SourceSpecification {
+extension SourceFileSpec {
 
     enum StubFactory {
 
-        static func makeSpecification(
-            algorithm: SourceSpecification.Algorithm = [],
+        static func makeSpec(
+            algorithm: SourceFileSpec.Algorithm = [],
             experimentalMode: Bool = false,
             internalImport: Bool = false,
-            secrets: SourceSpecification.Secrets = [:]
-        ) -> SourceSpecification {
+            secrets: SourceFileSpec.Secrets = [:]
+        ) -> SourceFileSpec {
             .init(
                 algorithm: algorithm,
                 experimentalMode: experimentalMode,

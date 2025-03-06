@@ -3,7 +3,7 @@ import XCTest
 
 final class SourceObfuscatorTests: XCTestCase {
 
-    private typealias Technique = SourceSpecification.ObfuscationStep.Technique
+    private typealias Technique = SourceFileSpec.ObfuscationStep.Technique
 
     private var obfuscationStepSpy: ObfuscationStepSpy!
     private var obfuscationStepResolverSpy: ObfuscationStepResolverSpy!
@@ -24,11 +24,11 @@ final class SourceObfuscatorTests: XCTestCase {
         super.tearDown()
     }
 
-    func test_givenSourceSpecification_whenObfuscate_thenObfuscationStepResolverCallsMatchAlgorithm() throws {
+    func test_givenSourceFileSpec_whenObfuscate_thenObfuscationStepResolverCallsMatchAlgorithm() throws {
         // given
         let encryptionTechnique = Technique.encryption(algorithm: .aes128GCM)
         let compressionTechnique = Technique.compression(algorithm: .lz4)
-        var sourceSpecification = SourceSpecification.StubFactory.makeSpecification(
+        var sourceFileSpec = SourceFileSpec.StubFactory.makeSpec(
             algorithm: [
                 .init(technique: encryptionTechnique),
                 .init(technique: compressionTechnique)
@@ -39,7 +39,7 @@ final class SourceObfuscatorTests: XCTestCase {
         )
 
         // when
-        try sut.obfuscate(&sourceSpecification)
+        try sut.obfuscate(&sourceFileSpec)
 
         // then
         XCTAssertEqual(
@@ -48,14 +48,14 @@ final class SourceObfuscatorTests: XCTestCase {
         )
     }
 
-    func test_givenSourceSpecification_whenObfuscate_thenSourceSpecificationSecretDataEqualsExpectedValue() throws {
+    func test_givenSourceFileSpec_whenObfuscate_thenSourceFileSpecSecretDataEqualsExpectedValue() throws {
         // given
         let plainData: Data = .init([0x20, 0x20])
         let obfuscatedData: Data = .init([0xaa, 0x33, 0xa0, 0x43, 0x00, 0x8d, 0x2e, 0x1a])
         obfuscationStepSpy.obfuscateReturnValue = obfuscatedData
 
-        let createNamespaceKey = SourceSpecification.Secrets.Key.create(identifier: "Secrets")
-        var sourceSpecification = SourceSpecification.StubFactory.makeSpecification(
+        let createNamespaceKey = SourceFileSpec.Secrets.Key.create(identifier: "Secrets")
+        var sourceFileSpec = SourceFileSpec.StubFactory.makeSpec(
             algorithm: [
                 .init(technique: .encryption(algorithm: .aes128GCM))
             ],
@@ -65,30 +65,30 @@ final class SourceObfuscatorTests: XCTestCase {
         )
 
         // when
-        try sut.obfuscate(&sourceSpecification)
+        try sut.obfuscate(&sourceFileSpec)
 
         // then
-        XCTAssertEqual(1, sourceSpecification.secrets.count)
-        XCTAssertEqual(1, sourceSpecification.secrets[createNamespaceKey]?.count)
+        XCTAssertEqual(1, sourceFileSpec.secrets.count)
+        XCTAssertEqual(1, sourceFileSpec.secrets[createNamespaceKey]?.count)
         XCTAssertEqual([plainData], obfuscationStepSpy.recordedData)
-        XCTAssertEqual(obfuscatedData, sourceSpecification.secrets[createNamespaceKey]?[0].data)
+        XCTAssertEqual(obfuscatedData, sourceFileSpec.secrets[createNamespaceKey]?[0].data)
     }
 
-    func test_givenSourceSpecificationWithEmptySecrets_whenObfuscate_thenSourceSpecificationLeftIntactAndObfuscationStepResolverNotCalled() throws {
+    func test_givenSourceFileSpecWithEmptySecrets_whenObfuscate_thenSourceFileSpecLeftIntactAndObfuscationStepResolverNotCalled() throws {
         // given
-        var sourceSpecification = SourceSpecification.StubFactory.makeSpecification(
+        var sourceFileSpec = SourceFileSpec.StubFactory.makeSpec(
             algorithm: [
                 .init(technique: .encryption(algorithm: .aes128GCM)),
                 .init(technique: .compression(algorithm: .lz4))
             ]
         )
-        let sourceSpecificationSnapshot = sourceSpecification
+        let sourceFileSpecSnapshot = sourceFileSpec
 
         // when
-        try sut.obfuscate(&sourceSpecification)
+        try sut.obfuscate(&sourceFileSpec)
 
         // then
-        XCTAssertEqual(sourceSpecificationSnapshot, sourceSpecification)
+        XCTAssertEqual(sourceFileSpecSnapshot, sourceFileSpec)
         XCTAssertTrue(obfuscationStepResolverSpy.recordedTechniques.isEmpty)
     }
 }

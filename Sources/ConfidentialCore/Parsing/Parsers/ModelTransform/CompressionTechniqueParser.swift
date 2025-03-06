@@ -3,7 +3,7 @@ import Parsing
 
 struct CompressionTechniqueParser: Parser {
 
-    typealias Technique = SourceSpecification.ObfuscationStep.Technique
+    typealias Technique = SourceFileSpec.ObfuscationStep.Technique
 
     private typealias Algorithm = Obfuscation.Compression.CompressionAlgorithm
 

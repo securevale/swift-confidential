@@ -5,7 +5,7 @@ import ConfidentialKit
 
 final class SourceObfuscator_ObfuscationStepResolverTests: XCTestCase {
 
-    private typealias Technique = SourceSpecification.ObfuscationStep.Technique
+    private typealias Technique = SourceFileSpec.ObfuscationStep.Technique
 
     func test_givenObfuscationStepResolver_whenObfuscationStepForTechnique_thenReturnsExpectedObfuscationStepInstance() {
         // given

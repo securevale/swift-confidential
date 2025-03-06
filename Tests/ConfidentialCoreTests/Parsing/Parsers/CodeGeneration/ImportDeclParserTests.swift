@@ -7,12 +7,12 @@ final class ImportDeclParserTests: XCTestCase {
 
     private typealias SUT = ImportDeclParser
 
-    private let algorithmStub: SourceSpecification.Algorithm = [.init(technique: .randomization)]
+    private let algorithmStub: SourceFileSpec.Algorithm = [.init(technique: .randomization)]
     private let customModuleNameStub = "Crypto"
 
     func test_givenInternalImportDisabled_whenParse_thenReturnsExpectedImportDeclStatementsAndInputLeftIntact() throws {
         // given
-        let secrets: SourceSpecification.Secrets = [
+        let secrets: SourceFileSpec.Secrets = [
             .extend(identifier: "Obfuscation.Secret", moduleName: C.Code.Generation.confidentialKitModuleName): [
                 .StubFactory.makeInternalSecret()
             ],
@@ -21,14 +21,14 @@ final class ImportDeclParserTests: XCTestCase {
                 .StubFactory.makePublicSecret(named: "secret2")
             ]
         ]
-        var sourceSpecifications: [SourceSpecification] = [
-            .StubFactory.makeSpecification(
+        var sourceFileSpecs: [SourceFileSpec] = [
+            .StubFactory.makeSpec(
                 algorithm: algorithmStub,
                 experimentalMode: false,
                 internalImport: false,
                 secrets: secrets
             ),
-            .StubFactory.makeSpecification(
+            .StubFactory.makeSpec(
                 algorithm: algorithmStub,
                 experimentalMode: true,
                 internalImport: false,
@@ -37,12 +37,12 @@ final class ImportDeclParserTests: XCTestCase {
         ]
 
         // when
-        let statements = try sourceSpecifications
+        let statements = try sourceFileSpecs
             .enumerated()
             .map { idx, spec in
                 var spec = spec
                 let statements = try SUT().parse(&spec)
-                sourceSpecifications[idx] = spec
+                sourceFileSpecs[idx] = spec
                 return statements
             }
 
@@ -63,14 +63,15 @@ final class ImportDeclParserTests: XCTestCase {
             ],
             statements.map { String(describing: syntax(from: $0)) }
         )
-        XCTAssertEqual([algorithmStub, algorithmStub], sourceSpecifications.map(\.algorithm))
-        XCTAssertTrue(sourceSpecifications.map(\.internalImport).allSatisfy { $0 == false })
-        XCTAssertEqual([secrets, secrets], sourceSpecifications.map(\.secrets))
+        XCTAssertEqual([algorithmStub, algorithmStub], sourceFileSpecs.map(\.algorithm))
+        XCTAssertEqual([false, true], sourceFileSpecs.map(\.experimentalMode))
+        XCTAssertTrue(sourceFileSpecs.map(\.internalImport).allSatisfy { $0 == false })
+        XCTAssertEqual([secrets, secrets], sourceFileSpecs.map(\.secrets))
     }
 
     func test_givenInternalImportEnabled_whenParse_thenReturnsExpectedImportDeclStatementsAndInputLeftIntact() throws {
         // given
-        let secrets: SourceSpecification.Secrets = [
+        let secrets: SourceFileSpec.Secrets = [
             .extend(identifier: "Obfuscation.Secret", moduleName: C.Code.Generation.confidentialKitModuleName): [
                 .StubFactory.makeInternalSecret()
             ],
@@ -78,14 +79,14 @@ final class ImportDeclParserTests: XCTestCase {
                 .StubFactory.makeInternalSecret()
             ]
         ]
-        var sourceSpecifications: [SourceSpecification] = [
-            .StubFactory.makeSpecification(
+        var sourceFileSpecs: [SourceFileSpec] = [
+            .StubFactory.makeSpec(
                 algorithm: algorithmStub,
                 experimentalMode: false,
                 internalImport: true,
                 secrets: secrets
             ),
-            .StubFactory.makeSpecification(
+            .StubFactory.makeSpec(
                 algorithm: algorithmStub,
                 experimentalMode: true,
                 internalImport: true,
@@ -94,12 +95,12 @@ final class ImportDeclParserTests: XCTestCase {
         ]
 
         // when
-        let statements = try sourceSpecifications
+        let statements = try sourceFileSpecs
             .enumerated()
             .map { idx, spec in
                 var spec = spec
                 let statements = try SUT().parse(&spec)
-                sourceSpecifications[idx] = spec
+                sourceFileSpecs[idx] = spec
                 return statements
             }
 
@@ -129,27 +130,29 @@ final class ImportDeclParserTests: XCTestCase {
             ],
             statements.map { String(describing: syntax(from: $0)) }
         )
-        XCTAssertEqual([algorithmStub, algorithmStub], sourceSpecifications.map(\.algorithm))
-        XCTAssertTrue(sourceSpecifications.map(\.internalImport).allSatisfy { $0 == true })
-        XCTAssertEqual([secrets, secrets], sourceSpecifications.map(\.secrets))
+        XCTAssertEqual([algorithmStub, algorithmStub], sourceFileSpecs.map(\.algorithm))
+        XCTAssertEqual([false, true], sourceFileSpecs.map(\.experimentalMode))
+        XCTAssertTrue(sourceFileSpecs.map(\.internalImport).allSatisfy { $0 == true })
+        XCTAssertEqual([secrets, secrets], sourceFileSpecs.map(\.secrets))
     }
 
     func test_givenInternalImportEnabledAndPublicAccessLevel_whenParse_thenThrowsExpectedErrorAndInputLeftIntact() {
         // given
-        let secrets: SourceSpecification.Secrets = [
+        let secrets: SourceFileSpec.Secrets = [
             .create(identifier: "Secrets"): [
                 .StubFactory.makeInternalSecret(named: "secret1"),
                 .StubFactory.makePublicSecret(named: "secret2")
             ]
         ]
-        var sourceSpecification = SourceSpecification.StubFactory.makeSpecification(
+        var sourceFileSpec = SourceFileSpec.StubFactory.makeSpec(
             algorithm: algorithmStub,
+            experimentalMode: false,
             internalImport: true,
             secrets: secrets
         )
 
         // when & then
-        XCTAssertThrowsError(try SUT().parse(&sourceSpecification)) { error in
+        XCTAssertThrowsError(try SUT().parse(&sourceFileSpec)) { error in
             XCTAssertEqual(
                 """
                 Cannot use internal import when the secret(s) access \
@@ -160,9 +163,10 @@ final class ImportDeclParserTests: XCTestCase {
                 "\(error)"
             )
         }
-        XCTAssertEqual(algorithmStub, sourceSpecification.algorithm)
-        XCTAssertTrue(sourceSpecification.internalImport)
-        XCTAssertEqual(secrets, sourceSpecification.secrets)
+        XCTAssertEqual(algorithmStub, sourceFileSpec.algorithm)
+        XCTAssertFalse(sourceFileSpec.experimentalMode)
+        XCTAssertTrue(sourceFileSpec.internalImport)
+        XCTAssertEqual(secrets, sourceFileSpec.secrets)
     }
 }
 

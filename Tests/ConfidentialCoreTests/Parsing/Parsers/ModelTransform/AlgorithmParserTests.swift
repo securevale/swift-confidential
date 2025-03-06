@@ -3,7 +3,7 @@ import XCTest
 
 final class AlgorithmParserTests: XCTestCase {
 
-    private typealias ObfuscationStepParserSpy = ParserSpy<Substring, SourceSpecification.ObfuscationStep>
+    private typealias ObfuscationStepParserSpy = ParserSpy<Substring, SourceFileSpec.ObfuscationStep>
 
     private let obfuscationStepStub = "test"
     private lazy var algorithmStub = (0..<2).map { _ in obfuscationStepStub }[...]

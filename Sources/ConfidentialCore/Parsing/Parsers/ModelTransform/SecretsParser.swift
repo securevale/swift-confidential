@@ -6,13 +6,13 @@ import Parsing
 struct SecretsParser<NamespaceParser: Parser, AccessModifierParser: Parser>: Parser
 where
     NamespaceParser.Input == Substring,
-    NamespaceParser.Output == SourceSpecification.Secret.Namespace,
+    NamespaceParser.Output == SourceFileSpec.Secret.Namespace,
     AccessModifierParser.Input == Substring,
-    AccessModifierParser.Output == SourceSpecification.Secret.AccessModifier
+    AccessModifierParser.Output == SourceFileSpec.Secret.AccessModifier
 { // swiftlint:disable:this opening_brace
 
     typealias GenerateNonce = () throws -> Obfuscation.Nonce
-    typealias Secrets = SourceSpecification.Secrets
+    typealias Secrets = SourceFileSpec.Secrets
 
     private let namespaceParser: NamespaceParser
     private let accessModifierParser: AccessModifierParser
@@ -43,7 +43,7 @@ where
                 let namespace = try namespaceParser.parse(
                     secret.namespace ?? input.defaultNamespace ?? ""
                 )
-                let secret = SourceSpecification.Secret(
+                let secret = SourceFileSpec.Secret(
                     accessModifier: try accessModifierParser.parse(
                         secret.accessModifier ?? input.defaultAccessModifier ?? ""
                     ),
@@ -79,7 +79,7 @@ private extension SecretsParser {
     func dataProjectionAttribute(
         for value: Configuration.Secret.Value,
         experimentalMode: Bool
-    ) -> SourceSpecification.Secret.DataProjectionAttribute
+    ) -> SourceFileSpec.Secret.DataProjectionAttribute
     {
         typealias DataTypes = Configuration.Secret.Value.DataTypes
 

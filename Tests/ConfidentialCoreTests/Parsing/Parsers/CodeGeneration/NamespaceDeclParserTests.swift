@@ -6,11 +6,11 @@ import SwiftSyntax
 final class NamespaceDeclParserTests: XCTestCase {
 
     private typealias MembersParserSpy = ParserSpy<
-        ArraySlice<SourceSpecification.Secret>,
+        ArraySlice<SourceFileSpec.Secret>,
         [MemberBlockItemSyntax]
     >
     private typealias DeobfuscateDataFunctionDeclParserSpy = ParserSpy<
-        SourceSpecification.Algorithm,
+        SourceFileSpec.Algorithm,
         any DeclSyntaxProtocol
     >
 
@@ -42,13 +42,13 @@ final class NamespaceDeclParserTests: XCTestCase {
         super.tearDown()
     }
 
-    func test_givenSourceSpecification_whenParse_thenReturnsExpectedNamespaceDeclarationsAndInputIsConsumed() throws {
+    func test_givenSourceFileSpec_whenParse_thenReturnsExpectedNamespaceDeclarationsAndInputIsConsumed() throws {
         // given
         let customModuleNameStub = "Crypto"
         let namespaceNameStubs = ["A", "B", "C", "D"].map { "Secrets" + $0 }
-        let internalSecretStub = SourceSpecification.Secret.StubFactory.makeInternalSecret()
-        let publicSecretStub = SourceSpecification.Secret.StubFactory.makePublicSecret()
-        var sourceSpecification = SourceSpecification.StubFactory.makeSpecification(
+        let internalSecretStub = SourceFileSpec.Secret.StubFactory.makeInternalSecret()
+        let publicSecretStub = SourceFileSpec.Secret.StubFactory.makePublicSecret()
+        var sourceFileSpec = SourceFileSpec.StubFactory.makeSpec(
             secrets: [
                 .create(identifier: namespaceNameStubs[0]): [publicSecretStub, internalSecretStub],
                 .create(identifier: namespaceNameStubs[1]): [internalSecretStub],
@@ -58,7 +58,7 @@ final class NamespaceDeclParserTests: XCTestCase {
         )
 
         // when
-        let namespaceDeclarations: [CodeBlockItemSyntax] = try sut.parse(&sourceSpecification)
+        let namespaceDeclarations: [CodeBlockItemSyntax] = try sut.parse(&sourceFileSpec)
 
         // then
         let namespaceDeclarationsSyntax = namespaceDeclarations
@@ -121,9 +121,10 @@ final class NamespaceDeclParserTests: XCTestCase {
         XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([internalSecretStub, publicSecretStub]))
         XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([publicSecretStub]))
         XCTAssertEqual([[]], deobfuscateDataFunctionDeclParserSpy.parseRecordedInput)
-        XCTAssertTrue(sourceSpecification.algorithm.isEmpty)
-        XCTAssertFalse(sourceSpecification.internalImport)
-        XCTAssertTrue(sourceSpecification.secrets.isEmpty)
+        XCTAssertTrue(sourceFileSpec.algorithm.isEmpty)
+        XCTAssertFalse(sourceFileSpec.experimentalMode)
+        XCTAssertFalse(sourceFileSpec.internalImport)
+        XCTAssertTrue(sourceFileSpec.secrets.isEmpty)
     }
 }
 

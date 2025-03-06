@@ -2,7 +2,7 @@
 import ConfidentialKit
 import Foundation
 
-extension SourceSpecification.Secret {
+extension SourceFileSpec.Secret {
 
     enum StubFactory {
 
@@ -10,7 +10,7 @@ extension SourceSpecification.Secret {
             named name: String = "secret",
             data: Data = .init(),
             nonce: Obfuscation.Nonce = .zero
-        ) -> SourceSpecification.Secret {
+        ) -> SourceFileSpec.Secret {
             makeSecret(
                 accessModifier: .internal,
                 name: name,
@@ -23,7 +23,7 @@ extension SourceSpecification.Secret {
             named name: String = "secret",
             data: Data = .init(),
             nonce: Obfuscation.Nonce = .zero
-        ) -> SourceSpecification.Secret {
+        ) -> SourceFileSpec.Secret {
             makeSecret(
                 accessModifier: .public,
                 name: name,
@@ -35,11 +35,11 @@ extension SourceSpecification.Secret {
         static func makeSecret(
             from secret: Configuration.Secret,
             using encoder: any DataEncoder,
-            accessModifier: (String?) -> SourceSpecification.Secret.AccessModifier = {
+            accessModifier: (String?) -> SourceFileSpec.Secret.AccessModifier = {
                 .init(rawValue: $0 ?? "") ?? .internal
             },
             nonce: Obfuscation.Nonce = .zero
-        ) throws -> SourceSpecification.Secret {
+        ) throws -> SourceFileSpec.Secret {
             makeSecret(
                 accessModifier: accessModifier(secret.accessModifier),
                 name: secret.name,
@@ -49,11 +49,11 @@ extension SourceSpecification.Secret {
         }
 
         private static func makeSecret(
-            accessModifier: SourceSpecification.Secret.AccessModifier,
+            accessModifier: SourceFileSpec.Secret.AccessModifier,
             name: String,
             data: Data,
             nonce: Obfuscation.Nonce
-        ) -> SourceSpecification.Secret {
+        ) -> SourceFileSpec.Secret {
             .init(
                 accessModifier: accessModifier,
                 name: name,

@@ -3,7 +3,7 @@ import SwiftSyntax
 
 struct ImportDeclParser: Parser {
 
-    func parse(_ input: inout SourceSpecification) throws -> [CodeBlockItemSyntax] {
+    func parse(_ input: inout SourceFileSpec) throws -> [CodeBlockItemSyntax] {
         guard
             !input.internalImport || canUseInternalImport(given: input.secrets)
         else {
@@ -27,7 +27,7 @@ struct ImportDeclParser: Parser {
 
 private extension ImportDeclParser {
 
-    func canUseInternalImport(given secrets: SourceSpecification.Secrets) -> Bool {
+    func canUseInternalImport(given secrets: SourceFileSpec.Secrets) -> Bool {
         !secrets
             .flatMap(\.value)
             .map(\.accessModifier)
@@ -40,7 +40,7 @@ private extension ImportDeclParser {
         implementationOnly: Bool
     ) -> [CodeBlockItemSyntax]
     where
-        Namespaces.Element == SourceSpecification.Secret.Namespace
+        Namespaces.Element == SourceFileSpec.Secret.Namespace
     {
         var implementationOnlyModuleNames: Set<String> = []
         var moduleNames: Set<String> = [C.Code.Generation.foundationModuleName]

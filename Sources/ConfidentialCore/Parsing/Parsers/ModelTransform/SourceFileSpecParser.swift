@@ -1,11 +1,11 @@
 import Parsing
 
-package struct SourceSpecificationParser<AlgorithmParser: Parser, SecretsParser: Parser>: Parser
+package struct SourceFileSpecParser<AlgorithmParser: Parser, SecretsParser: Parser>: Parser
 where
     AlgorithmParser.Input == Configuration,
-    AlgorithmParser.Output == SourceSpecification.Algorithm,
+    AlgorithmParser.Output == SourceFileSpec.Algorithm,
     SecretsParser.Input == Configuration,
-    SecretsParser.Output == SourceSpecification.Secrets
+    SecretsParser.Output == SourceFileSpec.Secrets
 { // swiftlint:disable:this opening_brace
 
     private let algorithmParser: AlgorithmParser
@@ -16,8 +16,8 @@ where
         self.secretsParser = secretsParser
     }
 
-    package func parse(_ input: inout Configuration) throws -> SourceSpecification {
-        let spec = SourceSpecification(
+    package func parse(_ input: inout Configuration) throws -> SourceFileSpec {
+        let spec = SourceFileSpec(
             algorithm: try algorithmParser.parse(&input),
             experimentalMode: input.isExperimentalModeEnabled,
             internalImport: input.isInternalImportEnabled,
@@ -34,5 +34,5 @@ where
 
 package extension Parsers.ModelTransform {
 
-    typealias SourceSpecification = SourceSpecificationParser
+    typealias SourceFileSpec = SourceFileSpecParser
 }

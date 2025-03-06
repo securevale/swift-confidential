@@ -4,7 +4,7 @@ import Parsing
 
 struct SecretNamespaceParser: Parser {
 
-    typealias Namespace = SourceSpecification.Secret.Namespace
+    typealias Namespace = SourceFileSpec.Secret.Namespace
 
     private enum NamespaceKind: Equatable {
         case create

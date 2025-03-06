@@ -3,7 +3,7 @@ import SwiftSyntax
 
 struct SecretVariableDeclParser: Parser {
 
-    typealias Secret = SourceSpecification.Secret
+    typealias Secret = SourceFileSpec.Secret
 
     func parse(_ input: inout Secret) throws -> any DeclSyntaxProtocol {
         let valueHexComponents = input.data.hexEncodedStringComponents(options: .numericLiteral)

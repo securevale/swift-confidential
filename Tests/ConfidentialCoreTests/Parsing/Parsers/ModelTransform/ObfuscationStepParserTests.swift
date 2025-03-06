@@ -5,7 +5,7 @@ import Parsing
 
 final class ObfuscationStepParserTests: XCTestCase {
 
-    private typealias Technique = SourceSpecification.ObfuscationStep.Technique
+    private typealias Technique = SourceFileSpec.ObfuscationStep.Technique
     private typealias TechniqueParserSpy = ParserSpy<Substring, Technique>
 
     private let inputStub = "test"[...]

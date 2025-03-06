@@ -3,9 +3,9 @@ import SwiftSyntax
 
 struct NamespaceDeclParser<MembersParser: Parser, DeobfuscateDataFunctionDeclParser: Parser>: Parser
 where
-    MembersParser.Input == ArraySlice<SourceSpecification.Secret>,
+    MembersParser.Input == ArraySlice<SourceFileSpec.Secret>,
     MembersParser.Output == [MemberBlockItemSyntax],
-    DeobfuscateDataFunctionDeclParser.Input == SourceSpecification.Algorithm,
+    DeobfuscateDataFunctionDeclParser.Input == SourceFileSpec.Algorithm,
     DeobfuscateDataFunctionDeclParser.Output == any DeclSyntaxProtocol
 { // swiftlint:disable:this opening_brace
 
@@ -20,12 +20,12 @@ where
         self.deobfuscateDataFunctionDeclParser = deobfuscateDataFunctionDeclParser
     }
 
-    func parse(_ input: inout SourceSpecification) throws -> [CodeBlockItemSyntax] {
+    func parse(_ input: inout SourceFileSpec) throws -> [CodeBlockItemSyntax] {
         let deobfuscateDataFunctionDecl = try deobfuscateDataFunctionDeclParser.parse(&input.algorithm)
         let codeBlocks = try input.secrets.namespaces
             .map { namespace -> CodeBlockItemSyntax in
                 guard var secrets = input.secrets[namespace] else {
-                    fatalError("Unexpected source specification integrity violation")
+                    fatalError("Unexpected source file spec integrity violation")
                 }
 
                 let decl: any DeclSyntaxProtocol
@@ -59,7 +59,7 @@ private extension NamespaceDeclParser {
 
     func enumDecl(
         identifier: String,
-        secrets: inout ArraySlice<SourceSpecification.Secret>,
+        secrets: inout ArraySlice<SourceFileSpec.Secret>,
         deobfuscateDataFunctionDecl: some DeclSyntaxProtocol
     ) throws -> EnumDeclSyntax {
         let accessModifier: TokenSyntax = secrets
@@ -80,7 +80,7 @@ private extension NamespaceDeclParser {
 
     func extensionDecl(
         extendedTypeIdentifier: String,
-        secrets: inout ArraySlice<SourceSpecification.Secret>,
+        secrets: inout ArraySlice<SourceFileSpec.Secret>,
         deobfuscateDataFunctionDecl: some DeclSyntaxProtocol
     ) throws -> ExtensionDeclSyntax {
         .init(
@@ -91,7 +91,7 @@ private extension NamespaceDeclParser {
     }
 
     func memberBlock(
-        from secrets: inout ArraySlice<SourceSpecification.Secret>,
+        from secrets: inout ArraySlice<SourceFileSpec.Secret>,
         with deobfuscateDataFunctionDecl: some DeclSyntaxProtocol
     ) throws -> MemberBlockSyntax {
         var declarations = try membersParser.parse(&secrets)

@@ -9,7 +9,7 @@ package struct SourceObfuscator {
         self.obfuscationStepResolver = obfuscationStepResolver
     }
 
-    package func obfuscate(_ source: inout SourceSpecification) throws {
+    package func obfuscate(_ source: inout SourceFileSpec) throws {
         guard !source.secrets.isEmpty else {
             return
         }
@@ -17,7 +17,7 @@ package struct SourceObfuscator {
         let obfuscateData = obfuscationFunc(given: source.algorithm)
         try source.secrets.namespaces.forEach { namespace in
             guard let secrets = source.secrets[namespace] else {
-                fatalError("Unexpected source specification integrity violation")
+                fatalError("Unexpected source file spec integrity violation")
             }
 
             source.secrets[namespace] = try secrets.map { secret in
@@ -31,7 +31,7 @@ package struct SourceObfuscator {
 
 private extension SourceObfuscator {
 
-    typealias Algorithm = SourceSpecification.Algorithm
+    typealias Algorithm = SourceFileSpec.Algorithm
     typealias Nonce = Obfuscation.Nonce
     typealias ObfuscationFunc = (Data, Nonce) throws -> Data
 

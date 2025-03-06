@@ -5,7 +5,7 @@ import SwiftSyntax
 
 final class SourceFileParserTests: XCTestCase {
 
-    private typealias CodeBlockParserSpy = ParserSpy<SourceSpecification, [CodeBlockItemSyntax]>
+    private typealias CodeBlockParserSpy = ParserSpy<SourceFileSpec, [CodeBlockItemSyntax]>
 
     private let enumNameStub = "Secrets"
 
@@ -31,16 +31,16 @@ final class SourceFileParserTests: XCTestCase {
         super.tearDown()
     }
 
-    func test_givenSourceSpecification_whenParse_thenReturnsExpectedSourceFileTextAndInputIsConsumed() throws {
+    func test_givenSourceFileSpec_whenParse_thenReturnsExpectedSourceFileTextAndInputIsConsumed() throws {
         // given
-        var sourceSpecification = SourceSpecification.StubFactory.makeSpecification(
+        var sourceFileSpec = SourceFileSpec.StubFactory.makeSpec(
             secrets: [
                 .create(identifier: enumNameStub): []
             ]
         )
 
         // when
-        let sourceFileText: SourceFileText = try sut.parse(&sourceSpecification)
+        let sourceFileText: SourceFileText = try sut.parse(&sourceFileSpec)
 
         // then
         XCTAssertEqual(
@@ -51,17 +51,17 @@ final class SourceFileParserTests: XCTestCase {
             """,
             .init(describing: sourceFileText)
         )
-        XCTAssertTrue(sourceSpecification.algorithm.isEmpty)
-        XCTAssertTrue(sourceSpecification.secrets.isEmpty)
+        XCTAssertTrue(sourceFileSpec.algorithm.isEmpty)
+        XCTAssertTrue(sourceFileSpec.secrets.isEmpty)
     }
 
     func test_givenCodeBlockParserFails_whenParse_thenThrowsError() {
         // given
-        var sourceSpecification = SourceSpecification.StubFactory.makeSpecification()
+        var sourceFileSpec = SourceFileSpec.StubFactory.makeSpec()
         codeBlockParserSpy.consumeInput = { _ in throw ErrorDummy() }
 
         // when & then
-        XCTAssertThrowsError(try sut.parse(&sourceSpecification))
+        XCTAssertThrowsError(try sut.parse(&sourceFileSpec))
     }
 }
 

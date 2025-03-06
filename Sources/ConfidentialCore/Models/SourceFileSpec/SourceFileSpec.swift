@@ -1,14 +1,14 @@
 import ConfidentialKit
 import Foundation
 
-package struct SourceSpecification: Equatable {
+package struct SourceFileSpec: Equatable {
     var algorithm: Algorithm
     var experimentalMode: Bool
     var internalImport: Bool
     var secrets: Secrets
 }
 
-package extension SourceSpecification {
+package extension SourceFileSpec {
 
     typealias Algorithm = ArraySlice<ObfuscationStep>
 
@@ -26,7 +26,7 @@ package extension SourceSpecification {
 
     struct Secrets: Hashable {
 
-        package typealias Secret = SourceSpecification.Secret
+        package typealias Secret = SourceFileSpec.Secret
 
         private var secrets: [Secret.Namespace: ArraySlice<Secret>]
 
@@ -45,7 +45,7 @@ package extension SourceSpecification {
     }
 }
 
-package extension SourceSpecification.ObfuscationStep {
+package extension SourceFileSpec.ObfuscationStep {
 
     enum Technique: Hashable {
         case compression(algorithm: Obfuscation.Compression.CompressionAlgorithm)
@@ -54,7 +54,7 @@ package extension SourceSpecification.ObfuscationStep {
     }
 }
 
-extension SourceSpecification.Secret: Hashable {
+extension SourceFileSpec.Secret: Hashable {
 
     package static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.accessModifier == rhs.accessModifier &&
@@ -71,7 +71,7 @@ extension SourceSpecification.Secret: Hashable {
     }
 }
 
-extension SourceSpecification.Secret {
+extension SourceFileSpec.Secret {
 
     enum AccessModifier: String, CaseIterable {
         case `internal`
@@ -93,7 +93,7 @@ extension SourceSpecification.Secret {
     }
 }
 
-extension SourceSpecification.Secrets: Collection {
+extension SourceFileSpec.Secrets: Collection {
 
     package typealias Element = Dictionary<Secret.Namespace, ArraySlice<Secret>>.Element
     package typealias Index = Dictionary<Secret.Namespace, ArraySlice<Secret>>.Index
@@ -115,7 +115,7 @@ extension SourceSpecification.Secrets: Collection {
     }
 }
 
-extension SourceSpecification.Secrets: ExpressibleByDictionaryLiteral {
+extension SourceFileSpec.Secrets: ExpressibleByDictionaryLiteral {
 
     package init(dictionaryLiteral elements: (Secret.Namespace, ArraySlice<Secret>)...) {
         self.init(.init(uniqueKeysWithValues: elements))

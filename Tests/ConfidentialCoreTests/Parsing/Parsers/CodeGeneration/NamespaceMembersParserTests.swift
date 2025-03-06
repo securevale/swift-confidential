@@ -6,7 +6,7 @@ import SwiftSyntax
 
 final class NamespaceMembersParserTests: XCTestCase {
 
-    private typealias Secret = SourceSpecification.Secret
+    private typealias Secret = SourceFileSpec.Secret
     private typealias SecretDeclParserSpy = ParserSpy<Secret, any DeclSyntaxProtocol>
 
     private let secretDeclStub = VariableDeclSyntax.makeSecretVariableDecl(

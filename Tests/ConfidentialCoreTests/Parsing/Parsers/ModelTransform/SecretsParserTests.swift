@@ -6,11 +6,11 @@ import ConfidentialUtils
 
 final class SecretsParserTests: XCTestCase {
 
-    private typealias Namespace = SourceSpecification.Secret.Namespace
-    private typealias AccessModifier = SourceSpecification.Secret.AccessModifier
+    private typealias Namespace = SourceFileSpec.Secret.Namespace
+    private typealias AccessModifier = SourceFileSpec.Secret.AccessModifier
     private typealias NamespaceParserSpy = ParserSpy<Substring, Namespace>
     private typealias AccessModifierSpy = ParserSpy<Substring, AccessModifier>
-    private typealias Secrets = SourceSpecification.Secrets
+    private typealias Secrets = SourceFileSpec.Secrets
 
     private let secretsNamespaceStub: Namespace = .create(identifier: "Secrets")
     private let secretsAccessModifierStub: AccessModifier = .internal
@@ -60,9 +60,9 @@ final class SecretsParserTests: XCTestCase {
         let secrets: Secrets = try sut.parse(&configuration)
 
         // then
-        let expectedSecrets: SourceSpecification.Secrets = [
+        let expectedSecrets: SourceFileSpec.Secrets = [
             secretsNamespaceStub: try secretsStub.map {
-                try SourceSpecification.Secret.StubFactory.makeSecret(
+                try SourceFileSpec.Secret.StubFactory.makeSecret(
                     from: $0,
                     using: secretValueEncoderSpy.underlyingEncoder,
                     nonce: nonceStub

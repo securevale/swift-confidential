@@ -2,7 +2,7 @@ import ConfidentialKit
 
 protocol DataObfuscationStepResolver {
 
-    typealias Technique = SourceSpecification.ObfuscationStep.Technique
+    typealias Technique = SourceFileSpec.ObfuscationStep.Technique
 
     func obfuscationStep(for technique: Technique) -> any DataObfuscationStep
 }

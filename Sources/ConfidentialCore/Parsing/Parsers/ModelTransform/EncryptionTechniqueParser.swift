@@ -3,7 +3,7 @@ import Parsing
 
 struct EncryptionTechniqueParser: Parser {
 
-    typealias Technique = SourceSpecification.ObfuscationStep.Technique
+    typealias Technique = SourceFileSpec.ObfuscationStep.Technique
 
     private typealias Algorithm = Obfuscation.Encryption.SymmetricEncryptionAlgorithm
 
