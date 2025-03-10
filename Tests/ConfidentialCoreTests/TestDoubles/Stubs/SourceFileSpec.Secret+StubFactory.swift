@@ -19,6 +19,19 @@ extension SourceFileSpec.Secret {
             )
         }
 
+        static func makePackageSecret(
+            named name: String = "secret",
+            data: Data = .init(),
+            nonce: Obfuscation.Nonce = .zero
+        ) -> SourceFileSpec.Secret {
+            makeSecret(
+                accessModifier: .package,
+                name: name,
+                data: data,
+                nonce: nonce
+            )
+        }
+
         static func makePublicSecret(
             named name: String = "secret",
             data: Data = .init(),

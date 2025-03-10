@@ -62,11 +62,14 @@ private extension NamespaceDeclParser {
         secrets: inout ArraySlice<SourceFileSpec.Secret>,
         deobfuscateDataFunctionDecl: some DeclSyntaxProtocol
     ) throws -> EnumDeclSyntax {
-        let accessModifier: TokenSyntax = secrets
-            .map(\.accessModifier)
-            .contains(.public)
-        ? .keyword(.public)
-        : .keyword(.internal)
+        let accessModifiers = Set(secrets.map(\.accessModifier))
+        let accessModifier: TokenSyntax = if accessModifiers.contains(.public) {
+            .keyword(.public)
+        } else if accessModifiers.contains(.package) {
+            .keyword(.package)
+        } else {
+            .keyword(.internal)
+        }
 
         return .init(
             leadingTrivia: .newline,

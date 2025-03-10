@@ -16,7 +16,7 @@ extension VariableDeclSyntax {
         dataArgumentExpression: ArrayExprSyntax,
         nonceArgumentExpression: IntegerLiteralExprSyntax
     ) -> Self {
-        assert([.internal, .public].contains(accessModifier))
+        assert([.internal, .package, .public].contains(accessModifier))
         assert([.let, .var].contains(bindingSpecifier))
         return .init(
             attributes: .init {

@@ -136,37 +136,54 @@ final class ImportDeclParserTests: XCTestCase {
         XCTAssertEqual([secrets, secrets], sourceFileSpecs.map(\.secrets))
     }
 
-    func test_givenInternalImportEnabledAndPublicAccessLevel_whenParse_thenThrowsExpectedErrorAndInputLeftIntact() {
+    func test_givenInternalImportEnabledAndNonInternalAccessLevel_whenParse_thenThrowsExpectedErrorAndInputLeftIntact() {
         // given
-        let secrets: SourceFileSpec.Secrets = [
+        let packageSecrets: SourceFileSpec.Secrets = [
+            .create(identifier: "Secrets"): [
+                .StubFactory.makeInternalSecret(named: "secret1")
+            ],
+            .extend(identifier: "Obfuscation.Secret", moduleName: "ConfidentialKit"): [
+                .StubFactory.makeInternalSecret(named: "secret1"),
+                .StubFactory.makePackageSecret(named: "secret2")
+            ]
+        ]
+        let publicSecrets: SourceFileSpec.Secrets = [
             .create(identifier: "Secrets"): [
                 .StubFactory.makeInternalSecret(named: "secret1"),
                 .StubFactory.makePublicSecret(named: "secret2")
             ]
         ]
-        var sourceFileSpec = SourceFileSpec.StubFactory.makeSpec(
-            algorithm: algorithmStub,
-            experimentalMode: false,
-            internalImport: true,
-            secrets: secrets
-        )
-
-        // when & then
-        XCTAssertThrowsError(try SUT().parse(&sourceFileSpec)) { error in
-            XCTAssertEqual(
-                """
-                Cannot use internal import when the secret(s) access \
-                level is public.
-                Either change the access level to internal, or disable \
-                internal import.
-                """,
-                "\(error)"
+        let sourceFileSpecs = [packageSecrets, publicSecrets].map { secrets in
+            (
+                SourceFileSpec.StubFactory.makeSpec(
+                    algorithm: algorithmStub,
+                    experimentalMode: false,
+                    internalImport: true,
+                    secrets: secrets
+                ),
+                secrets
             )
         }
-        XCTAssertEqual(algorithmStub, sourceFileSpec.algorithm)
-        XCTAssertFalse(sourceFileSpec.experimentalMode)
-        XCTAssertTrue(sourceFileSpec.internalImport)
-        XCTAssertEqual(secrets, sourceFileSpec.secrets)
+
+        // when & then
+        for (sourceFileSpec, secrets) in sourceFileSpecs {
+            var sourceFileSpec = sourceFileSpec
+            XCTAssertThrowsError(try SUT().parse(&sourceFileSpec)) { error in
+                XCTAssertEqual(
+                    """
+                    Cannot use internal import when the secret(s) access \
+                    level is package or public.
+                    Either change the access level to internal, or disable \
+                    internal import.
+                    """,
+                    "\(error)"
+                )
+            }
+            XCTAssertEqual(algorithmStub, sourceFileSpec.algorithm)
+            XCTAssertFalse(sourceFileSpec.experimentalMode)
+            XCTAssertTrue(sourceFileSpec.internalImport)
+            XCTAssertEqual(secrets, sourceFileSpec.secrets)
+        }
     }
 }
 

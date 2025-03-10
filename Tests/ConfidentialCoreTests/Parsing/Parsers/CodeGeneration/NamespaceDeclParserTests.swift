@@ -45,15 +45,17 @@ final class NamespaceDeclParserTests: XCTestCase {
     func test_givenSourceFileSpec_whenParse_thenReturnsExpectedNamespaceDeclarationsAndInputIsConsumed() throws {
         // given
         let customModuleNameStub = "Crypto"
-        let namespaceNameStubs = ["A", "B", "C", "D"].map { "Secrets" + $0 }
+        let namespaceNameStubs = ["A", "B", "C", "D", "E"].map { "Secrets" + $0 }
         let internalSecretStub = SourceFileSpec.Secret.StubFactory.makeInternalSecret()
+        let packageSecretStub = SourceFileSpec.Secret.StubFactory.makePackageSecret()
         let publicSecretStub = SourceFileSpec.Secret.StubFactory.makePublicSecret()
         var sourceFileSpec = SourceFileSpec.StubFactory.makeSpec(
             secrets: [
-                .create(identifier: namespaceNameStubs[0]): [publicSecretStub, internalSecretStub],
-                .create(identifier: namespaceNameStubs[1]): [internalSecretStub],
-                .extend(identifier: namespaceNameStubs[2], moduleName: .none): [internalSecretStub, publicSecretStub],
-                .extend(identifier: namespaceNameStubs[3], moduleName: customModuleNameStub): [publicSecretStub]
+                .create(identifier: namespaceNameStubs[0]): [publicSecretStub, packageSecretStub, internalSecretStub],
+                .create(identifier: namespaceNameStubs[1]): [internalSecretStub, packageSecretStub],
+                .create(identifier: namespaceNameStubs[2]): [internalSecretStub],
+                .extend(identifier: namespaceNameStubs[3], moduleName: .none): [internalSecretStub, publicSecretStub],
+                .extend(identifier: namespaceNameStubs[4], moduleName: customModuleNameStub): [publicSecretStub]
             ]
         )
 
@@ -65,58 +67,48 @@ final class NamespaceDeclParserTests: XCTestCase {
             .map { $0.formatted(using: .init(indentationWidth: .spaces(0))) }
             .map { String(describing: $0) }
             .sorted { $0 > $1 }
+        let expectedEnumDeclaration: (String, String) -> String = { [self] accessModifier, identifier in
+            """
+
+
+            \(accessModifier) enum \(identifier) {
+
+                static var \(memberNameStub): \(memberTypeNameStub) = false
+
+                static func \(deobfuscateDataFunctionNameStub)() {
+                }
+            }
+            """
+        }
+        let expectedExtensionDeclaration: (String) -> String = { [self] identifier in
+            """
+
+
+            extension \(identifier) {
+
+                static var \(memberNameStub): \(memberTypeNameStub) = false
+
+                static func \(deobfuscateDataFunctionNameStub)() {
+                }
+            }
+            """
+        }
 
         XCTAssertEqual(
             [
-                """
-
-                
-                public enum \(namespaceNameStubs[0]) {
-
-                    static var \(memberNameStub): \(memberTypeNameStub) = false
-
-                    static func \(deobfuscateDataFunctionNameStub)() {
-                    }
-                }
-                """,
-                """
-
-                
-                internal enum \(namespaceNameStubs[1]) {
-
-                    static var \(memberNameStub): \(memberTypeNameStub) = false
-
-                    static func \(deobfuscateDataFunctionNameStub)() {
-                    }
-                }
-                """,
-                """
-
-                
-                extension \(namespaceNameStubs[2]) {
-
-                    static var \(memberNameStub): \(memberTypeNameStub) = false
-
-                    static func \(deobfuscateDataFunctionNameStub)() {
-                    }
-                }
-                """,
-                """
-
-                
-                extension \(customModuleNameStub).\(namespaceNameStubs[3]) {
-
-                    static var \(memberNameStub): \(memberTypeNameStub) = false
-
-                    static func \(deobfuscateDataFunctionNameStub)() {
-                    }
-                }
-                """
+                expectedEnumDeclaration("public", namespaceNameStubs[0]),
+                expectedEnumDeclaration("package", namespaceNameStubs[1]),
+                expectedEnumDeclaration("internal", namespaceNameStubs[2]),
+                expectedExtensionDeclaration(namespaceNameStubs[3]),
+                expectedExtensionDeclaration("\(customModuleNameStub).\(namespaceNameStubs[4])")
             ],
             namespaceDeclarationsSyntax
         )
-        XCTAssertEqual(4, membersParserSpy.parseRecordedInput.count)
-        XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([publicSecretStub, internalSecretStub]))
+        XCTAssertEqual(5, membersParserSpy.parseRecordedInput.count)
+        XCTAssertTrue(
+            membersParserSpy.parseRecordedInput.contains([publicSecretStub, packageSecretStub, internalSecretStub])
+        )
+        XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([internalSecretStub, packageSecretStub]))
         XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([internalSecretStub]))
         XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([internalSecretStub, publicSecretStub]))
         XCTAssertTrue(membersParserSpy.parseRecordedInput.contains([publicSecretStub]))

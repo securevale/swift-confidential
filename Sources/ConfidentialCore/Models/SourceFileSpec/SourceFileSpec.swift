@@ -75,6 +75,7 @@ extension SourceFileSpec.Secret {
 
     enum AccessModifier: String, CaseIterable {
         case `internal`
+        case `package`
         case `public`
     }
 

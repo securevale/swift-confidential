@@ -10,7 +10,7 @@ struct ImportDeclParser: Parser {
             throw ParsingError.assertionFailed(
                 description: """
                              Cannot use internal import when the secret(s) access \
-                             level is public.
+                             level is package or public.
                              Either change the access level to internal, or disable \
                              internal import.
                              """
@@ -28,10 +28,10 @@ struct ImportDeclParser: Parser {
 private extension ImportDeclParser {
 
     func canUseInternalImport(given secrets: SourceFileSpec.Secrets) -> Bool {
-        !secrets
+        secrets
             .flatMap(\.value)
             .map(\.accessModifier)
-            .contains(.public)
+            .allSatisfy { $0 == .internal }
     }
 
     func makeImportDeclStatements<Namespaces: Collection>(

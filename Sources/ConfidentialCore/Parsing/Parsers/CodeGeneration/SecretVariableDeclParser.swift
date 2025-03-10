@@ -32,6 +32,7 @@ private extension SecretVariableDeclParser {
     func keyword(for accessModifier: Secret.AccessModifier) -> Keyword {
         switch accessModifier {
         case .internal: .internal
+        case .package: .package
         case .public: .public
         }
     }

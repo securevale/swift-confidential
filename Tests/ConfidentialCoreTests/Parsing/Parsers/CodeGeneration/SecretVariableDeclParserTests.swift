@@ -11,48 +11,78 @@ final class SecretVariableDeclParserTests: XCTestCase {
     private let deobfuscateArgumentNameStub = "deobfuscate"
     private let deobfuscateDataFuncNameStub = "deobfuscateData"
 
-    func test_givenInternalSecretWithPropertyWrapperAttribute_whenParse_thenReturnsExpectedSecretDecl() throws {
+    func test_givenSecretWithPropertyWrapperAttribute_whenParse_thenReturnsExpectedSecretDecl() throws {
         // given
-        let secret = makeSecretStub(
-            accessModifier: .internal,
-            attribute: dataProjectionAttribute(isPropertyWrapper: true)
-        )
+        let secrets = [
+            makeSecretStub(
+                accessModifier: .internal,
+                attribute: dataProjectionAttribute(isPropertyWrapper: true)
+            ),
+            makeSecretStub(
+                accessModifier: .package,
+                attribute: dataProjectionAttribute(isPropertyWrapper: true)
+            ),
+            makeSecretStub(
+                accessModifier: .public,
+                attribute: dataProjectionAttribute(isPropertyWrapper: true)
+            )
+        ]
 
         // when
-        let secretDecl = try SecretVariableDeclParser().parse(secret)
+        let secretDecls = try secrets.map { secret in
+            (secret, try SecretVariableDeclParser().parse(secret))
+        }
 
         // then
         let expectedDeclTypeName = TypeInfo(of: Obfuscation.Secret.self).fullyQualifiedName
-        XCTAssertEqual(
-            """
+        secretDecls.forEach { secret, secretDecl in
+            XCTAssertEqual(
+                """
 
-                @\(dataProjectionAttributeNameStub)(\(deobfuscateArgumentNameStub): \(deobfuscateDataFuncNameStub))
-                internal static var \(secret.name): \(expectedDeclTypeName) = .init(data: [0x20, 0x20], nonce: 123456789)
-            """,
-            .init(describing: syntax(from: secretDecl))
-        )
+                    @\(dataProjectionAttributeNameStub)(\(deobfuscateArgumentNameStub): \(deobfuscateDataFuncNameStub))
+                    \(secret.accessModifier) static var \(secret.name): \(expectedDeclTypeName) = \
+                .init(data: [0x20, 0x20], nonce: 123456789)
+                """,
+                .init(describing: syntax(from: secretDecl))
+            )
+        }
     }
 
-    func test_givenPublicSecretWithMacroAttribute_whenParse_thenReturnsExpectedSecretDecl() throws {
+    func test_givenSecretWithMacroAttribute_whenParse_thenReturnsExpectedSecretDecl() throws {
         // given
-        let secret = makeSecretStub(
-            accessModifier: .public,
-            attribute: dataProjectionAttribute(isPropertyWrapper: false)
-        )
+        let secrets = [
+            makeSecretStub(
+                accessModifier: .internal,
+                attribute: dataProjectionAttribute(isPropertyWrapper: false)
+            ),
+            makeSecretStub(
+                accessModifier: .package,
+                attribute: dataProjectionAttribute(isPropertyWrapper: false)
+            ),
+            makeSecretStub(
+                accessModifier: .public,
+                attribute: dataProjectionAttribute(isPropertyWrapper: false)
+            )
+        ]
 
         // when
-        let secretDecl = try SecretVariableDeclParser().parse(secret)
+        let secretDecls = try secrets.map { secret in
+            (secret, try SecretVariableDeclParser().parse(secret))
+        }
 
         // then
         let expectedDeclTypeName = TypeInfo(of: Obfuscation.Secret.self).fullyQualifiedName
-        XCTAssertEqual(
-            """
+        secretDecls.forEach { secret, secretDecl in
+            XCTAssertEqual(
+                """
 
-                @\(dataProjectionAttributeNameStub)(\(deobfuscateArgumentNameStub): \(deobfuscateDataFuncNameStub))
-                public static let \(secret.name): \(expectedDeclTypeName) = .init(data: [0x20, 0x20], nonce: 123456789)
-            """,
-            .init(describing: syntax(from: secretDecl))
-        )
+                    @\(dataProjectionAttributeNameStub)(\(deobfuscateArgumentNameStub): \(deobfuscateDataFuncNameStub))
+                    \(secret.accessModifier) static let \(secret.name): \(expectedDeclTypeName) = \
+                .init(data: [0x20, 0x20], nonce: 123456789)
+                """,
+                .init(describing: syntax(from: secretDecl))
+            )
+        }
     }
 }
 
