@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/securevale/swift-confidential/actions/workflows/ci.yml/badge.svg)](https://github.com/securevale/swift-confidential/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/securevale/swift-confidential/branch/master/graph/badge.svg)](https://codecov.io/gh/securevale/swift-confidential)
-[![Swift](https://img.shields.io/badge/Swift-5.10%20%7C%205.9-red)](https://www.swift.org/download)
+[![Swift](https://img.shields.io/badge/Swift-6.0%20%7C%205.10%20%7C%205.9-red)](https://www.swift.org/download)
 [![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%20visionOS%20%7C%20watchOS%20%7C%20tvOS-red)]()
 
 A highly configurable and performant tool for obfuscating Swift literals embedded in the application code that you should protect from static code analysis, making the app more resistant to reverse engineering.
@@ -13,7 +13,7 @@ Swift Confidential can save you a lot of time, especially if you are developing 
 
 ## Motivation
 
-Pretty much every single app has at least few literals embedded in code, those include: URLs, various client identifiers (e.g. API keys or API tokens), pinning data (e.g. PEM certificates or SPKI digests), Keychain item identifiers, RASP-related literals (e.g. list of suspicious dylibs or list of suspicious file paths for jailbreak detection), and many other context-specific literals. While the listed examples of code literals might seem innocent, not obfuscating them, in many cases, can be considered as giving a handshake to the potential threat actor. This is especially true in security-sensitive apps, such as mobile banking apps, 2FA authenticator apps and password managers. As a responsible software engineer, you should be aware that extracting source code literals from the app package is generally easy enough that even less expirienced malicious users can accomplish this with little effort.
+Pretty much every single app has at least few literals embedded in code, those include: URLs, various client identifiers (e.g. API keys), pinning data (e.g. X.509 certificates or SPKI digests), Keychain item identifiers, RASP-related literals (e.g. list of suspicious dylibs or list of suspicious file paths for jailbreak detection), and many other context-specific literals. While the listed examples of code literals might seem innocent, not obfuscating them, in many cases, can be considered as giving a handshake to the potential threat actor. This is especially true in security-sensitive apps, such as mobile banking apps, 2FA authenticator apps and password managers. As a responsible software engineer, you should be aware that extracting source code literals from the app package is generally easy enough that even less expirienced malicious users can accomplish this with little effort.
 
 <p align="center">
     <img src="Resources/machoview-cstring-literals.png" alt="Mach-O C String Literals">
@@ -25,7 +25,7 @@ This tool aims to provide an elegant and maintainable solution to the above prob
 > [!NOTE]  
 > While Swift Confidential certainly makes the static analysis of the code more challenging, **it is by no means the only code hardening technique that you should employ to protect your app against reverse engineering and tampering**. To achieve a decent level of security, we highly encourage you to supplement this tool's security measures with **runtime application self-protection (RASP) checks**, as well as **Swift code obfuscation**. With that said, no security measure can ever guarantee absolute security. Any motivated and skilled enough attacker will eventually bypass all security protections. For this reason, **always keep your threat models up to date**.
 
-## Getting started
+## Getting Started
 
 Begin by creating a `confidential.yml` YAML configuration file in the root directory of your SwiftPM target's sources or Xcode project (depending on the preferred [installation method](#installation)). At minimum, the configuration must contain obfuscation algorithm and one or more secret definitions.
 
@@ -115,8 +115,8 @@ let package = Package(
     // name, platforms, products, etc.
     dependencies: [
         // other dependencies
-        .package(url: "https://github.com/securevale/swift-confidential.git", .upToNextMinor(from: "0.3.0")),
-        .package(url: "https://github.com/securevale/swift-confidential-plugin.git", .upToNextMinor(from: "0.3.0"))
+        .package(url: "https://github.com/securevale/swift-confidential.git", .upToNextMinor(from: "0.4.0")),
+        .package(url: "https://github.com/securevale/swift-confidential-plugin.git", .upToNextMinor(from: "0.4.0"))
     ],
     targets: [
         .target(
@@ -152,7 +152,22 @@ For convenience, you can also add the `confidential.yml` configuration file to y
 Once set up, build your target and the Confidential plugin will automatically generate a Swift source file with obfuscated secret literals. In addition, the plugin will regenerate the obfuscated secret literals every time it detects a change to `confidential.yml` configuration file or when you clean build your project.
 
 > [!IMPORTANT]  
-> Make sure to use the same version requirements for both `swift-confidential` and `swift-confidential-plugin` packages. See [Versioning](#versioning) section for more information about API stability.
+> Make sure to use the same version requirements for both `swift-confidential` and `swift-confidential-plugin` packages. See [Source Stability](#source-stability) section for details.
+
+### Experimental Mode
+
+Swift Confidential 0.4.0 has experimental support for Swift 6 language mode, by replacing [`@Obfuscated` property wrapper](./Sources/ConfidentialKit/Obfuscation/PropertyWrappers/Obfuscated.swift) with [`@Obfuscated` macro](./Sources/_ConfidentialKit/Obfuscation/Macros/Obfuscated.swift).
+
+To use experimental API for generated Swift code:
+
+1. Explicitly enable Experimental Mode by setting `experimentalMode` configuration option to `true` in your `confidential.yml` configuration file.
+2. In the applicable SwiftPM and/or Xcode targets, change your target dependency from the `ConfidentialKit` to the `_ConfidentialKit` (note the leading underscore) library.
+
+> [!NOTE]  
+> Experimental Mode requires the Swift 6 toolchain (i.e. Xcode 16.0 or later).
+
+> [!CAUTION]  
+> Swift macros have noticeable impact on build time. Also, with the currently available Swift toolchain versions, the `@Obfuscated` macro causes Swift compiler to crash (segmentation fault: 11) when building in release configuration.
 
 ## Configuration
 
@@ -167,7 +182,8 @@ The table below lists the keys to include in the configuration file along with t
 | algorithm                | List of strings     | The list of obfuscation techniques representing individual steps that are composed together to form the obfuscation algorithm. See [Obfuscation techniques](#obfuscation-techniques) section for usage details.<br/><sub>**Required.**</sub> |
 | defaultAccessModifier    | String              | The default access-level modifier applied to each generated secret literal, unless the secret definition states otherwise. The default value is `internal`. See [Access control](#access-control) section for usage details. |
 | defaultNamespace         | String              | The default namespace in which to enclose all the generated secret literals without explicitly assigned namespace. The default value is `extend Obfuscation.Secret from ConfidentialKit`. See [Namespaces](#namespaces) section for usage details. |
-| implementationOnlyImport | Boolean             | Specifies whether to generate implementation-only `ConfidentialKit` import. The default value is `false`. See [Building libraries for distribution](#building-libraries-for-distribution) section for usage details. |
+| experimentalMode         | Boolean             | Specifies whether to use [Experimental Mode](#experimental-mode). The default value is `false`. <br/><sub>**Swift 6 only.**</sub> |
+| internalImport           | Boolean             | Specifies whether to generate internal (previously known as implementation-only) `ConfidentialKit` import. The default value is `false`. See [Building libraries for distribution](#building-libraries-for-distribution) section for usage details. |
 | secrets                  | List of objects     | The list of objects defining the secret literals to be obfuscated. See [Secrets](#secrets) section for usage details.<br/><sub>**Required.**</sub> |
 
 <details>
@@ -204,7 +220,7 @@ This technique involves data compression using the algorithm of your choice. In 
 **Syntax**
 
 ```yaml
-compress using <algorithm>
+compress using <#algorithm#>
 ```
 
 The supported algorithms are shown in the following table:
@@ -222,7 +238,7 @@ This technique involves data encryption using the algorithm of your choice. The 
 **Syntax**
 
 ```yaml
-encrypt using <algorithm>
+encrypt using <#algorithm#>
 ```
 
 The supported algorithms are shown in the following table:
@@ -252,7 +268,7 @@ The configuration file utilizes YAML objects to describe the secret literals, wh
 
 | Key              | Value type                | Description                                                                      |
 |------------------|---------------------------|----------------------------------------------------------------------------------|
-| accessModifier   | String                    | The access-level modifier of the generated Swift property containing obfuscated secret literal's data. The supported values are `internal` and `public`. If not specified, the top-level `defaultAccessModifier` value is used. See [Access control](#access-control) section for usage details. |
+| accessModifier   | String                    | The access-level modifier of the generated Swift property containing obfuscated secret literal's data. The supported values are `internal`, `package` and `public`. If not specified, the top-level `defaultAccessModifier` value is used. See [Access control](#access-control) section for usage details. |
 | name             | String                    | The name of the generated Swift property containing obfuscated secret literal's data. This value is used as-is, without validity checking. Thus, make sure to use a valid property name.<br/><sub>**Required.**</sub> | 
 | namespace        | String                    | The namespace in which to enclose the generated secret literal declaration. See [Namespaces](#namespaces) section for usage details. |
 | value            | String or List of strings | The plain value of the secret literal, which is to be obfuscated. The YAML data types are mapped to `String` and `Array<String>` in Swift, respectively.<br/><sub>**Required.**</sub> |
@@ -322,10 +338,10 @@ In accordance with Swift programming best practices, Swift Confidential encapsul
 **Syntax**
 
 ```yaml
-create <namespace> # creates new namespace
+create <#namespace#> # creates new namespace
 
-extend <namespace> [from <module>] # extends existing namespace, optionally specifying 
-                                   # the module to which this namespace belongs
+extend <#namespace#> [from <#module#>] # extends existing namespace, optionally specifying 
+                                       # the module to which this namespace belongs
 ```
 
 <details>
@@ -373,26 +389,27 @@ You can specify the access-level modifiers for generated Swift code, both global
 **Syntax**
 
 ```yaml
-<access_modifier>
+<#access modifier#>
 ```
 
 The supported access-level modifiers are shown in the following table:
 | Access modifier  | Description                                                                                     |
 |------------------|-------------------------------------------------------------------------------------------------|
 | internal         | The generated declarations are accessible only within their defining module.                    |
+| package          | The generated declarations are accessible only within their defining package.                   |
 | public           | The generated declarations are accessible within their defining module and any module that imports the defining module. |
 
 <details>
 <summary><strong>Example usage</strong></summary>
 
-Supposing that you would like to keep all your secret literals in a single shared Swift module used by other project modules/targets, you can do so with a configuration similar to this one:
+Supposing that you would like to keep all your secret literals in a single shared Swift module used by other modules within the same Swift package, you can do so with a configuration similar to this one:
 
 ```yaml
 algorithm:
   - encrypt using aes-192-gcm
   - shuffle
 defaultNamespace: create Secrets
-defaultAccessModifier: public
+defaultAccessModifier: package
 secrets:
   - name: apiKey
     value: 214C1E2E-A87E-4460-8205-4562FDF54D1C
@@ -406,19 +423,19 @@ secrets:
 > **Warning**  
 > The algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**.
 
-With `defaultAccessModifier` set to `public`, all of the Swift properties generated based on the `secrets` list are accessible outside their defining module:
+With `defaultAccessModifier` set to `package`, all of the Swift properties generated based on the `secrets` list are accessible within their defining package:
 
 ```swift
 import ConfidentialKit
 import Foundation
 
-public enum Secrets {
+package enum Secrets {
 
     @ConfidentialKit.Obfuscated<Swift.String>(deobfuscateData)
-    public static var apiKey: ConfidentialKit.Obfuscation.Secret = .init(data: [/* obfuscated data */], nonce: /* cryptographically secure random number */)
+    package static var apiKey: ConfidentialKit.Obfuscation.Secret = .init(data: [/* obfuscated data */], nonce: /* cryptographically secure random number */)
 
     @ConfidentialKit.Obfuscated<Swift.Array<Swift.String>>(deobfuscateData)
-    public static var trustedSPKIDigests: ConfidentialKit.Obfuscation.Secret = .init(data: [/* obfuscated data */], nonce: /* cryptographically secure random number */)
+    package static var trustedSPKIDigests: ConfidentialKit.Obfuscation.Secret = .init(data: [/* obfuscated data */], nonce: /* cryptographically secure random number */)
 
     // ...
 }
@@ -429,18 +446,20 @@ Additionally, if you need more fine-grained control, you can override `defaultAc
 
 ### Building libraries for distribution
 
-By default, Swift Confidential does not annotate the generated `ConfidentialKit` import with `@_implementationOnly` attribute. However, there are cases, such as when [creating an XCFramework bundle](https://developer.apple.com/documentation/xcode/creating-a-multi-platform-binary-framework-bundle), in which you should use implementation-only imports to avoid exposing internal symbols to your library consumers. To enable implementation-only `ConfidentialKit` import, set `implementationOnlyImport` configuration option to `true`.
+By default, Swift Confidential does not apply the `internal` access-level modifier to the generated `ConfidentialKit` import declaration. However, there are cases, such as when [creating an XCFramework bundle](https://developer.apple.com/documentation/xcode/creating-a-multi-platform-binary-framework-bundle), in which you should use internal (previously known as implementation-only) imports to avoid exposing internal symbols to your library consumers. To enable internal `ConfidentialKit` import, set `internalImport` configuration option to `true`.
 
 > [!IMPORTANT]  
-> The implementation-only imports are applicable for types used only internally, thus it is an error to enable `implementationOnlyImport` if either of the secrets has access level set to `public`. Also note that setting the `implementationOnlyImport` option to `true` does not imply implementation-only imports for extended namespaces.
+> The internal imports are applicable for types used only internally, thus it is an error to enable `internalImport` if either of the secrets has access level set to `package` or `public`. Also note that setting the `internalImport` option to `true` does not imply internal imports for extended namespaces.
 
-### Additional considerations for Confidential Swift Package plugin
+### Additional considerations for Confidential build tool plugin
 
-The [Confidential plugin](https://github.com/securevale/swift-confidential-plugin) expects the configuration file to be named `confidential.yml` or `confidential.yaml`, and it assumes a single configuration file per SwiftPM target/Xcode project. If you use the plugin with SwiftPM target and you define multiple configuration files in different subdirectories, then the plugin will use the first one it finds, and which one is undefined. Whereas, if you apply the plugin to the Xcode project's target, the configuration file is expected to be located in the project's top-level directory (all other configuration files are ignored).
+The [Confidential plugin](https://github.com/securevale/swift-confidential-plugin) expects the configuration file to be named `confidential.yml` or `confidential.yaml`, and it assumes a single configuration file per SwiftPM target / Xcode project. If you use the plugin with SwiftPM target and you define multiple configuration files in different subdirectories, then the plugin will use the first one it finds, and which one is undefined. Whereas, if you apply the plugin to the Xcode project's target, the configuration file is expected to be located in the project's top-level directory (all other configuration files are ignored).
 
-## Versioning
+## Source Stability
 
-This project follows [semantic versioning](https://semver.org/). While still in major version `0`, source-stability is only guaranteed within minor versions (e.g. between `0.3.0` and `0.3.1`). If you want to guard against potentially source-breaking package updates, you can specify your package dependency using source control requirement (e.g. `.upToNextMinor(from: "0.3.0")`).
+This project follows [semantic versioning](https://semver.org/). While still in major version `0`, source-stability is only guaranteed within minor versions (e.g. between `0.4.0` and `0.4.1`). If you want to guard against potentially source-breaking package updates, you can specify your package dependency using source control requirement (e.g. `.upToNextMinor(from: "0.4.0")`).
+
+The public API of the `swift-confidential` package consists of non-underscored declarations that are marked public in the `ConfidentialKit` module. The [experimental API](#experimental-mode) (denoted with a leading underscore) may change in any release, including patch releases.
 
 ## License
 
