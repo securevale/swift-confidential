@@ -4,7 +4,7 @@
 
 set -Eeuo pipefail
 
-source "$(dirname "$0")"/Commons/common.sh
+source "$(dirname "$0")"/commons/common.sh
 
 #################
 #   CONSTANTS   #
@@ -13,7 +13,7 @@ source "$(dirname "$0")"/Commons/common.sh
 readonly SCRIPT_NAME=$(basename -s ".sh" "$0")
 readonly SCRIPT_FULL_NAME=$(basename "$0")
 readonly SCRIPT_ABS_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
-readonly SCRIPT_TEMPLATES_ABS_PATH="$SCRIPT_ABS_PATH/Templates"
+readonly SCRIPT_TEMPLATES_ABS_PATH="$SCRIPT_ABS_PATH/templates"
 
 readonly OPTION_HELP_SHORT="-h"
 readonly OPTION_HELP="--help"

@@ -4,7 +4,7 @@
 
 set -Eeuo pipefail
 
-source "$(dirname "$0")"/Commons/common.sh
+source "$(dirname "$0")"/commons/common.sh
 
 #################
 #   CONSTANTS   #

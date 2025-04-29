@@ -16,7 +16,7 @@ Swift Confidential can save you a lot of time, especially if you are developing 
 Pretty much every single app has at least few literals embedded in code, those include: URLs, various client identifiers (e.g. API keys), pinning data (e.g. X.509 certificates or SPKI digests), Keychain item identifiers, RASP-related literals (e.g. list of suspicious dylibs or list of suspicious file paths for jailbreak detection), and many other context-specific literals. While the listed examples of code literals might seem innocent, not obfuscating them, in many cases, can be considered as giving a handshake to the potential threat actor. This is especially true in security-sensitive apps, such as mobile banking apps, 2FA authenticator apps and password managers. As a responsible software engineer, you should be aware that extracting source code literals from the app package is generally easy enough that even less expirienced malicious users can accomplish this with little effort.
 
 <p align="center">
-    <img src="Resources/machoview-cstring-literals.png" alt="Mach-O C String Literals">
+    <img src="resources/machoview-cstring-literals.png" alt="Mach-O C String Literals">
     <em>A sneak peek at the __TEXT.__cstring section in a sample Mach-O file reveals a lot of interesting information about the app.</em>
 </p>
 
