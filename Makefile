@@ -13,7 +13,7 @@ release-artifacts: ## Generate release artifacts
 	@./scripts/generate_release_artifacts.sh $(version)
 
 release: release-artifacts ## Generate release artifacts and tag the release with given version
-	@git tag $(version)
+	@git tag -s $(version) -m "Release $(version)"
 	@git push origin $(version)
 
 tests: ## Run package tests
