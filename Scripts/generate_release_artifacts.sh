@@ -163,10 +163,17 @@ function swift_build_cmd() {
 }
 
 function build_product() {
-    eval "$(swift_build_cmd "$1" "$2") > /dev/null"
-    local -r bin_path=$(eval "$(swift_build_cmd "$1" "$2") --show-bin-path")
+    local -r product="$1"
+    local -r arch="$2"
+    local -r build_logs_path="$TMP_DIR_PATH/build_${product}-${arch}.logs"
 
-    echo "$bin_path/$1"
+    if ! eval "$(swift_build_cmd "$product" "$arch") &> $build_logs_path"
+    then
+        cat "$build_logs_path" >&2
+        exit 1
+    fi
+
+    echo "$(eval "$(swift_build_cmd "$product" "$arch") --show-bin-path")/$product"
 }
 
 function build_universal_binary() {
@@ -175,9 +182,12 @@ function build_universal_binary() {
     local -r product="$1"
 
     echo_progress "Building ${BOLD}$product${NORMAL} product for $SWIFT_BUILD_ARCH_X86 architecture"
-    local -r x86_bin_path=$(build_product "$product" "$SWIFT_BUILD_ARCH_X86")
+    local x86_bin_path
+    x86_bin_path=$(build_product "$product" "$SWIFT_BUILD_ARCH_X86")
+
     echo_progress "Building ${BOLD}$product${NORMAL} product for $SWIFT_BUILD_ARCH_ARM architecture"
-    local -r arm_bin_path=$(build_product "$product" "$SWIFT_BUILD_ARCH_ARM")
+    local arm_bin_path
+    arm_bin_path=$(build_product "$product" "$SWIFT_BUILD_ARCH_ARM")
 
     echo_progress "Creating fat binary for $SWIFT_BUILD_ARCH_X86+$SWIFT_BUILD_ARCH_ARM"
     mkdir -p "$UNIVERSAL_BIN_DIR_ABS_PATH"
