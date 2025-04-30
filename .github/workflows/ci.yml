@@ -3,7 +3,8 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - 'master'
+      - 'release/**'
     paths-ignore:
       - '.gitignore'
       - '.spi.yml'
@@ -79,7 +80,7 @@ jobs:
 
       - name: Upload Code Coverage Report
         if: ${{ matrix.upload_coverage }}
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./.coverage/
