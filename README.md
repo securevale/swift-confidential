@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/securevale/swift-confidential/actions/workflows/ci.yml/badge.svg)](https://github.com/securevale/swift-confidential/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/securevale/swift-confidential/branch/master/graph/badge.svg)](https://codecov.io/gh/securevale/swift-confidential)
-[![Swift](https://img.shields.io/badge/Swift-6.0%20%7C%205.10%20%7C%205.9-red)](https://www.swift.org/download)
+[![Swift](https://img.shields.io/badge/Swift-6.1%20%7C%206.0%20%7C%205.10%20%7C%205.9-red)](https://www.swift.org/download)
 [![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%20visionOS%20%7C%20watchOS%20%7C%20tvOS-red)]()
 
 A highly configurable and performant tool for obfuscating Swift literals embedded in the application code that you should protect from static code analysis, making the app more resistant to reverse engineering.
@@ -167,7 +167,7 @@ To use experimental API for generated Swift code:
 > Experimental Mode requires the Swift 6 toolchain (i.e. Xcode 16.0 or later).
 
 > [!CAUTION]  
-> Swift macros have noticeable impact on build time. Also, with the currently available Swift toolchain versions, the `@Obfuscated` macro causes Swift compiler to crash (segmentation fault: 11) when building in release configuration.
+> Swift macros have noticeable impact on build time. Also, with the currently available Swift toolchain versions, [the `@Obfuscated` macro causes Swift compiler to crash (segmentation fault: 11) when building in release configuration](https://github.com/swiftlang/swift/issues/80062).
 
 ## Configuration
 
