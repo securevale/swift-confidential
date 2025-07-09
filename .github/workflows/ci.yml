@@ -31,9 +31,12 @@ concurrency:
 jobs:
   lint:
     name: Lint
-    runs-on: macos-13
+    runs-on: macos-15
 
     steps:
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -63,6 +66,12 @@ jobs:
             upload_coverage: false
           - macos: 14
             xcode: '15.4'  # Swift 5.10
+            upload_coverage: false
+          - macos: 15
+            xcode: '16.2'  # Swift 6.0
+            upload_coverage: false
+          - macos: 15
+            xcode: '16.4'  # Swift 6.1
             upload_coverage: true
 
     steps:
