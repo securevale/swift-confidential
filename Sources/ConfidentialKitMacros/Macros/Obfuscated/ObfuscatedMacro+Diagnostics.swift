@@ -7,7 +7,7 @@ extension ObfuscatedMacro {
 
         private typealias DiagnosticMessage = MacroExpansionDiagnosticMessage<Self>
 
-        static func macroCanOnlyBeAttachedToVariableDeclaration(node: some SyntaxProtocol) -> some Error {
+        static func macroCanOnlyBeAttachedToVariableDeclaration(node: some SyntaxProtocol) -> DiagnosticsError {
             DiagnosticsError(
                 node: node,
                 message: DiagnosticMessage(
@@ -20,7 +20,7 @@ extension ObfuscatedMacro {
         static func macroDoesNotSupportClosureExpressions(
             node: some SyntaxProtocol,
             highlight: some SyntaxProtocol
-        ) -> some Error {
+        ) -> DiagnosticsError {
             DiagnosticsError(
                 node: node,
                 message: DiagnosticMessage(
@@ -33,7 +33,7 @@ extension ObfuscatedMacro {
             )
         }
 
-        static func macroMissingArgumentForParameter(at position: Int, node: some SyntaxProtocol) -> some Error {
+        static func macroMissingArgumentForParameter(at position: Int, node: some SyntaxProtocol) -> DiagnosticsError {
             DiagnosticsError(
                 node: node,
                 message: DiagnosticMessage(
@@ -43,7 +43,7 @@ extension ObfuscatedMacro {
             )
         }
 
-        static func macroMissingGenericParameter(named name: String, node: some SyntaxProtocol) -> some Error {
+        static func macroMissingGenericParameter(named name: String, node: some SyntaxProtocol) -> DiagnosticsError {
             DiagnosticsError(
                 node: node,
                 message: DiagnosticMessage(
@@ -53,7 +53,7 @@ extension ObfuscatedMacro {
             )
         }
 
-        static func secretVariableDeclarationMustHaveValidIdentifier(node: some SyntaxProtocol) -> some Error {
+        static func secretVariableDeclarationMustHaveValidIdentifier(node: some SyntaxProtocol) -> DiagnosticsError {
             DiagnosticsError(
                 node: node,
                 message: DiagnosticMessage(
