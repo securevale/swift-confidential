@@ -53,6 +53,25 @@ extension ObfuscatedMacro {
             )
         }
 
+        #if canImport(SwiftSyntax601)
+        static func macroExpectsTypeGenericParameter(
+            named name: String,
+            node: some SyntaxProtocol,
+            highlight: some SyntaxProtocol
+        ) -> DiagnosticsError {
+            DiagnosticsError(
+                node: node,
+                message: DiagnosticMessage(
+                    message: """
+                    '\(name)' is a type generic parameter
+                    """,
+                    severity: .error
+                ),
+                highlights: [Syntax(highlight)]
+            )
+        }
+        #endif
+
         static func secretVariableDeclarationMustHaveValidIdentifier(node: some SyntaxProtocol) -> DiagnosticsError {
             DiagnosticsError(
                 node: node,

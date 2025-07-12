@@ -24,7 +24,7 @@ var package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-syntax.git", "509.1.1"..<"601.0.0")
+        .package(url: "https://github.com/swiftlang/swift-syntax.git", "509.1.1"..<"602.0.0")
     ],
     targets: [
         // Client Library

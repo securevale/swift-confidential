@@ -75,6 +75,15 @@ private extension ObfuscatedMacro {
                 node: node
             )
         }
+        #if canImport(SwiftSyntax601)
+        guard case let .type(type) = type else {
+            throw DiagnosticErrors.macroExpectsTypeGenericParameter(
+                named: C.genericParameterName,
+                node: node,
+                highlight: type
+            )
+        }
+        #endif
 
         return type.trimmed
     }
