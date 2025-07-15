@@ -13,7 +13,7 @@ Swift Confidential can save you a lot of time, especially if you are developing 
 
 ## Motivation
 
-Pretty much every single app has at least few literals embedded in code, those include: URLs, various client identifiers (e.g. API keys), pinning data (e.g. X.509 certificates or SPKI digests), Keychain item identifiers, RASP-related literals (e.g. list of suspicious dylibs or list of suspicious file paths for jailbreak detection), and many other context-specific literals. While the listed examples of code literals might seem innocent, not obfuscating them, in many cases, can be considered as giving a handshake to the potential threat actor. This is especially true in security-sensitive apps, such as mobile banking apps, 2FA authenticator apps and password managers. As a responsible software engineer, you should be aware that extracting source code literals from the app package is generally easy enough that even less expirienced malicious users can accomplish this with little effort.
+Pretty much every single app has at least few literals embedded in code, those include: URLs, various client identifiers (e.g. API keys), pinning data (e.g. X.509 certificates or SPKI digests), Keychain item identifiers, RASP-related literals (e.g. list of suspicious dylibs or list of suspicious file paths for jailbreak detection), and many other context-specific literals. While the listed examples of code literals might seem innocent, not obfuscating them, in many cases, can be considered as giving a handshake to the potential threat actor. This is especially true in security-sensitive apps, such as mobile banking apps, 2FA authenticator apps and password managers. As a responsible software engineer, you should be aware that extracting source code literals from the app package is generally easy enough that even less experienced malicious users can accomplish this with little effort.
 
 <p align="center">
     <img src="resources/machoview-cstring-literals.png" alt="Mach-O C String Literals">
@@ -156,7 +156,7 @@ Once set up, build your target and the Confidential plugin will automatically ge
 
 ### Experimental Mode
 
-Swift Confidential 0.4.0 has experimental support for Swift 6 language mode, by replacing [`@Obfuscated` property wrapper](./Sources/ConfidentialKit/Obfuscation/PropertyWrappers/Obfuscated.swift) with [`@Obfuscated` macro](./Sources/_ConfidentialKit/Obfuscation/Macros/Obfuscated.swift).
+Swift Confidential 0.4.0 introduces experimental support for Swift 6 language mode by replacing the [`@Obfuscated` property wrapper](./Sources/ConfidentialKit/Obfuscation/PropertyWrappers/Obfuscated.swift) with an [`@Obfuscated` macro](./Sources/_ConfidentialKit/Obfuscation/Macros/Obfuscated.swift).
 
 To use experimental API for generated Swift code:
 
@@ -167,7 +167,7 @@ To use experimental API for generated Swift code:
 > Experimental Mode requires the Swift 6 toolchain (i.e. Xcode 16.0 or later).
 
 > [!CAUTION]  
-> Swift macros have noticeable impact on build time. Also, with the currently available Swift toolchain versions, [the `@Obfuscated` macro causes Swift compiler to crash (segmentation fault: 11) when building in release configuration](https://github.com/swiftlang/swift/issues/80062).
+> Swift macros have a noticeable impact on build time, especially on CI/CD machines with limited CPU and memory. To address this issue, starting with Xcode 16.4, you can consider enabling [SwiftSyntax prebuilts for macros](https://forums.swift.org/t/preview-swift-syntax-prebuilts-for-macros/80202).
 
 ## Configuration
 
