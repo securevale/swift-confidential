@@ -3,19 +3,24 @@ import XCTest
 
 final class FixedWidthInteger_SecureRandomTests: XCTestCase {
 
-    func test_givenFixedWidthIntegerTypes_whenSecureRandom_thenReturnsNonZeroValues() throws {
+    func test_givenFixedWidthIntegerTypes_whenSecureRandom_thenConsecutiveValuesAreNotEqual() throws {
         // given
-        let types: [Any] = [
+        let types: [any FixedWidthInteger.Type] = [
             UInt8.self, UInt16.self, UInt32.self, UInt64.self,
             Int8.self, Int16.self, Int32.self, Int64.self
         ]
 
         // when
-        let values = try types.map { try ($0 as! any FixedWidthInteger.Type).secureRandom() }
+        let values: [(AnyHashable, AnyHashable)] = try types.map {
+            (
+                AnyHashable(try $0.secureRandom()),
+                AnyHashable(try $0.secureRandom())
+            )
+        }
 
         // then
         values.forEach {
-            XCTAssertNotEqual(.zero, $0.nonzeroBitCount)
+            XCTAssertNotEqual($0.0, $0.1)
         }
     }
 

@@ -7,6 +7,20 @@ final class SourceObfuscator_ObfuscationStepResolverTests: XCTestCase {
 
     private typealias Technique = SourceFileSpec.ObfuscationStep.Technique
 
+    private typealias SUT = SourceObfuscator.ObfuscationStepResolver
+
+    private var sut: SUT!
+
+    override func setUp() {
+        super.setUp()
+        sut = .init()
+    }
+
+    override func tearDown() {
+        sut = nil
+        super.tearDown()
+    }
+
     func test_givenObfuscationStepResolver_whenObfuscationStepForTechnique_thenReturnsExpectedObfuscationStepInstance() {
         // given
         let compressionTechnique = Technique.compression(algorithm: .lz4)
@@ -17,12 +31,11 @@ final class SourceObfuscator_ObfuscationStepResolverTests: XCTestCase {
             encryptionTechnique,
             randomizationTechnique
         ]
-        let resolver = SourceObfuscator.ObfuscationStepResolver()
 
         // when
         let obfuscationSteps: [Technique: any DataObfuscationStep] = .init(
             uniqueKeysWithValues: techniques.map {
-                let step = resolver.obfuscationStep(for: $0)
+                let step = sut.obfuscationStep(for: $0)
                 return ($0, step)
             }
         )

@@ -9,6 +9,8 @@ final class NamespaceMembersParserTests: XCTestCase {
     private typealias Secret = SourceFileSpec.Secret
     private typealias SecretDeclParserSpy = ParserSpy<Secret, any DeclSyntaxProtocol>
 
+    private typealias SUT = NamespaceMembersParser<SecretDeclParserSpy>
+
     private let secretDeclStub = VariableDeclSyntax.makeSecretVariableDecl(
         dataProjectionAttribute: AttributeSyntax(
             attributeName: IdentifierTypeSyntax(name: .identifier("Test"))
@@ -34,7 +36,7 @@ final class NamespaceMembersParserTests: XCTestCase {
 
     private var secretDeclParserSpy: SecretDeclParserSpy!
 
-    private var sut: NamespaceMembersParser<SecretDeclParserSpy>!
+    private var sut: SUT!
 
     override func setUp() {
         super.setUp()

@@ -5,7 +5,9 @@ final class SecretAccessModifierParserTests: XCTestCase {
 
     private typealias AccessModifier = SourceFileSpec.Secret.AccessModifier
 
-    private var sut: SecretAccessModifierParser!
+    private typealias SUT = SecretAccessModifierParser
+
+    private var sut: SUT!
 
     override func setUp() {
         super.setUp()

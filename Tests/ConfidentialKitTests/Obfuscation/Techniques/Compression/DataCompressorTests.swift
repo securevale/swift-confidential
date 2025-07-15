@@ -12,7 +12,8 @@ final class DataCompressorTests: XCTestCase {
         // when
         let decompressedData = try compressedData
             .map { params, data in
-                try SUT(algorithm: params.algorithm).deobfuscate(data, nonce: params.nonce)
+                let sut = SUT(algorithm: params.algorithm)
+                return try sut.deobfuscate(data, nonce: params.nonce)
             }
 
         // then

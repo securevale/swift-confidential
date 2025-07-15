@@ -13,8 +13,8 @@ final class DataCompressor_DataObfuscationStepTests: XCTestCase {
 
         // when & then
         try compressedDataStub.forEach { params, expectedData in
-            let compressedData = try SUT(algorithm: params.algorithm)
-                .obfuscate(plainData, nonce: params.nonce)
+            let sut = SUT(algorithm: params.algorithm)
+            let compressedData = try sut.obfuscate(plainData, nonce: params.nonce)
             XCTAssertEqual(expectedData, compressedData)
         }
     }
@@ -23,17 +23,17 @@ final class DataCompressor_DataObfuscationStepTests: XCTestCase {
         // given
         let plainData = plainData
         let compressedData = try compressedDataStub.map { params, _ in
-            (
+            let sut = SUT(algorithm: params.algorithm)
+            return (
                 params,
-                try SUT(algorithm: params.algorithm)
-                    .obfuscate(plainData, nonce: params.nonce)
+                try sut.obfuscate(plainData, nonce: params.nonce)
             )
         }
 
         // when
         let decompressedData = try compressedData.map { params, data in
-            try SUT(algorithm: params.algorithm)
-                .deobfuscate(data, nonce: params.nonce)
+            let sut = SUT(algorithm: params.algorithm)
+            return try sut.deobfuscate(data, nonce: params.nonce)
         }
 
         // then

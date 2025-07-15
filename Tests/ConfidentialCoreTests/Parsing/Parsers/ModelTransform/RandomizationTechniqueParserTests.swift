@@ -3,7 +3,9 @@ import XCTest
 
 final class RandomizationTechniqueParserTests: XCTestCase {
 
-    private var sut: RandomizationTechniqueParser!
+    private typealias SUT = RandomizationTechniqueParser
+
+    private var sut: SUT!
 
     override func setUp() {
         super.setUp()

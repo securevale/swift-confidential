@@ -8,7 +8,9 @@ final class CompressionTechniqueParserTests: XCTestCase {
     private typealias Algorithm = Obfuscation.Compression.CompressionAlgorithm
     private typealias Technique = CompressionTechniqueParser.Technique
 
-    private var sut: CompressionTechniqueParser!
+    private typealias SUT = CompressionTechniqueParser
+
+    private var sut: SUT!
 
     override func setUp() {
         super.setUp()

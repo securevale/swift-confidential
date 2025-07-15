@@ -8,14 +8,16 @@ final class ObfuscationStepParserTests: XCTestCase {
     private typealias Technique = SourceFileSpec.ObfuscationStep.Technique
     private typealias TechniqueParserSpy = ParserSpy<Substring, Technique>
 
+    private typealias SUT = ObfuscationStepParser<
+        OneOfBuilder<Substring, Technique>.OneOf2<TechniqueParserSpy, TechniqueParserSpy>
+    >
+
     private let inputStub = "test"[...]
 
     private var compressionTechniqueParserSpy: TechniqueParserSpy!
     private var randomizationTechniqueParserSpy: TechniqueParserSpy!
 
-    private var sut: ObfuscationStepParser<
-        OneOfBuilder<Substring, Technique>.OneOf2<TechniqueParserSpy, TechniqueParserSpy>
-    >!
+    private var sut: SUT!
 
     override func setUp() {
         super.setUp()

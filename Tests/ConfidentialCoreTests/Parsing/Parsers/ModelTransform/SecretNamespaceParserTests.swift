@@ -5,10 +5,12 @@ final class SecretNamespaceParserTests: XCTestCase {
 
     private typealias Namespace = SecretNamespaceParser.Namespace
 
+    private typealias SUT = SecretNamespaceParser
+
     private let secretsNamespaceStub = "Secrets"
     private let secretModuleStub = "SecretModule"
 
-    private var sut: SecretNamespaceParser!
+    private var sut: SUT!
 
     override func setUp() {
         super.setUp()

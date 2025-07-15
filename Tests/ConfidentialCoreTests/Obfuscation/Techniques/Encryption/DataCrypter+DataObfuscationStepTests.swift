@@ -15,8 +15,8 @@ final class DataCrypter_DataObfuscationStepTests: XCTestCase {
 
         // when
         let encryptedData = try encryptionParamsStub.map { params in
-            try SUT(algorithm: params.algorithm)
-                .obfuscate(plainData, nonce: params.nonce)
+            let sut = SUT(algorithm: params.algorithm)
+            return try sut.obfuscate(plainData, nonce: params.nonce)
         }
 
         // then
@@ -32,17 +32,17 @@ final class DataCrypter_DataObfuscationStepTests: XCTestCase {
             [0xdf, 0xc8, 0x72, 0x04, 0x6b, 0xbf, 0xe5, 0x54, 0x33, 0x0e, 0xc2, 0x4f]
         )
         let encryptedData = try encryptionParamsStub.map { params in
-            (
+            let sut = SUT(algorithm: params.algorithm)
+            return (
                 params,
-                try SUT(algorithm: params.algorithm)
-                    .obfuscate(plainData, nonce: params.nonce)
+                try sut.obfuscate(plainData, nonce: params.nonce)
             )
         }
 
         // when
         let decryptedData = try encryptedData.map { params, data in
-            try SUT(algorithm: params.algorithm)
-                .deobfuscate(data, nonce: params.nonce)
+            let sut = SUT(algorithm: params.algorithm)
+            return try sut.deobfuscate(data, nonce: params.nonce)
         }
 
         // then

@@ -5,10 +5,12 @@ final class SourceObfuscatorTests: XCTestCase {
 
     private typealias Technique = SourceFileSpec.ObfuscationStep.Technique
 
+    private typealias SUT = SourceObfuscator
+
     private var obfuscationStepSpy: ObfuscationStepSpy!
     private var obfuscationStepResolverSpy: ObfuscationStepResolverSpy!
 
-    private var sut: SourceObfuscator!
+    private var sut: SUT!
 
     override func setUp() {
         super.setUp()

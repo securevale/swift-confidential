@@ -12,7 +12,7 @@ extension SingleValue {
         }
 
         static func makeSecretMessageData() -> Data {
-            makeSecretMessage().data(using: .utf8)!
+            .init(makeSecretMessage().utf8)
         }
     }
 }

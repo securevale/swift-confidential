@@ -17,8 +17,8 @@ final class DataCrypterTests: XCTestCase {
         // when
         let decryptedData = try encryptedData
             .map { components, data in
-                try SUT(algorithm: components.algorithm)
-                    .deobfuscate(data, nonce: components.nonce)
+                let sut = SUT(algorithm: components.algorithm)
+                return try sut.deobfuscate(data, nonce: components.nonce)
             }
 
         // then
@@ -108,9 +108,9 @@ private extension DataCrypterTests {
         var encryptedData: Data
         switch components.algorithm {
         case .aes128GCM, .aes192GCM, .aes256GCM:
-            encryptedData = try! AES.GCM.seal(plainData, using: key, nonce: .init()).combined!
+            encryptedData = try! AES.GCM.seal(plainData, using: key).combined!
         case .chaChaPoly:
-            encryptedData = try! ChaChaPoly.seal(plainData, using: key, nonce: .init()).combined
+            encryptedData = try! ChaChaPoly.seal(plainData, using: key).combined
         }
 
         if components.isMagicBitSet {

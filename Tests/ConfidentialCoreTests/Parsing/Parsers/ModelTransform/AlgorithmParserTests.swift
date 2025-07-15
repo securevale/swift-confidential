@@ -5,12 +5,14 @@ final class AlgorithmParserTests: XCTestCase {
 
     private typealias ObfuscationStepParserSpy = ParserSpy<Substring, SourceFileSpec.ObfuscationStep>
 
+    private typealias SUT = AlgorithmParser<ObfuscationStepParserSpy>
+
     private let obfuscationStepStub = "test"
     private lazy var algorithmStub = (0..<2).map { _ in obfuscationStepStub }[...]
 
     private var obfuscationStepParserSpy: ObfuscationStepParserSpy!
 
-    private var sut: AlgorithmParser<ObfuscationStepParserSpy>!
+    private var sut: SUT!
 
     override func setUp() {
         super.setUp()

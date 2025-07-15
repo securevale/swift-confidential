@@ -7,11 +7,13 @@ final class SourceFileParserTests: XCTestCase {
 
     private typealias CodeBlockParserSpy = ParserSpy<SourceFileSpec, [CodeBlockItemSyntax]>
 
+    private typealias SUT = SourceFileParser<CodeBlockParserSpy>
+
     private let enumNameStub = "Secrets"
 
     private var codeBlockParserSpy: CodeBlockParserSpy!
 
-    private var sut: SourceFileParser<CodeBlockParserSpy>!
+    private var sut: SUT!
 
     override func setUp() {
         super.setUp()

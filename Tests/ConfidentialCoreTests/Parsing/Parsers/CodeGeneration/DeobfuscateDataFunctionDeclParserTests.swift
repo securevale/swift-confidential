@@ -10,6 +10,8 @@ final class DeobfuscateDataFunctionDeclParserTests: XCTestCase {
     private typealias EncryptionAlgorithm = Obfuscation.Encryption.SymmetricEncryptionAlgorithm
     private typealias Algorithm = SourceFileSpec.Algorithm
 
+    private typealias SUT = DeobfuscateDataFunctionDeclParser
+
     private let compressionAlgorithmStub: CompressionAlgorithm = .lzfse
     private let encryptionAlgorithmStub: EncryptionAlgorithm = .aes128GCM
     private lazy var algorithmStub: Algorithm = [
@@ -32,10 +34,10 @@ final class DeobfuscateDataFunctionDeclParserTests: XCTestCase {
     func test_givenAlgorithmAndNestingLevelSetToOne_whenParse_thenReturnsExpectedFunctionDeclAndAlgorithmIsEmpty() throws {
         // given
         var algorithm = algorithmStub
-        let parser = DeobfuscateDataFunctionDeclParser(functionNestingLevel: 1)
+        let sut = SUT(functionNestingLevel: 1)
 
         // when
-        let functionDecl = try parser.parse(&algorithm)
+        let functionDecl = try sut.parse(&algorithm)
 
         // then
         let functionDeclSyntax = functionDecl
@@ -71,10 +73,10 @@ final class DeobfuscateDataFunctionDeclParserTests: XCTestCase {
     func test_givenEmptyAlgorithm_whenParse_thenThrowsExpectedError() {
         // given
         var algorithm = Algorithm()
-        let parser = DeobfuscateDataFunctionDeclParser(functionNestingLevel: .zero)
+        let sut = SUT(functionNestingLevel: .zero)
 
         // when & then
-        XCTAssertThrowsError(try parser.parse(&algorithm)) { error in
+        XCTAssertThrowsError(try sut.parse(&algorithm)) { error in
             XCTAssertEqual(
                 "Obfuscation algorithm must consist of at least one obfuscation step.",
                 "\(error)"

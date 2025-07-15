@@ -8,7 +8,9 @@ final class EncryptionTechniqueParserTests: XCTestCase {
     private typealias Algorithm = Obfuscation.Encryption.SymmetricEncryptionAlgorithm
     private typealias Technique = EncryptionTechniqueParser.Technique
 
-    private var sut: EncryptionTechniqueParser!
+    private typealias SUT = EncryptionTechniqueParser
+
+    private var sut: SUT!
 
     override func setUp() {
         super.setUp()

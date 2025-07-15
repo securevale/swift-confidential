@@ -14,6 +14,8 @@ final class NamespaceDeclParserTests: XCTestCase {
         any DeclSyntaxProtocol
     >
 
+    private typealias SUT = NamespaceDeclParser<MembersParserSpy, DeobfuscateDataFunctionDeclParserSpy>
+
     private let memberNameStub = "tested"
     private let memberTypeNameStub = "Bool"
     private let deobfuscateDataFunctionNameStub = "test"
@@ -21,7 +23,7 @@ final class NamespaceDeclParserTests: XCTestCase {
     private var membersParserSpy: MembersParserSpy!
     private var deobfuscateDataFunctionDeclParserSpy: DeobfuscateDataFunctionDeclParserSpy!
 
-    private var sut: NamespaceDeclParser<MembersParserSpy, DeobfuscateDataFunctionDeclParserSpy>!
+    private var sut: SUT!
 
     override func setUp() {
         super.setUp()

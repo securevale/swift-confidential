@@ -7,9 +7,23 @@ import SwiftSyntax
 
 final class SecretVariableDeclParserTests: XCTestCase {
 
+    private typealias SUT = SecretVariableDeclParser
+
     private let dataProjectionAttributeNameStub = "ConfidentialKit.Obfuscated<Swift.String>"
     private let deobfuscateArgumentNameStub = "deobfuscate"
     private let deobfuscateDataFuncNameStub = "deobfuscateData"
+
+    private var sut: SUT!
+
+    override func setUp() {
+        super.setUp()
+        sut = .init()
+    }
+
+    override func tearDown() {
+        sut = nil
+        super.tearDown()
+    }
 
     func test_givenSecretWithPropertyWrapperAttribute_whenParse_thenReturnsExpectedSecretDecl() throws {
         // given
@@ -30,7 +44,7 @@ final class SecretVariableDeclParserTests: XCTestCase {
 
         // when
         let secretDecls = try secrets.map { secret in
-            (secret, try SecretVariableDeclParser().parse(secret))
+            (secret, try XCTUnwrap(sut.parse(secret)))
         }
 
         // then
@@ -67,7 +81,7 @@ final class SecretVariableDeclParserTests: XCTestCase {
 
         // when
         let secretDecls = try secrets.map { secret in
-            (secret, try SecretVariableDeclParser().parse(secret))
+            (secret, try XCTUnwrap(sut.parse(secret)))
         }
 
         // then

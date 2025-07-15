@@ -12,6 +12,8 @@ final class SecretsParserTests: XCTestCase {
     private typealias AccessModifierSpy = ParserSpy<Substring, AccessModifier>
     private typealias Secrets = SourceFileSpec.Secrets
 
+    private typealias SUT = SecretsParser<NamespaceParserSpy, AccessModifierSpy>
+
     private let secretsNamespaceStub: Namespace = .create(identifier: "Secrets")
     private let secretsAccessModifierStub: AccessModifier = .internal
     private let secretsStub: ArraySlice<Configuration.Secret> = [
@@ -25,7 +27,7 @@ final class SecretsParserTests: XCTestCase {
     private var secretValueEncoderSpy: DataEncoderSpy!
     private var generateNonceSpy: ParameterlessClosureSpy<UInt64>!
 
-    private var sut: SecretsParser<NamespaceParserSpy, AccessModifierSpy>!
+    private var sut: SUT!
 
     override func setUp() {
         super.setUp()
@@ -126,7 +128,7 @@ final class SecretsParserTests: XCTestCase {
         XCTAssertThrowsError(try sut.parse(&configuration))
         XCTAssertEqual([""], namespaceParserSpy.parseRecordedInput)
         XCTAssertEqual([], accessModifierParserSpy.parseRecordedInput)
-        XCTAssertEqual(.zero, generateNonceSpy.callCount)
+        XCTAssertEqual(0, generateNonceSpy.callCount)
         XCTAssertEqual(secretsStub[...], configuration.secrets)
     }
 
@@ -159,7 +161,7 @@ final class SecretsParserTests: XCTestCase {
         XCTAssertThrowsError(try sut.parse(&configuration))
         XCTAssertEqual([""], namespaceParserSpy.parseRecordedInput)
         XCTAssertEqual([""], accessModifierParserSpy.parseRecordedInput)
-        XCTAssertEqual(.zero, generateNonceSpy.callCount)
+        XCTAssertEqual(0, generateNonceSpy.callCount)
         XCTAssertEqual(secretsStub[...], configuration.secrets)
     }
 

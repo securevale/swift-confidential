@@ -5,6 +5,8 @@ import SwiftSyntax
 
 final class SourceFileTextTests: XCTestCase {
 
+    private typealias SUT = SourceFileText
+
     private var temporaryFileURL: URL!
 
     override func setUp() {
@@ -58,11 +60,11 @@ final class SourceFileTextTests: XCTestCase {
                 )
             })
         )
-        let sourceFileText = SourceFileText(from: sourceFile)
+        let sut = SUT(from: sourceFile)
         let encoding = String.Encoding.utf8
 
         // when
-        try sourceFileText.write(to: temporaryFileURL, encoding: encoding)
+        try sut.write(to: temporaryFileURL, encoding: encoding)
 
         // then
         let fileContents = try String(contentsOf: temporaryFileURL, encoding: encoding)

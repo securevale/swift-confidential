@@ -5,11 +5,11 @@ import ConfidentialKit
 
 final class DataShuffler_DataObfuscationStepTests: XCTestCase {
 
-    private typealias DataShuffler = Obfuscation.Randomization.DataShuffler
+    private typealias SUT = Obfuscation.Randomization.DataShuffler
 
     private let nonceStub: Obfuscation.Nonce = 14977856632874584036
 
-    private var sut: DataShuffler!
+    private var sut: SUT!
 
     override func setUp() {
         super.setUp()

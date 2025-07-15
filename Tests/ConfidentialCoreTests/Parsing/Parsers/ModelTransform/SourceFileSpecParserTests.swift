@@ -6,6 +6,8 @@ final class SourceFileSpecParserTests: XCTestCase {
     private typealias AlgorithmParserSpy = ParserSpy<Configuration, SourceFileSpec.Algorithm>
     private typealias SecretsParserSpy = ParserSpy<Configuration, SourceFileSpec.Secrets>
 
+    private typealias SUT = SourceFileSpecParser<AlgorithmParserSpy, SecretsParserSpy>
+
     private let configurationStub: Configuration = {
         var configuration = Configuration.StubFactory.makeConfiguration()
         configuration.defaultAccessModifier = "internal"
@@ -24,7 +26,7 @@ final class SourceFileSpecParserTests: XCTestCase {
     private var algorithmParserSpy: AlgorithmParserSpy!
     private var secretsParserSpy: SecretsParserSpy!
 
-    private var sut: SourceFileSpecParser<AlgorithmParserSpy, SecretsParserSpy>!
+    private var sut: SUT!
 
     override func setUp() {
         super.setUp()

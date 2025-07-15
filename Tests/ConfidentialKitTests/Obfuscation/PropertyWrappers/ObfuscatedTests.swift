@@ -3,6 +3,8 @@ import XCTest
 
 final class ObfuscatedTests: XCTestCase {
 
+    private typealias SUT = Obfuscated<SingleValue>
+
     private let secretPlainValue: SingleValue = .StubFactory.makeSecretMessage()
     private let secretNonce: Obfuscation.Nonce = .StubFactory.makeNonce()
 
@@ -10,7 +12,7 @@ final class ObfuscatedTests: XCTestCase {
     private var deobfuscateDataSpy: DeobfuscateDataFuncSpy!
     private var dataDecoderSpy: DataDecoderSpy!
 
-    private var sut: Obfuscated<SingleValue>!
+    private var sut: SUT!
 
     override func setUp() {
         super.setUp()

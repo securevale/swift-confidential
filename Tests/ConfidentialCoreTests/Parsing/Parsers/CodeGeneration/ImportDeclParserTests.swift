@@ -10,6 +10,18 @@ final class ImportDeclParserTests: XCTestCase {
     private let algorithmStub: SourceFileSpec.Algorithm = [.init(technique: .randomization)]
     private let customModuleNameStub = "Crypto"
 
+    private var sut: SUT!
+
+    override func setUp() {
+        super.setUp()
+        sut = .init()
+    }
+
+    override func tearDown() {
+        sut = nil
+        super.tearDown()
+    }
+
     func test_givenInternalImportDisabled_whenParse_thenReturnsExpectedImportDeclStatementsAndInputLeftIntact() throws {
         // given
         let secrets: SourceFileSpec.Secrets = [
@@ -41,7 +53,7 @@ final class ImportDeclParserTests: XCTestCase {
             .enumerated()
             .map { idx, spec in
                 var spec = spec
-                let statements = try SUT().parse(&spec)
+                let statements = try XCTUnwrap(sut.parse(&spec))
                 sourceFileSpecs[idx] = spec
                 return statements
             }
@@ -99,7 +111,7 @@ final class ImportDeclParserTests: XCTestCase {
             .enumerated()
             .map { idx, spec in
                 var spec = spec
-                let statements = try SUT().parse(&spec)
+                let statements = try XCTUnwrap(sut.parse(&spec))
                 sourceFileSpecs[idx] = spec
                 return statements
             }
@@ -168,7 +180,7 @@ final class ImportDeclParserTests: XCTestCase {
         // when & then
         for (sourceFileSpec, secrets) in sourceFileSpecs {
             var sourceFileSpec = sourceFileSpec
-            XCTAssertThrowsError(try SUT().parse(&sourceFileSpec)) { error in
+            XCTAssertThrowsError(try sut.parse(&sourceFileSpec)) { error in
                 XCTAssertEqual(
                     """
                     Cannot use internal import when the secret(s) access \

@@ -5,13 +5,13 @@ final class BinaryInteger_BytesTests: XCTestCase {
 
     func test_givenBinaryIntegers_whenBytes_thenReturnsExpectedValues() {
         // given
-        let integers: [Any] = [
+        let integers: [any FixedWidthInteger] = [
             UInt8(1), UInt16(1), UInt32(1), UInt64(1),
             Int8(1), Int16(1), Int32(1), Int64(1)
         ]
 
         // when
-        let bytes = integers.map { ($0 as! any FixedWidthInteger).littleEndian.bytes }
+        let bytes = integers.map { $0.littleEndian.bytes }
 
         // then
         XCTAssertEqual(
@@ -53,6 +53,6 @@ final class BinaryInteger_BytesTests: XCTestCase {
         let int = Int(bytes: bytes)
 
         // then
-        XCTAssertEqual(.zero, int)
+        XCTAssertEqual(0, int)
     }
 }

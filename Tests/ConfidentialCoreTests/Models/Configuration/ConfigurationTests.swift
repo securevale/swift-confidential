@@ -3,6 +3,8 @@ import XCTest
 
 final class ConfigurationTests: XCTestCase {
 
+    private typealias SUT = Configuration
+
     func test_givenJSONEncodedConfiguration_whenDecodeWithJSONDecoder_thenNoThrowAndReturnsExpectedConfigurationInstance() {
         // given
         let algorithm = ["compress using lz4", "encrypt using aes-128-gcm"]
@@ -36,9 +38,9 @@ final class ConfigurationTests: XCTestCase {
         // when & then
         var configurations: [Configuration] = []
         XCTAssertNoThrow(
-            configurations = try jsonConfigurations.map { try decoder.decode(Configuration.self, from: $0) }
+            configurations = try jsonConfigurations.map { try decoder.decode(SUT.self, from: $0) }
         )
-        let expectedConfiguration = Configuration(
+        let expectedConfiguration = SUT(
             algorithm: algorithm[...],
             defaultAccessModifier: defaultAccessModifier,
             defaultNamespace: defaultNamespace,
@@ -100,14 +102,14 @@ final class ConfigurationTests: XCTestCase {
 
         // when & then
         for (json, jsonData) in invalidConfigurations {
-            XCTAssertThrowsError(try decoder.decode(Configuration.self, from: jsonData), json)
+            XCTAssertThrowsError(try decoder.decode(SUT.self, from: jsonData), json)
         }
     }
 
     func test_givenSecretSingleValue_whenJSONEncodeUnderlyingValue_thenResultEqualsJSONEncodedAssociatedValue() throws {
         // given
         let associatedValue = "test"
-        let value = Configuration.Secret.Value.singleValue(associatedValue)
+        let value = SUT.Secret.Value.singleValue(associatedValue)
         let encoder = JSONEncoder()
 
         // when
@@ -123,7 +125,7 @@ final class ConfigurationTests: XCTestCase {
     func test_givenSecretArrayValue_whenJSONEncodeUnderlyingValue_thenResultEqualsJSONEncodedAssociatedValue() throws {
         // given
         let associatedValue = ["test"]
-        let value = Configuration.Secret.Value.array(associatedValue)
+        let value = SUT.Secret.Value.array(associatedValue)
         let encoder = JSONEncoder()
 
         // when
