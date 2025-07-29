@@ -42,6 +42,12 @@ var package = Package(
 )
 
 #if os(macOS)
+package.products.append(
+    .library(
+        name: "ConfidentialObfuscator",
+        targets: ["ConfidentialObfuscator"]
+    )
+)
 package.dependencies.append(contentsOf: [
     .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.6.1"),
     .package(url: "https://github.com/swiftlang/swift-syntax.git", "509.1.1"..<"602.0.0"),
@@ -60,12 +66,21 @@ package.targets.append(contentsOf: [
         ]
     ),
 
+    // Obfuscator
+    .target(
+        name: "ConfidentialObfuscator",
+        dependencies: [
+            "ConfidentialCore",
+            .product(name: "Yams", package: "Yams"),
+            .product(name: "Parsing", package: "swift-parsing")
+        ]
+    ),
+
     // CLI Tool
     .executableTarget(
         name: "swift-confidential",
         dependencies: [
-            "ConfidentialCore",
-            "Yams",
+            "ConfidentialObfuscator",
             .product(name: "ArgumentParser", package: "swift-argument-parser")
         ]
     ),
@@ -74,6 +89,10 @@ package.targets.append(contentsOf: [
     .testTarget(
         name: "ConfidentialCoreTests",
         dependencies: ["ConfidentialCore"]
+    ),
+    .testTarget(
+        name: "ConfidentialObfuscatorTests",
+        dependencies: ["ConfidentialObfuscator"]
     )
 ])
 #endif

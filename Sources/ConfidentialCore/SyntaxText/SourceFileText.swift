@@ -10,13 +10,11 @@ package struct SourceFileText: Equatable {
             .formatted(using: .init(indentationWidth: .spaces(0)))
     }
 
-    package func write(to url: URL, encoding: String.Encoding = .utf8) throws {
+    package func text() -> String {
         var text = ""
         syntax.write(to: &text)
 
-        try text
-            .trimmingCharacters(in: .newlines)
-            .write(to: url, atomically: true, encoding: encoding)
+        return text.trimmingCharacters(in: .newlines)
     }
 }
 
