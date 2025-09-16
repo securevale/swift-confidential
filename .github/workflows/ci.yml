@@ -38,7 +38,7 @@ jobs:
         run: brew install swiftlint
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Lint Swift Code
         run: swiftlint lint --strict --reporter github-actions-logging
@@ -48,7 +48,7 @@ jobs:
         with:
           scandir: './Scripts'
           ignore_paths: Templates
-          version: v0.10.0
+          version: v0.11.0
         env:
           SHELLCHECK_OPTS: -e SC1009 -e SC1072 -e SC1073 -e SC1090 -e SC1091
 
@@ -72,6 +72,9 @@ jobs:
             upload_coverage: false
           - macos: 15
             xcode: '16.4'  # Swift 6.1
+            upload_coverage: false
+          - macos: 15
+            xcode: '26.0'  # Swift 6.2
             upload_coverage: true
 
     steps:
@@ -79,7 +82,7 @@ jobs:
         run: system_profiler SPHardwareDataType SPSoftwareDataType SPDeveloperToolsDataType
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Upgrade Bash
         run: make bash
