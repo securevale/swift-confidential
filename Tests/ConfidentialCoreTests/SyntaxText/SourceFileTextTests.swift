@@ -7,21 +7,7 @@ final class SourceFileTextTests: XCTestCase {
 
     private typealias SUT = SourceFileText
 
-    private var temporaryFileURL: URL!
-
-    override func setUp() {
-        super.setUp()
-        temporaryFileURL = .init(fileURLWithPath: NSTemporaryDirectory())
-            .appendingPathComponent("\(UUID().uuidString).swift")
-    }
-
-    override func tearDownWithError() throws {
-        try FileManager.default.removeItem(at: temporaryFileURL)
-        temporaryFileURL = nil
-        try super.tearDownWithError()
-    }
-
-    func test_givenSourceFileTextWithSourceFileSyntax_whenWriteToFile_thenFileContainsExpectedSyntaxText() throws {
+    func test_givenSourceFileTextWithSourceFileSyntax_whenGetText_thenReturnsExpectedSyntaxText() {
         // given
         let sourceFile = SourceFileSyntax(
             statements: CodeBlockItemListSyntax(itemsBuilder: {
@@ -61,13 +47,11 @@ final class SourceFileTextTests: XCTestCase {
             })
         )
         let sut = SUT(from: sourceFile)
-        let encoding = String.Encoding.utf8
 
         // when
-        try sut.write(to: temporaryFileURL, encoding: encoding)
+        let sourceFileText = sut.text()
 
         // then
-        let fileContents = try String(contentsOf: temporaryFileURL, encoding: encoding)
         XCTAssertEqual(
             """
             import Foundation
@@ -77,7 +61,7 @@ final class SourceFileTextTests: XCTestCase {
               var data: Data
             }
             """,
-            fileContents
+            sourceFileText
         )
     }
 }
