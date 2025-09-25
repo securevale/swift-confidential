@@ -19,7 +19,6 @@ struct ImportDeclParser: Parser {
 
         return makeImportDeclStatements(
             from: input.secrets.namespaces,
-            experimentalMode: input.experimentalMode,
             implementationOnly: input.internalImport
         )
     }
@@ -36,7 +35,6 @@ private extension ImportDeclParser {
 
     func makeImportDeclStatements<Namespaces: Collection>(
         from namespaces: Namespaces,
-        experimentalMode: Bool,
         implementationOnly: Bool
     ) -> [CodeBlockItemSyntax]
     where
@@ -44,14 +42,10 @@ private extension ImportDeclParser {
     {
         var implementationOnlyModuleNames: Set<String> = []
         var moduleNames: Set<String> = [C.Code.Generation.foundationModuleName]
-        var confidentialKitModuleNames: Set<String> = [C.Code.Generation.confidentialKitModuleName]
-        if experimentalMode {
-            confidentialKitModuleNames.insert(C.Code.Generation.Experimental.confidentialKitModuleName)
-        }
         if implementationOnly {
-            implementationOnlyModuleNames.formUnion(confidentialKitModuleNames)
+            implementationOnlyModuleNames.insert(C.Code.Generation.confidentialKitModuleName)
         } else {
-            moduleNames.formUnion(confidentialKitModuleNames)
+            moduleNames.insert(C.Code.Generation.confidentialKitModuleName)
         }
 
         moduleNames.formUnion(
@@ -96,27 +90,7 @@ private extension ImportDeclParser {
                     )
                 )
             }
-        let implementationOnlyImports = implementationOnlyModuleNames
-            .map { moduleName in
-                CodeBlockItemSyntax(
-                    item: .init(
-                        makeImportDecl(attributes: ._implementationOnly, moduleName: moduleName)
-                    )
-                )
-            }
-        imports.insert(
-            CodeBlockItemSyntax(
-                item: .init(
-                    IfConfigDeclSyntax.makeIfSwiftVersionOrFeatureDecl(
-                        swiftVersion: 6.0,
-                        featureFlag: "AccessLevelOnImport",
-                        ifElements: .statements(CodeBlockItemListSyntax(internalImports)),
-                        elseElements: .statements(CodeBlockItemListSyntax(implementationOnlyImports))
-                    )
-                )
-            ),
-            at: .zero
-        )
+        imports.insert(contentsOf: internalImports, at: .zero)
 
         return imports
     }

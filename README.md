@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/securevale/swift-confidential/actions/workflows/ci.yml/badge.svg)](https://github.com/securevale/swift-confidential/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/securevale/swift-confidential/branch/master/graph/badge.svg)](https://codecov.io/gh/securevale/swift-confidential)
-[![Swift](https://img.shields.io/badge/Swift-6.2%20%7C%206.1%20%7C%206.0%20%7C%205.10%20%7C%205.9-red)](https://www.swift.org/download)
+[![Swift](https://img.shields.io/badge/Swift-6.2%20%7C%206.1%20%7C%206.0-red)](https://www.swift.org/download)
 [![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%20visionOS%20%7C%20watchOS%20%7C%20tvOS-red)]()
 
 A highly configurable and performant tool for obfuscating Swift literals embedded in the application code that you should protect from static code analysis, making the app more resistant to reverse engineering.
@@ -107,7 +107,7 @@ Swift Confidential can be used with both SwiftPM and Xcode targets, depending on
 To use Swift Confidential with your SwiftPM target, add the `ConfidentialKit` library along with `Confidential` plugin to the package's dependencies and then to your target's dependencies and plugins respectively:
 
 ```swift
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 
 import PackageDescription
 
@@ -156,6 +156,9 @@ Once set up, build your target and the Confidential plugin will automatically ge
 
 ### Experimental Mode
 
+<details>
+<summary><strong>Swift Confidential 0.4.0-0.4.2</strong></summary>
+
 Swift Confidential 0.4.0 introduces experimental support for Swift 6 language mode by replacing the [`@Obfuscated` property wrapper](./Sources/ConfidentialKit/Obfuscation/PropertyWrappers/Obfuscated.swift) with an [`@Obfuscated` macro](./Sources/_ConfidentialKit/Obfuscation/Macros/Obfuscated.swift).
 
 To use experimental API for generated Swift code:
@@ -163,11 +166,13 @@ To use experimental API for generated Swift code:
 1. Explicitly enable Experimental Mode by setting `experimentalMode` configuration option to `true` in your `confidential.yml` configuration file.
 2. In the applicable SwiftPM and/or Xcode targets, change your target dependency from the `ConfidentialKit` to the `_ConfidentialKit` (note the leading underscore) library.
 
-> [!NOTE]  
+> **Note**  
 > Experimental Mode requires the Swift 6 toolchain (i.e. Xcode 16.0 or later).
 
-> [!CAUTION]  
+> **Caution**  
 > Swift macros have a noticeable impact on build time, especially on CI/CD machines with limited CPU and memory. To address this issue, starting with Xcode 16.4, you can consider enabling [SwiftSyntax prebuilts for macros](https://forums.swift.org/t/preview-swift-syntax-prebuilts-for-macros/80202).
+
+</details>
 
 ## Configuration
 

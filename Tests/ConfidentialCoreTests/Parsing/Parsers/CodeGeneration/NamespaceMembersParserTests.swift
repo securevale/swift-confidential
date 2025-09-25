@@ -16,7 +16,6 @@ final class NamespaceMembersParserTests: XCTestCase {
             attributeName: IdentifierTypeSyntax(name: .identifier("Test"))
         ),
         accessModifier: .internal,
-        bindingSpecifier: .let,
         name: "secret",
         dataArgumentExpression: ArrayExprSyntax {
             ArrayElementSyntax(

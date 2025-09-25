@@ -7,17 +7,14 @@ extension VariableDeclSyntax {
     private static let dataArgumentName: String = "data"
     private static let nonceArgumentName: String = "nonce"
 
-    // swiftlint:disable:next function_parameter_count
     static func makeSecretVariableDecl(
         dataProjectionAttribute: AttributeSyntax,
         accessModifier: Keyword,
-        bindingSpecifier: Keyword,
         name: String,
         dataArgumentExpression: ArrayExprSyntax,
         nonceArgumentExpression: IntegerLiteralExprSyntax
     ) -> Self {
         assert([.internal, .package, .public].contains(accessModifier))
-        assert([.let, .var].contains(bindingSpecifier))
         return .init(
             attributes: .init {
                 dataProjectionAttribute
@@ -33,7 +30,7 @@ extension VariableDeclSyntax {
                 )
                 DeclModifierSyntax(name: .keyword(.static))
             },
-            bindingSpecifier,
+            .let,
             name: PatternSyntax(IdentifierPatternSyntax(identifier: .identifier(name))),
             type: TypeAnnotationSyntax(
                 type: IdentifierTypeSyntax(

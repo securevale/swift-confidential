@@ -1,5 +1,6 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 
+import CompilerPluginSupport
 import PackageDescription
 
 var package = Package(
@@ -18,11 +19,26 @@ var package = Package(
             targets: ["ConfidentialKit"]
         )
     ],
+    dependencies: [
+        .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.1"..<"603.0.0")
+    ],
     targets: [
         // Client Library
         .target(
             name: "ConfidentialKit",
-            dependencies: ["ConfidentialUtils"]
+            dependencies: [
+                "ConfidentialKitMacros",
+                "ConfidentialUtils"
+            ]
+        ),
+
+        // Macros
+        .macro(
+            name: "ConfidentialKitMacros",
+            dependencies: [
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
+            ]
         ),
 
         // Utils
@@ -34,19 +50,25 @@ var package = Package(
             dependencies: ["ConfidentialKit"]
         ),
         .testTarget(
+            name: "ConfidentialKitMacrosTests",
+            dependencies: [
+                "ConfidentialKitMacros",
+                .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
+            ]
+        ),
+        .testTarget(
             name: "ConfidentialUtilsTests",
             dependencies: ["ConfidentialUtils"]
         )
     ],
-    swiftLanguageVersions: [.v5]
+    swiftLanguageModes: [.v5, .v6]
 )
 
 #if os(macOS)
 package.dependencies.append(contentsOf: [
     .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.6.1"),
-    .package(url: "https://github.com/swiftlang/swift-syntax.git", "509.1.1"..<"603.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-parsing.git", from: "0.14.1"),
-    .package(url: "https://github.com/jpsim/Yams.git", from: "5.4.0")
+    .package(url: "https://github.com/jpsim/Yams.git", from: "6.1.0")
 ])
 package.targets.append(contentsOf: [
     // Core Module

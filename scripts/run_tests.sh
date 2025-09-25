@@ -18,6 +18,7 @@ readonly COVERAGE_DIR_NAME=".coverage"
 readonly COVERAGE_INCLUDE_LIST=(
         "Sources/ConfidentialCore/"
         "Sources/ConfidentialKit/"
+        "Sources/ConfidentialKitMacros/"
         "Sources/ConfidentialUtils/"
     )
 

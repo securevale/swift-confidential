@@ -25,57 +25,20 @@ final class SecretVariableDeclParserTests: XCTestCase {
         super.tearDown()
     }
 
-    func test_givenSecretWithPropertyWrapperAttribute_whenParse_thenReturnsExpectedSecretDecl() throws {
+    func test_givenSecret_whenParse_thenReturnsExpectedSecretDecl() throws {
         // given
         let secrets = [
             makeSecretStub(
                 accessModifier: .internal,
-                attribute: dataProjectionAttribute(isPropertyWrapper: true)
+                attribute: makeDataProjectionAttributeStub()
             ),
             makeSecretStub(
                 accessModifier: .package,
-                attribute: dataProjectionAttribute(isPropertyWrapper: true)
+                attribute: makeDataProjectionAttributeStub()
             ),
             makeSecretStub(
                 accessModifier: .public,
-                attribute: dataProjectionAttribute(isPropertyWrapper: true)
-            )
-        ]
-
-        // when
-        let secretDecls = try secrets.map { secret in
-            (secret, try XCTUnwrap(sut.parse(secret)))
-        }
-
-        // then
-        let expectedDeclTypeName = TypeInfo(of: Obfuscation.Secret.self).fullyQualifiedName
-        secretDecls.forEach { secret, secretDecl in
-            XCTAssertEqual(
-                """
-
-                    @\(dataProjectionAttributeNameStub)(\(deobfuscateArgumentNameStub): \(deobfuscateDataFuncNameStub))
-                    \(secret.accessModifier) static var \(secret.name): \(expectedDeclTypeName) = \
-                .init(data: [0x20, 0x20], nonce: 123456789)
-                """,
-                .init(describing: syntax(from: secretDecl))
-            )
-        }
-    }
-
-    func test_givenSecretWithMacroAttribute_whenParse_thenReturnsExpectedSecretDecl() throws {
-        // given
-        let secrets = [
-            makeSecretStub(
-                accessModifier: .internal,
-                attribute: dataProjectionAttribute(isPropertyWrapper: false)
-            ),
-            makeSecretStub(
-                accessModifier: .package,
-                attribute: dataProjectionAttribute(isPropertyWrapper: false)
-            ),
-            makeSecretStub(
-                accessModifier: .public,
-                attribute: dataProjectionAttribute(isPropertyWrapper: false)
+                attribute: makeDataProjectionAttributeStub()
             )
         ]
 
@@ -117,11 +80,10 @@ private extension SecretVariableDeclParserTests {
         )
     }
 
-    func dataProjectionAttribute(isPropertyWrapper: Bool) -> Secret.DataProjectionAttribute {
+    func makeDataProjectionAttributeStub() -> Secret.DataProjectionAttribute {
         .init(
             name: dataProjectionAttributeNameStub,
-            arguments: [(label: deobfuscateArgumentNameStub, value: deobfuscateDataFuncNameStub)],
-            isPropertyWrapper: isPropertyWrapper
+            arguments: [(label: deobfuscateArgumentNameStub, value: deobfuscateDataFuncNameStub)]
         )
     }
 }
