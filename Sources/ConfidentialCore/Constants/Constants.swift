@@ -10,6 +10,8 @@ enum C {
             static let confidentialKitModuleName: String = "ConfidentialKit"
             static let foundationModuleName: String = "Foundation"
 
+            static let obfuscatedMacroFullyQualifiedName: String = "\(confidentialKitModuleName).Obfuscated"
+
             static let deobfuscateDataFuncName: String = "deobfuscateData"
             static let deobfuscateDataFuncDataParamName: String = "data"
             static let deobfuscateDataFuncNonceParamName: String = "nonce"

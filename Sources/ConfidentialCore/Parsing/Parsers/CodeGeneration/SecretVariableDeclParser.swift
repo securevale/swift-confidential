@@ -19,7 +19,6 @@ struct SecretVariableDeclParser: Parser {
         return VariableDeclSyntax.makeSecretVariableDecl(
             dataProjectionAttribute: attribute(from: input.dataProjectionAttribute),
             accessModifier: keyword(for: input.accessModifier),
-            bindingSpecifier: input.dataProjectionAttribute.isPropertyWrapper ? .var : .let,
             name: input.name,
             dataArgumentExpression: ArrayExprSyntax(elements: .init(dataArgumentElements)),
             nonceArgumentExpression: IntegerLiteralExprSyntax(literal: "\(raw: input.nonce)")

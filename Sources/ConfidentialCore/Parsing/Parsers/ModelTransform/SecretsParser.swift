@@ -83,37 +83,21 @@ private extension SecretsParser {
     {
         typealias DataTypes = Configuration.Secret.Value.DataTypes
 
-        let name: String
-        let isPropertyWrapper: Bool
-        if experimentalMode {
-            let baseName = C.Code.Generation.Experimental.obfuscatedMacroFullyQualifiedName
-            let genericArgumentTypeInfo: TypeInfo
-            switch value {
-            case .array:
-                genericArgumentTypeInfo = .init(of: DataTypes.Array.self)
-            case .singleValue:
-                genericArgumentTypeInfo = .init(of: DataTypes.SingleValue.self)
-            }
-            name = "\(baseName)<\(genericArgumentTypeInfo.fullyQualifiedName)>"
-            isPropertyWrapper = false
-        } else {
-            let typeInfo: TypeInfo
-            switch value {
-            case .array:
-                typeInfo = .init(of: Obfuscated<DataTypes.Array>.self)
-            case .singleValue:
-                typeInfo = .init(of: Obfuscated<DataTypes.SingleValue>.self)
-            }
-            name = typeInfo.fullyQualifiedName
-            isPropertyWrapper = true
+        let baseName = C.Code.Generation.obfuscatedMacroFullyQualifiedName
+        let genericArgumentTypeInfo: TypeInfo
+        switch value {
+        case .array:
+            genericArgumentTypeInfo = .init(of: DataTypes.Array.self)
+        case .singleValue:
+            genericArgumentTypeInfo = .init(of: DataTypes.SingleValue.self)
         }
+        let name = "\(baseName)<\(genericArgumentTypeInfo.fullyQualifiedName)>"
 
         return .init(
             name: name,
             arguments: [
                 (label: .none, value: C.Code.Generation.deobfuscateDataFuncName)
-            ],
-            isPropertyWrapper: isPropertyWrapper
+            ]
         )
     }
 }

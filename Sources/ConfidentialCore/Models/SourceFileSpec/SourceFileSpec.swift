@@ -85,7 +85,6 @@ extension SourceFileSpec.Secret {
 
         let name: String
         let arguments: [Argument]
-        let isPropertyWrapper: Bool
     }
 
     package enum Namespace: Hashable {

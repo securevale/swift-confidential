@@ -74,8 +74,7 @@ extension SourceFileSpec.Secret {
                 nonce: nonce,
                 dataProjectionAttribute: .init(
                     name: "Test",
-                    arguments: [],
-                    isPropertyWrapper: true
+                    arguments: []
                 )
             )
         }

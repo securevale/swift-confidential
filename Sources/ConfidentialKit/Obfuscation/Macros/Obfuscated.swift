@@ -1,4 +1,3 @@
-import ConfidentialKit
 import Foundation
 
 /// Creates a projection variable that exposes a plain secret value.
