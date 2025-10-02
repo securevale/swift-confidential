@@ -15,9 +15,9 @@ final class DeobfuscateDataFunctionDeclParserTests: XCTestCase {
     private let compressionAlgorithmStub: CompressionAlgorithm = .lzfse
     private let encryptionAlgorithmStub: EncryptionAlgorithm = .aes128GCM
     private lazy var algorithmStub: Algorithm = [
-        .init(technique: .compression(algorithm: compressionAlgorithmStub)),
-        .init(technique: .randomization),
-        .init(technique: .encryption(algorithm: encryptionAlgorithmStub))
+        .compress(algorithm: compressionAlgorithmStub),
+        .shuffle,
+        .encrypt(algorithm: encryptionAlgorithmStub)
     ]
 
     private let dataFullyQualifiedName = TypeInfo(of: Data.self)

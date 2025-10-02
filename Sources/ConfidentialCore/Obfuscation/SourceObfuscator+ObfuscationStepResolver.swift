@@ -2,9 +2,9 @@ import ConfidentialKit
 
 protocol DataObfuscationStepResolver {
 
-    typealias Technique = SourceFileSpec.ObfuscationStep.Technique
+    typealias Step = SourceFileSpec.ObfuscationStep
 
-    func obfuscationStep(for technique: Technique) -> any DataObfuscationStep
+    func implementation(for step: Step) -> any DataObfuscationStep
 }
 
 extension SourceObfuscator {
@@ -12,13 +12,13 @@ extension SourceObfuscator {
     struct ObfuscationStepResolver: DataObfuscationStepResolver {
 
         @inline(__always)
-        func obfuscationStep(for technique: Technique) -> any DataObfuscationStep {
-            switch technique {
-            case let .compression(algorithm):
+        func implementation(for step: Step) -> any DataObfuscationStep {
+            switch step {
+            case let .compress(algorithm):
                 return Obfuscation.Compression.DataCompressor(algorithm: algorithm)
-            case let .encryption(algorithm):
+            case let .encrypt(algorithm):
                 return Obfuscation.Encryption.DataCrypter(algorithm: algorithm)
-            case .randomization:
+            case .shuffle:
                 return Obfuscation.Randomization.DataShuffler()
             }
         }

@@ -1,9 +1,9 @@
 @testable import ConfidentialCore
 import XCTest
 
-final class RandomizationTechniqueParserTests: XCTestCase {
+final class ShuffleStepParserTests: XCTestCase {
 
-    private typealias SUT = RandomizationTechniqueParser
+    private typealias SUT = ShuffleStepParser
 
     private var sut: SUT!
 
@@ -22,10 +22,10 @@ final class RandomizationTechniqueParserTests: XCTestCase {
         var input = "\(C.Parsing.Keywords.shuffle)"[...]
 
         // when
-        let technique = try sut.parse(&input)
+        let step = try sut.parse(&input)
 
         // then
-        XCTAssertEqual(.randomization, technique)
+        XCTAssertEqual(.shuffle, step)
         XCTAssertTrue(input.isEmpty)
     }
 
@@ -34,10 +34,10 @@ final class RandomizationTechniqueParserTests: XCTestCase {
         var input = "   \(C.Parsing.Keywords.shuffle)"[...]
 
         // when
-        let technique = try sut.parse(&input)
+        let step = try sut.parse(&input)
 
         // then
-        XCTAssertEqual(.randomization, technique)
+        XCTAssertEqual(.shuffle, step)
         XCTAssertTrue(input.isEmpty)
     }
 

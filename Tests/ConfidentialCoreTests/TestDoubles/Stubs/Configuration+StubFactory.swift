@@ -5,15 +5,14 @@ extension Configuration {
     enum StubFactory {
 
         static func makeConfiguration(
-            algorithm: ArraySlice<String> = [],
-            experimentalMode: Bool = false,
+            algorithm: Configuration.Algorithm? = .none,
             secrets: ArraySlice<Configuration.Secret> = []
         ) -> Configuration {
             .init(
                 algorithm: algorithm,
                 defaultAccessModifier: .none,
                 defaultNamespace: .none,
-                experimentalMode: experimentalMode,
+                experimentalMode: false,
                 internalImport: .none,
                 secrets: secrets
             )

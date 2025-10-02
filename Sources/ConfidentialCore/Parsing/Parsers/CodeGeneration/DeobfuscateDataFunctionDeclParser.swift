@@ -60,7 +60,7 @@ private extension DeobfuscateDataFunctionDeclParser {
             tryKeyword: .keyword(.try, leadingTrivia: .spaces(tryIndentWidth)),
             expression: FunctionCallExprSyntax(
                 calledExpression: deobfuscateFunctionAccessExpr(
-                    for: obfuscationStep.technique,
+                    for: obfuscationStep,
                     indentWidth: functionCallExprIndentWidth
                 ),
                 leftParen: .leftParenToken(),
@@ -96,7 +96,7 @@ private extension DeobfuscateDataFunctionDeclParser {
             tryKeyword: .keyword(.try, leadingTrivia: .spaces(tryIndentWidth)),
             expression: FunctionCallExprSyntax(
                 calledExpression: deobfuscateFunctionAccessExpr(
-                    for: obfuscationStep.technique,
+                    for: obfuscationStep,
                     indentWidth: functionCallExprIndentWidth
                 ),
                 leftParen: .leftParenToken(trailingTrivia: .newlines(1)),
@@ -126,16 +126,16 @@ private extension DeobfuscateDataFunctionDeclParser {
     }
 
     func deobfuscateFunctionAccessExpr(
-        for technique: ObfuscationStep.Technique,
+        for obfuscationStep: ObfuscationStep,
         indentWidth: Int
     ) -> some ExprSyntaxProtocol {
         let initCallExpr: FunctionCallExprSyntax
-        switch technique {
-        case let .compression(algorithm):
+        switch obfuscationStep {
+        case let .compress(algorithm):
             initCallExpr = FunctionCallExprSyntax.makeDataCompressorInitializerCallExpr(algorithm: algorithm)
-        case let .encryption(algorithm):
+        case let .encrypt(algorithm):
             initCallExpr = FunctionCallExprSyntax.makeDataCrypterInitializerCallExpr(algorithm: algorithm)
-        case .randomization:
+        case .shuffle:
             initCallExpr = FunctionCallExprSyntax.makeDataShufflerInitializerCallExpr()
         }
 

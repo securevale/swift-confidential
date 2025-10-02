@@ -3,7 +3,7 @@ import XCTest
 
 final class SourceObfuscatorTests: XCTestCase {
 
-    private typealias Technique = SourceFileSpec.ObfuscationStep.Technique
+    private typealias ObfuscationStep = SourceFileSpec.ObfuscationStep
 
     private typealias SUT = SourceObfuscator
 
@@ -15,7 +15,7 @@ final class SourceObfuscatorTests: XCTestCase {
     override func setUp() {
         super.setUp()
         obfuscationStepSpy = .init()
-        obfuscationStepResolverSpy = .init(obfuscationStepReturnValue: obfuscationStepSpy)
+        obfuscationStepResolverSpy = .init(implementationReturnValue: obfuscationStepSpy)
         sut = .init(obfuscationStepResolver: obfuscationStepResolverSpy)
     }
 
@@ -28,12 +28,12 @@ final class SourceObfuscatorTests: XCTestCase {
 
     func test_givenSourceFileSpec_whenObfuscate_thenObfuscationStepResolverCallsMatchAlgorithm() throws {
         // given
-        let encryptionTechnique = Technique.encryption(algorithm: .aes128GCM)
-        let compressionTechnique = Technique.compression(algorithm: .lz4)
+        let encryptStep = ObfuscationStep.encrypt(algorithm: .aes128GCM)
+        let compressStep = ObfuscationStep.compress(algorithm: .lz4)
         var sourceFileSpec = SourceFileSpec.StubFactory.makeSpec(
             algorithm: [
-                .init(technique: encryptionTechnique),
-                .init(technique: compressionTechnique)
+                encryptStep,
+                compressStep
             ],
             secrets: [
                 .create(identifier: "Secrets"): [.StubFactory.makeInternalSecret()]
@@ -45,8 +45,8 @@ final class SourceObfuscatorTests: XCTestCase {
 
         // then
         XCTAssertEqual(
-            [encryptionTechnique, compressionTechnique],
-            obfuscationStepResolverSpy.recordedTechniques
+            [encryptStep, compressStep],
+            obfuscationStepResolverSpy.recordedSteps
         )
     }
 
@@ -59,7 +59,7 @@ final class SourceObfuscatorTests: XCTestCase {
         let createNamespaceKey = SourceFileSpec.Secrets.Key.create(identifier: "Secrets")
         var sourceFileSpec = SourceFileSpec.StubFactory.makeSpec(
             algorithm: [
-                .init(technique: .encryption(algorithm: .aes128GCM))
+                .encrypt(algorithm: .aes128GCM)
             ],
             secrets: [
                 createNamespaceKey: [.StubFactory.makeInternalSecret(data: plainData)]
@@ -80,8 +80,8 @@ final class SourceObfuscatorTests: XCTestCase {
         // given
         var sourceFileSpec = SourceFileSpec.StubFactory.makeSpec(
             algorithm: [
-                .init(technique: .encryption(algorithm: .aes128GCM)),
-                .init(technique: .compression(algorithm: .lz4))
+                .compress(algorithm: .lz4),
+                .encrypt(algorithm: .aes128GCM)
             ]
         )
         let sourceFileSpecSnapshot = sourceFileSpec
@@ -91,6 +91,6 @@ final class SourceObfuscatorTests: XCTestCase {
 
         // then
         XCTAssertEqual(sourceFileSpecSnapshot, sourceFileSpec)
-        XCTAssertTrue(obfuscationStepResolverSpy.recordedTechniques.isEmpty)
+        XCTAssertTrue(obfuscationStepResolverSpy.recordedSteps.isEmpty)
     }
 }

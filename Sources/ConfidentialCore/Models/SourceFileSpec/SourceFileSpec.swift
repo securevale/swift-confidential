@@ -12,8 +12,10 @@ package extension SourceFileSpec {
 
     typealias Algorithm = ArraySlice<ObfuscationStep>
 
-    struct ObfuscationStep: Equatable {
-        let technique: Technique
+    enum ObfuscationStep: Hashable {
+        case compress(algorithm: Obfuscation.Compression.CompressionAlgorithm)
+        case encrypt(algorithm: Obfuscation.Encryption.SymmetricEncryptionAlgorithm)
+        case shuffle
     }
 
     struct Secret {
@@ -42,15 +44,6 @@ package extension SourceFileSpec {
             _read { yield self.secrets[namespace] }
             _modify { yield &self.secrets[namespace] }
         }
-    }
-}
-
-package extension SourceFileSpec.ObfuscationStep {
-
-    enum Technique: Hashable {
-        case compression(algorithm: Obfuscation.Compression.CompressionAlgorithm)
-        case encryption(algorithm: Obfuscation.Encryption.SymmetricEncryptionAlgorithm)
-        case randomization
     }
 }
 

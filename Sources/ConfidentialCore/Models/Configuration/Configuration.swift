@@ -2,7 +2,7 @@ import ConfidentialKit
 
 // swiftlint:disable discouraged_optional_boolean
 package struct Configuration: Equatable, Decodable {
-    var algorithm: ArraySlice<String>
+    var algorithm: Algorithm?
     var defaultAccessModifier: String?
     var defaultNamespace: String?
     var experimentalMode: Bool?
@@ -22,7 +22,7 @@ package extension Configuration {
             try container.decodeIfPresent(Bool.self, forKey: .implementationOnlyImport)
         }
         self = .init(
-            algorithm: try container.decode([String].self, forKey: .algorithm)[...],
+            algorithm: try container.decodeIfPresent(Algorithm.self, forKey: .algorithm),
             defaultAccessModifier: try container.decodeIfPresent(String.self, forKey: .defaultAccessModifier),
             defaultNamespace: try container.decodeIfPresent(String.self, forKey: .defaultNamespace),
             experimentalMode: try container.decodeIfPresent(Bool.self, forKey: .experimentalMode),
@@ -36,6 +36,26 @@ extension Configuration {
 
     var isExperimentalModeEnabled: Bool { experimentalMode ?? false }
     var isInternalImportEnabled: Bool { internalImport ?? false }
+}
+
+extension Configuration {
+
+    enum Algorithm: Equatable, Decodable {
+
+        case random(String)
+        case custom(ArraySlice<String>)
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            do {
+                let algorithm = try container.decode(String.self)
+                self = .random(algorithm)
+            } catch DecodingError.typeMismatch {
+                let algorithm = try container.decode([String].self)[...]
+                self = .custom(algorithm)
+            }
+        }
+    }
 }
 
 extension Configuration {
@@ -59,11 +79,12 @@ extension Configuration.Secret {
 
         init(from decoder: Decoder) throws {
             let container = try decoder.singleValueContainer()
-            if let value = try? container.decode(DataTypes.Array.self) {
-                self = .array(value)
-            } else {
+            do {
                 let value = try container.decode(DataTypes.SingleValue.self)
                 self = .singleValue(value)
+            } catch DecodingError.typeMismatch {
+                let value = try container.decode(DataTypes.Array.self)
+                self = .array(value)
             }
         }
     }

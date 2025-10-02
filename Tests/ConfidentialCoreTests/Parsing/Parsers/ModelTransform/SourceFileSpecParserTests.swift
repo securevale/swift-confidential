@@ -10,6 +10,7 @@ final class SourceFileSpecParserTests: XCTestCase {
 
     private let configurationStub: Configuration = {
         var configuration = Configuration.StubFactory.makeConfiguration()
+        configuration.algorithm = nil
         configuration.defaultAccessModifier = "internal"
         configuration.defaultNamespace = "Secrets"
         configuration.experimentalMode = false
@@ -17,7 +18,7 @@ final class SourceFileSpecParserTests: XCTestCase {
         return configuration
     }()
     private let algorithmStub: SourceFileSpec.Algorithm = [
-        .init(technique: .encryption(algorithm: .chaChaPoly))
+        .encrypt(algorithm: .chaChaPoly)
     ]
     private let secretsStub: SourceFileSpec.Secrets = [
         .extend(identifier: "Secrets", moduleName: "SecretModule"): [.StubFactory.makePublicSecret()]
@@ -31,7 +32,7 @@ final class SourceFileSpecParserTests: XCTestCase {
     override func setUp() {
         super.setUp()
         algorithmParserSpy = .init(result: algorithmStub)
-        algorithmParserSpy.consumeInput = { $0.algorithm = [] }
+        algorithmParserSpy.consumeInput = { $0.algorithm = nil }
         secretsParserSpy = .init(result: secretsStub)
         secretsParserSpy.consumeInput = { $0.secrets = [] }
         sut = .init(
@@ -64,7 +65,7 @@ final class SourceFileSpecParserTests: XCTestCase {
         XCTAssertEqual(expectedSpec, spec)
         XCTAssertEqual([configurationStub], algorithmParserSpy.parseRecordedInput)
         XCTAssertEqual([configurationStub], secretsParserSpy.parseRecordedInput)
-        XCTAssertTrue(configuration.algorithm.isEmpty)
+        XCTAssertNil(configuration.algorithm)
         XCTAssertNil(configuration.defaultAccessModifier)
         XCTAssertNil(configuration.defaultNamespace)
         XCTAssertNil(configuration.experimentalMode)

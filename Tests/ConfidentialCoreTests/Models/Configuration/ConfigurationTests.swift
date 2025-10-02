@@ -7,17 +7,16 @@ final class ConfigurationTests: XCTestCase {
 
     func test_givenJSONEncodedConfiguration_whenDecodeWithJSONDecoder_thenNoThrowAndReturnsExpectedConfigurationInstance() {
         // given
-        let algorithm = ["compress using lz4", "encrypt using aes-128-gcm"]
         let defaultAccessModifier = "internal"
         let defaultNamespace = "create Secrets"
         let internalImport = false
         let secret1 = ("secret1", "value", "extend Obfuscation.Secret from ConfidentialKit", "public")
         let secret2 = ("secret2", ["value1", "value2"])
-        let jsonConfiguration: (String) -> Data = { internalImportLabel in
+        let jsonConfiguration: (String, String) -> Data = { algorithm, internalImportLabel in
             .init(
                 """
                 {
-                  "algorithm": [\(algorithm.map { #""\#($0)""# }.joined(separator: ","))],
+                  "algorithm": \(algorithm),
                   "defaultAccessModifier": "\(defaultAccessModifier)",
                   "defaultNamespace": "\(defaultNamespace)",
                   "\(internalImportLabel)": \(internalImport),
@@ -30,37 +29,46 @@ final class ConfigurationTests: XCTestCase {
             )
         }
         let jsonConfigurations = [
-            jsonConfiguration("internalImport"),
-            jsonConfiguration("implementationOnlyImport")
+            jsonConfiguration(#""random""#, "internalImport"),
+            jsonConfiguration(#"["compress using lz4", "shuffle"]"#, "implementationOnlyImport")
         ]
         let decoder = JSONDecoder()
 
+        print(jsonConfigurations[0])
         // when & then
         var configurations: [Configuration] = []
         XCTAssertNoThrow(
             configurations = try jsonConfigurations.map { try decoder.decode(SUT.self, from: $0) }
         )
-        let expectedConfiguration = SUT(
-            algorithm: algorithm[...],
-            defaultAccessModifier: defaultAccessModifier,
-            defaultNamespace: defaultNamespace,
-            internalImport: internalImport,
-            secrets: [
-                .init(
-                    name: secret1.0,
-                    value: .singleValue(secret1.1),
-                    namespace: secret1.2,
-                    accessModifier: secret1.3
-                ),
-                .init(
-                    name: secret2.0,
-                    value: .array(secret2.1),
-                    namespace: .none,
-                    accessModifier: .none
-                )
-            ][...]
+        let expectedConfiguration: (SUT.Algorithm?) -> SUT = { algorithm in
+            SUT(
+                algorithm: algorithm,
+                defaultAccessModifier: defaultAccessModifier,
+                defaultNamespace: defaultNamespace,
+                internalImport: internalImport,
+                secrets: [
+                    .init(
+                        name: secret1.0,
+                        value: .singleValue(secret1.1),
+                        namespace: secret1.2,
+                        accessModifier: secret1.3
+                    ),
+                    .init(
+                        name: secret2.0,
+                        value: .array(secret2.1),
+                        namespace: .none,
+                        accessModifier: .none
+                    )
+                ][...]
+            )
+        }
+        XCTAssertEqual(
+            [
+                expectedConfiguration(.random("random")),
+                expectedConfiguration(.custom(["compress using lz4", "shuffle"]))
+            ],
+            configurations
         )
-        XCTAssertEqual([expectedConfiguration, expectedConfiguration], configurations)
     }
 
     func test_givenInvalidJSONEncodedConfiguration_whenDecodeWithJSONDecoder_thenThrowsError() {
@@ -69,11 +77,6 @@ final class ConfigurationTests: XCTestCase {
             """
             {
               "algorithm": ["compress using lz4"]
-            }
-            """,
-            """
-            {
-              "secrets": [{ "name": "secret", "value": "value" }]
             }
             """,
             """

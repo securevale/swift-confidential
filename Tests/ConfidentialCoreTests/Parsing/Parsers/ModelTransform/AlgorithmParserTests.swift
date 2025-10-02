@@ -3,81 +3,89 @@ import XCTest
 
 final class AlgorithmParserTests: XCTestCase {
 
-    private typealias ObfuscationStepParserSpy = ParserSpy<Substring, SourceFileSpec.ObfuscationStep>
+    private typealias ObfuscationStepsParserSpy = ParserSpy<
+        ArraySlice<String>, ArraySlice<SourceFileSpec.ObfuscationStep>
+    >
 
-    private typealias SUT = AlgorithmParser<ObfuscationStepParserSpy>
+    private typealias SUT = AlgorithmParser<ObfuscationStepsParserSpy>
 
-    private let obfuscationStepStub = "test"
-    private lazy var algorithmStub = (0..<2).map { _ in obfuscationStepStub }[...]
+    private let algorithmStub = ["step_1", "step_2"][...]
 
-    private var obfuscationStepParserSpy: ObfuscationStepParserSpy!
+    private var algorithmGeneratorSpy: AlgorithmGeneratorSpy!
+    private var obfuscationStepsParserSpy: ObfuscationStepsParserSpy!
 
     private var sut: SUT!
 
     override func setUp() {
         super.setUp()
-        obfuscationStepParserSpy = .init(result: .init(technique: .compression(algorithm: .lzfse)))
-        obfuscationStepParserSpy.consumeInput = { $0 = "" }
-        sut = .init(obfuscationStepParser: obfuscationStepParserSpy)
+        algorithmGeneratorSpy = .init(generateAlgorithmReturnValue: [.shuffle])
+        obfuscationStepsParserSpy = .init(result: [.compress(algorithm: .lzfse)])
+        obfuscationStepsParserSpy.consumeInput = { $0 = [] }
+        sut = .init(
+            algorithmGenerator: algorithmGeneratorSpy,
+            obfuscationStepsParser: obfuscationStepsParserSpy
+        )
     }
 
     override func tearDown() {
         sut = nil
-        obfuscationStepParserSpy = nil
+        obfuscationStepsParserSpy = nil
+        algorithmGeneratorSpy = nil
         super.tearDown()
     }
 
-    func test_givenConfiguration_whenParse_thenReturnsExpectedValueAndConfigurationAlgorithmIsEmpty() throws {
+    func test_givenConfiguration_whenParse_thenReturnsExpectedValueAndConfigurationAlgorithmIsConsumed() throws {
         // given
-        var configuration = Configuration.StubFactory.makeConfiguration(algorithm: algorithmStub)
+        var configurations: [Configuration] = [
+            .StubFactory.makeConfiguration(algorithm: .none),
+            .StubFactory.makeConfiguration(algorithm: .random("random")),
+            .StubFactory.makeConfiguration(algorithm: .custom(algorithmStub))
+        ]
 
         // when
-        let algorithm = try sut.parse(&configuration)
+        let algorithms = try configurations.indices.map {
+            try sut.parse(&configurations[$0])
+        }
 
         // then
+        XCTAssertEqual(2, algorithmGeneratorSpy.generateAlgorithmCallCount)
         XCTAssertEqual(
-            (0..<algorithmStub.count).map { _ in obfuscationStepParserSpy.result }[...],
-            algorithm
+            [
+                algorithmGeneratorSpy.generateAlgorithmReturnValue,
+                algorithmGeneratorSpy.generateAlgorithmReturnValue,
+                obfuscationStepsParserSpy.result
+            ],
+            algorithms
         )
-        XCTAssertEqual(
-            algorithmStub.map { $0[...] },
-            obfuscationStepParserSpy.parseRecordedInput
-        )
-        XCTAssertTrue(configuration.algorithm.isEmpty)
+        configurations.map(\.algorithm).forEach { XCTAssertNil($0) }
     }
 
-    func test_givenObfuscationStepParserFailsOnFirstStep_whenParse_thenThrowsErrorAndConfigurationAlgorithmLeftIntact() {
+    func test_givenObfuscationStepsParserFailsOnFirstStep_whenParse_thenThrowsErrorAndConfigurationAlgorithmLeftIntact() {
         // given
-        var configuration = Configuration.StubFactory.makeConfiguration(algorithm: algorithmStub)
-        obfuscationStepParserSpy.consumeInput = { _ in throw ErrorDummy() }
+        var configuration = Configuration.StubFactory.makeConfiguration(
+            algorithm: .custom(algorithmStub)
+        )
+        obfuscationStepsParserSpy.consumeInput = { _ in throw ErrorDummy() }
 
         // when & then
         XCTAssertThrowsError(try sut.parse(&configuration))
-        XCTAssertEqual(
-            [obfuscationStepStub[...]],
-            obfuscationStepParserSpy.parseRecordedInput
-        )
-        XCTAssertEqual(algorithmStub, configuration.algorithm)
+        XCTAssertEqual([algorithmStub], obfuscationStepsParserSpy.parseRecordedInput)
+        XCTAssertEqual(.custom(algorithmStub), configuration.algorithm)
     }
 
-    func test_givenObfuscationStepParserFailsOnSecondStep_whenParse_thenThrowsErrorAndConfigurationAlgorithmContainsAllButFirstStep() {
+    func test_givenObfuscationStepsParserFailsOnSecondStep_whenParse_thenThrowsErrorAndConfigurationAlgorithmContainsAllButFirstStep() {
         // given
-        var configuration = Configuration.StubFactory.makeConfiguration(algorithm: algorithmStub)
-        var stepCount: Int = .zero
-        obfuscationStepParserSpy.consumeInput = { input in
-            guard stepCount == .zero else {
-                throw ErrorDummy()
-            }
-            stepCount += 1
-            input = ""
+        var configuration = Configuration.StubFactory.makeConfiguration(
+            algorithm: .custom(algorithmStub)
+        )
+        obfuscationStepsParserSpy.consumeInput = { input in
+            input.removeFirst()
+            throw ErrorDummy()
         }
 
         // when & then
         XCTAssertThrowsError(try sut.parse(&configuration))
-        XCTAssertEqual(
-            algorithmStub.map { $0[...] },
-            obfuscationStepParserSpy.parseRecordedInput
-        )
-        XCTAssertEqual(algorithmStub.dropFirst(), configuration.algorithm)
+        XCTAssertEqual([algorithmStub], obfuscationStepsParserSpy.parseRecordedInput)
+        XCTAssertEqual(.custom(algorithmStub.dropFirst()), configuration.algorithm)
     }
 }

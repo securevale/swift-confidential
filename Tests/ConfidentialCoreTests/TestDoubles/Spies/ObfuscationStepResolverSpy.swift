@@ -2,16 +2,16 @@
 
 final class ObfuscationStepResolverSpy: DataObfuscationStepResolver {
 
-    var obfuscationStepReturnValue: any DataObfuscationStep
+    var implementationReturnValue: any DataObfuscationStep
 
-    private(set) var recordedTechniques: [Technique] = []
+    private(set) var recordedSteps: [Step] = []
 
-    init(obfuscationStepReturnValue: any DataObfuscationStep) {
-        self.obfuscationStepReturnValue = obfuscationStepReturnValue
+    init(implementationReturnValue: any DataObfuscationStep) {
+        self.implementationReturnValue = implementationReturnValue
     }
 
-    func obfuscationStep(for technique: Technique) -> DataObfuscationStep {
-        recordedTechniques.append(technique)
-        return obfuscationStepReturnValue
+    func implementation(for step: Step) -> DataObfuscationStep {
+        recordedSteps.append(step)
+        return implementationReturnValue
     }
 }

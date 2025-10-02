@@ -7,7 +7,7 @@ final class ImportDeclParserTests: XCTestCase {
 
     private typealias SUT = ImportDeclParser
 
-    private let algorithmStub: SourceFileSpec.Algorithm = [.init(technique: .randomization)]
+    private let algorithmStub: SourceFileSpec.Algorithm = [.shuffle]
     private let customModuleNameStub = "Crypto"
 
     private var sut: SUT!

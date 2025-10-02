@@ -3,12 +3,12 @@ import XCTest
 
 import ConfidentialKit
 
-final class CompressionTechniqueParserTests: XCTestCase {
+final class EncryptStepParserTests: XCTestCase {
 
-    private typealias Algorithm = Obfuscation.Compression.CompressionAlgorithm
-    private typealias Technique = CompressionTechniqueParser.Technique
+    private typealias Algorithm = Obfuscation.Encryption.SymmetricEncryptionAlgorithm
+    private typealias ObfuscationStep = SourceFileSpec.ObfuscationStep
 
-    private typealias SUT = CompressionTechniqueParser
+    private typealias SUT = EncryptStepParser
 
     private var sut: SUT!
 
@@ -25,33 +25,33 @@ final class CompressionTechniqueParserTests: XCTestCase {
     func test_givenValidInput_whenParse_thenReturnsExpectedEnumValueAndInputIsEmpty() throws {
         // given
         var inputData = Algorithm.allCases.map { algorithm in
-            "\(C.Parsing.Keywords.compress) \(C.Parsing.Keywords.using) \(algorithm.description)"[...]
+            "\(C.Parsing.Keywords.encrypt) \(C.Parsing.Keywords.using) \(algorithm.description)"[...]
         }
 
         // when
-        let techniques = try inputData.indices.map {
+        let steps = try inputData.indices.map {
             try sut.parse(&inputData[$0])
         }
 
         // then
-        let expectedTechniques = Algorithm.allCases.map { Technique.compression(algorithm: $0) }
-        XCTAssertEqual(inputData.count, techniques.count)
-        XCTAssertEqual(expectedTechniques.count, techniques.count)
-        techniques.enumerated().forEach { idx, technique in
-            XCTAssertEqual(expectedTechniques[idx], technique)
+        let expectedSteps = Algorithm.allCases.map { ObfuscationStep.encrypt(algorithm: $0) }
+        XCTAssertEqual(inputData.count, steps.count)
+        XCTAssertEqual(expectedSteps.count, steps.count)
+        steps.enumerated().forEach { idx, step in
+            XCTAssertEqual(expectedSteps[idx], step)
             XCTAssertTrue(inputData[idx].isEmpty)
         }
     }
 
     func test_givenValidInputWithExtraWhitespaces_whenParse_thenReturnsExpectedEnumValueAndInputIsEmpty() throws {
         // given
-        var input = " \(C.Parsing.Keywords.compress)  \(C.Parsing.Keywords.using)   \(Algorithm.lz4.description)"[...]
+        var input = " \(C.Parsing.Keywords.encrypt)  \(C.Parsing.Keywords.using)   \(Algorithm.aes128GCM.description)"[...]
 
         // when
-        let technique = try sut.parse(&input)
+        let step = try sut.parse(&input)
 
         // then
-        XCTAssertEqual(.compression(algorithm: .lz4), technique)
+        XCTAssertEqual(.encrypt(algorithm: .aes128GCM), step)
         XCTAssertTrue(input.isEmpty)
     }
 
@@ -67,14 +67,14 @@ final class CompressionTechniqueParserTests: XCTestCase {
     func test_givenInputWithoutExpectedWhitespace_whenParse_thenThrowsErrorAndInputEqualsExpectedRemainder() {
         // given
         let inputData = [
-            "\(C.Parsing.Keywords.compress)\(C.Parsing.Keywords.using) \(Algorithm.lz4.description)",
-            "\(C.Parsing.Keywords.compress) \(C.Parsing.Keywords.using)\(Algorithm.lz4.description)"
+            "\(C.Parsing.Keywords.encrypt)\(C.Parsing.Keywords.using) \(Algorithm.aes128GCM.description)",
+            "\(C.Parsing.Keywords.encrypt) \(C.Parsing.Keywords.using)\(Algorithm.aes128GCM.description)"
         ]
 
         // when & then
         let expectedRemainders = [
-            "\(C.Parsing.Keywords.using) \(Algorithm.lz4.description)",
-            "\(Algorithm.lz4.description)"
+            "\(C.Parsing.Keywords.using) \(Algorithm.aes128GCM.description)",
+            "\(Algorithm.aes128GCM.description)"
         ]
         for idx in inputData.indices {
             var input = inputData[idx][...]
@@ -88,15 +88,15 @@ final class CompressionTechniqueParserTests: XCTestCase {
         let inputData = [
             """
 
-            \(C.Parsing.Keywords.compress)
+            \(C.Parsing.Keywords.encrypt)
             """,
             """
-            \(C.Parsing.Keywords.compress)
+            \(C.Parsing.Keywords.encrypt)
             \(C.Parsing.Keywords.using)
             """,
             """
-            \(C.Parsing.Keywords.compress) \(C.Parsing.Keywords.using)
-            \(Algorithm.lz4.description)
+            \(C.Parsing.Keywords.encrypt) \(C.Parsing.Keywords.using)
+            \(Algorithm.aes128GCM.description)
             """
         ]
 
@@ -104,7 +104,7 @@ final class CompressionTechniqueParserTests: XCTestCase {
         let expectedRemainders = [
             """
 
-            \(C.Parsing.Keywords.compress)
+            \(C.Parsing.Keywords.encrypt)
             """,
             """
 
@@ -112,7 +112,7 @@ final class CompressionTechniqueParserTests: XCTestCase {
             """,
             """
 
-            \(Algorithm.lz4.description)
+            \(Algorithm.aes128GCM.description)
             """
         ]
         for idx in inputData.indices {
@@ -124,7 +124,7 @@ final class CompressionTechniqueParserTests: XCTestCase {
 
     func test_givenInputWithUnexpectedTrailingData_whenParse_thenThrowsErrorAndInputEqualsTrailingData() {
         // given
-        var input = "\(C.Parsing.Keywords.compress) \(C.Parsing.Keywords.using) \(Algorithm.lz4.description) Test"[...]
+        var input = "\(C.Parsing.Keywords.encrypt) \(C.Parsing.Keywords.using) \(Algorithm.aes128GCM.description) Test"[...]
 
         // when & then
         XCTAssertThrowsError(try sut.parse(&input))

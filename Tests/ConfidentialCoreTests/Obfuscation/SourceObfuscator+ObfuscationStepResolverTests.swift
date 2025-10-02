@@ -5,7 +5,7 @@ import ConfidentialKit
 
 final class SourceObfuscator_ObfuscationStepResolverTests: XCTestCase {
 
-    private typealias Technique = SourceFileSpec.ObfuscationStep.Technique
+    private typealias ObfuscationStep = SourceFileSpec.ObfuscationStep
 
     private typealias SUT = SourceObfuscator.ObfuscationStepResolver
 
@@ -21,28 +21,28 @@ final class SourceObfuscator_ObfuscationStepResolverTests: XCTestCase {
         super.tearDown()
     }
 
-    func test_givenObfuscationStepResolver_whenObfuscationStepForTechnique_thenReturnsExpectedObfuscationStepInstance() {
+    func test_givenObfuscationStepResolver_whenImplementationForStep_thenReturnsExpectedObfuscationStepInstance() {
         // given
-        let compressionTechnique = Technique.compression(algorithm: .lz4)
-        let encryptionTechnique = Technique.encryption(algorithm: .aes128GCM)
-        let randomizationTechnique = Technique.randomization
-        let techniques: [Technique] = [
-            compressionTechnique,
-            encryptionTechnique,
-            randomizationTechnique
+        let compressStep = ObfuscationStep.compress(algorithm: .lz4)
+        let encryptStep = ObfuscationStep.encrypt(algorithm: .aes128GCM)
+        let shuffleStep = ObfuscationStep.shuffle
+        let obfuscationSteps: [ObfuscationStep] = [
+            compressStep,
+            encryptStep,
+            shuffleStep
         ]
 
         // when
-        let obfuscationSteps: [Technique: any DataObfuscationStep] = .init(
-            uniqueKeysWithValues: techniques.map {
-                let step = sut.obfuscationStep(for: $0)
-                return ($0, step)
+        let implementations: [ObfuscationStep: any DataObfuscationStep] = .init(
+            uniqueKeysWithValues: obfuscationSteps.map {
+                let implementation = sut.implementation(for: $0)
+                return ($0, implementation)
             }
         )
 
         // then
-        XCTAssertTrue(obfuscationSteps[compressionTechnique] is Obfuscation.Compression.DataCompressor)
-        XCTAssertTrue(obfuscationSteps[encryptionTechnique] is Obfuscation.Encryption.DataCrypter)
-        XCTAssertTrue(obfuscationSteps[randomizationTechnique] is Obfuscation.Randomization.DataShuffler)
+        XCTAssertTrue(implementations[compressStep] is Obfuscation.Compression.DataCompressor)
+        XCTAssertTrue(implementations[encryptStep] is Obfuscation.Encryption.DataCrypter)
+        XCTAssertTrue(implementations[shuffleStep] is Obfuscation.Randomization.DataShuffler)
     }
 }

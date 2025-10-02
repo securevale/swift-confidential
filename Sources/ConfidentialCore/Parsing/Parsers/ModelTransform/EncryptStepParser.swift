@@ -1,17 +1,17 @@
 import ConfidentialKit
 import Parsing
 
-struct CompressionTechniqueParser: Parser {
+struct EncryptStepParser: Parser {
 
-    typealias Technique = SourceFileSpec.ObfuscationStep.Technique
+    typealias ObfuscationStep = SourceFileSpec.ObfuscationStep
 
-    private typealias Algorithm = Obfuscation.Compression.CompressionAlgorithm
+    private typealias Algorithm = Obfuscation.Encryption.SymmetricEncryptionAlgorithm
 
-    func parse(_ input: inout Substring) throws -> Technique {
-        try Parse(input: Substring.self, Technique.compression(algorithm:)) {
+    func parse(_ input: inout Substring) throws -> ObfuscationStep {
+        try Parse(input: Substring.self, ObfuscationStep.encrypt(algorithm:)) {
             Parse(input: Substring.self) {
                 Whitespace(.horizontal)
-                C.Parsing.Keywords.compress
+                C.Parsing.Keywords.encrypt
                 Whitespace(1..., .horizontal)
                 C.Parsing.Keywords.using
                 Whitespace(1..., .horizontal)

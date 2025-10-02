@@ -6,7 +6,7 @@ final class EncodableSpy<Value: Encodable>: Encodable {
 
     func encode(to encoder: Encoder) throws {
         encodeCallCount += 1
-        guard let encodableValue = encodableValue else { return }
+        guard let encodableValue else { return }
         var container = encoder.singleValueContainer()
         try container.encode(encodableValue)
     }

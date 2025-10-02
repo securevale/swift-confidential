@@ -16,7 +16,7 @@ final class ParameterlessClosureSpy<Result> {
 
     func closureWithError() throws -> Result {
         callCount += 1
-        if let error = error { throw error }
+        if let error { throw error }
         return result
     }
 }

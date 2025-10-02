@@ -21,6 +21,7 @@ enum C {
     enum Parsing {
 
         enum Keywords {
+            static let random: String = "random"
             static let compress: String = "compress"
             static let encrypt: String = "encrypt"
             static let shuffle: String = "shuffle"

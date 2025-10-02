@@ -10,21 +10,26 @@ where
     SecretsParser == AnySecretsParser
 { // swiftlint:disable:this opening_brace
 
-    private typealias Technique = SourceFileSpec.ObfuscationStep.Technique
-    private typealias AnyTechniqueParser = AnyParser<Substring, Technique>
-    private typealias OneOfManyTechniques = OneOfBuilder<Substring, Technique>.OneOf2<
-        OneOfBuilder<Substring, Technique>.OneOf2<AnyTechniqueParser, AnyTechniqueParser>,
-        AnyTechniqueParser
+    private typealias ObfuscationStep = SourceFileSpec.ObfuscationStep
+    private typealias AnyObfuscationStepParser = AnyParser<Substring, ObfuscationStep>
+    private typealias OneOfManyObfuscationSteps = OneOfBuilder<Substring, ObfuscationStep>.OneOf2<
+        OneOfBuilder<Substring, ObfuscationStep>.OneOf2<AnyObfuscationStepParser, AnyObfuscationStepParser>,
+        AnyObfuscationStepParser
     >
 
     init() {
         self.init(
             algorithmParser: ConfidentialCore.AlgorithmParser(
-                obfuscationStepParser: ObfuscationStepParser<OneOfManyTechniques> {
-                    CompressionTechniqueParser().eraseToAnyParser()
-                    EncryptionTechniqueParser().eraseToAnyParser()
-                    RandomizationTechniqueParser().eraseToAnyParser()
-                }
+                algorithmGenerator: RandomAlgorithmGenerator(
+                    randomNumberGenerator: SystemRandomNumberGenerator()
+                ),
+                obfuscationStepsParser: ObfuscationStepsParser<OneOfManyObfuscationSteps>(
+                    with: {
+                        CompressStepParser().eraseToAnyParser()
+                        EncryptStepParser().eraseToAnyParser()
+                        ShuffleStepParser().eraseToAnyParser()
+                    }
+                )
             )
             .eraseToAnyParser(),
             secretsParser: ConfidentialCore.SecretsParser(

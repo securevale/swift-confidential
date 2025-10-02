@@ -38,8 +38,7 @@ private extension SourceObfuscator {
     @inline(__always)
     func obfuscationFunc(given algorithm: Algorithm) -> ObfuscationFunc {
         algorithm
-            .map(\.technique)
-            .map(obfuscationStepResolver.obfuscationStep(for:))
+            .map(obfuscationStepResolver.implementation(for:))
             .reduce({ data, _ in data }, { partialFunc, step in
                 return {
                     try step.obfuscate(partialFunc($0, $1), nonce: $1)
