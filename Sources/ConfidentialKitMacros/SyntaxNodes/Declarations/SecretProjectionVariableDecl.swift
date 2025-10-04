@@ -6,8 +6,7 @@ extension VariableDeclSyntax {
         modifiers: DeclModifierListSyntax,
         secretIdentifier: TokenSyntax,
         type: TypeSyntax,
-        deobfuscateDataFunctionName: TokenSyntax,
-        deobfuscateDataFunctionArgumentLabels: (TokenSyntax, TokenSyntax)
+        deobfuscateDataArgument: ObfuscatedMacro.DeobfuscateDataArgument
     ) -> Self {
         .init(
             modifiers: modifiers,
@@ -24,10 +23,7 @@ extension VariableDeclSyntax {
                             catchClause()
                         }
                     ) {
-                        deobfuscatedDataVariableDecl(
-                            referencing: deobfuscateDataFunctionName,
-                            with: deobfuscateDataFunctionArgumentLabels
-                        )
+                        deobfuscatedDataVariableDecl(referencing: deobfuscateDataArgument)
                         valueAssignmentExpr(referencing: type)
                     }
                     returnStmt()
@@ -91,27 +87,35 @@ private extension VariableDeclSyntax {
     }
 
     static func deobfuscatedDataVariableDecl(
-        referencing deobfuscateDataFunctionName: TokenSyntax,
-        with deobfuscateDataFunctionArgumentLabels: (TokenSyntax, TokenSyntax)
+        referencing deobfuscateDataArgument: ObfuscatedMacro.DeobfuscateDataArgument
     ) -> Self {
-        .init(
+        let callee: any ExprSyntaxProtocol
+        let argumentLabels: (TokenSyntax, TokenSyntax)
+        switch deobfuscateDataArgument {
+        case let .closure(closureExpr):
+            callee = closureExpr
+            argumentLabels = (.wildcardToken(), .wildcardToken())
+        case let .functionReference(name, argLabels):
+            callee = DeclReferenceExprSyntax(baseName: name)
+            argumentLabels = argLabels
+        }
+
+        return .init(
             .let,
             name: deobfuscatedDataVariableName,
             initializer: .init(
                 value: TryExprSyntax(
                     expression: FunctionCallExprSyntax(
-                        callee: DeclReferenceExprSyntax(
-                            baseName: deobfuscateDataFunctionName
-                        )
+                        callee: callee
                     ) {
                         labeledExpr(
-                            label: deobfuscateDataFunctionArgumentLabels.0,
+                            label: argumentLabels.0,
                             expression: DeclReferenceExprSyntax(
                                 baseName: .identifier(secretDataVariableName)
                             )
                         )
                         labeledExpr(
-                            label: deobfuscateDataFunctionArgumentLabels.1,
+                            label: argumentLabels.1,
                             expression: DeclReferenceExprSyntax(
                                 baseName: .identifier(secretNonceVariableName)
                             )

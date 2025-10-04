@@ -17,16 +17,14 @@ extension ObfuscatedMacro {
             )
         }
 
-        static func macroDoesNotSupportClosureExpressions(
+        static func macroExpectsClosureOrFunctionReferenceExpression(
             node: some SyntaxProtocol,
             highlight: some SyntaxProtocol
         ) -> DiagnosticsError {
             DiagnosticsError(
                 node: node,
                 message: DiagnosticMessage(
-                    message: """
-                    '@Obfuscated' does not support closure expressions, use function reference instead
-                    """,
+                    message: "'@Obfuscated' expects closure or function reference expression",
                     severity: .error
                 ),
                 highlights: [Syntax(highlight)]

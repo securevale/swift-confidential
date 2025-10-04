@@ -3,6 +3,11 @@ import SwiftSyntaxMacros
 
 enum ObfuscatedMacro: PeerMacro {
 
+    enum DeobfuscateDataArgument {
+        case closure(ClosureExprSyntax)
+        case functionReference(name: TokenSyntax, argumentLabels: (TokenSyntax, TokenSyntax))
+    }
+
     static func expansion(
         of node: AttributeSyntax,
         providingPeersOf declaration: some DeclSyntaxProtocol,
@@ -12,18 +17,13 @@ enum ObfuscatedMacro: PeerMacro {
             throw DiagnosticErrors.macroCanOnlyBeAttachedToVariableDeclaration(node: node)
         }
 
-        let deobfuscateDataFuncRefExpr = try deobfuscateDataFunctionReferenceExpr(from: node)
+        let deobfuscateDataArgument = try deobfuscateDataArgument(from: node)
 
         let projectionVariableDecl = VariableDeclSyntax.makeSecretProjectionVariableDecl(
             modifiers: projectionVariableModifiers(for: variableDecl),
             secretIdentifier: try secretIdentifier(of: variableDecl),
             type: try projectionVariableType(from: node),
-            deobfuscateDataFunctionName: deobfuscateDataFunctionName(
-                from: deobfuscateDataFuncRefExpr
-            ),
-            deobfuscateDataFunctionArgumentLabels: deobfuscateDataFunctionArgumentLabels(
-                from: deobfuscateDataFuncRefExpr
-            )
+            deobfuscateDataArgument: deobfuscateDataArgument
         )
 
         return [
@@ -91,23 +91,29 @@ private extension ObfuscatedMacro {
 
 private extension ObfuscatedMacro {
 
-    static func deobfuscateDataFunctionReferenceExpr(
-        from node: AttributeSyntax
-    ) throws -> DeclReferenceExprSyntax {
+    static func deobfuscateDataArgument(from node: AttributeSyntax) throws -> DeobfuscateDataArgument {
         guard
             case let .argumentList(argumentList) = node.arguments,
             let argument = argumentList.first
         else {
             throw DiagnosticErrors.macroMissingArgumentForParameter(at: 1, node: node)
         }
-        guard let functionReferenceExpr = argument.expression.as(DeclReferenceExprSyntax.self) else {
-            throw DiagnosticErrors.macroDoesNotSupportClosureExpressions(
+        if let closureExpr = argument.expression.as(ClosureExprSyntax.self) {
+            return .closure(closureExpr)
+        } else if let functionReferenceExpr = argument.expression.as(DeclReferenceExprSyntax.self) {
+            let name = deobfuscateDataFunctionName(
+                from: functionReferenceExpr
+            )
+            let argumentLabels = deobfuscateDataFunctionArgumentLabels(
+                from: functionReferenceExpr
+            )
+            return .functionReference(name: name, argumentLabels: argumentLabels)
+        } else {
+            throw DiagnosticErrors.macroExpectsClosureOrFunctionReferenceExpression(
                 node: node,
                 highlight: argument.expression
             )
         }
-
-        return functionReferenceExpr
     }
 
     static func deobfuscateDataFunctionName(

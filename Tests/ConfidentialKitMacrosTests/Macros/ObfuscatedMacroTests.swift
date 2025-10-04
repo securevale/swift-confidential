@@ -1,6 +1,7 @@
 @testable import ConfidentialKitMacros
 import XCTest
 
+import SwiftSyntax
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
 
@@ -55,6 +56,28 @@ final class ObfuscatedMacroTests: XCTestCase {
         )
     }
 
+    func test_givenDeobfuscateDataClosure_whenExpandMacro_thenProducesExpectedSourceCode() {
+        // given
+        let originalSource = makeOriginalSource(deobfuscateDataArgument: "{ data, _ in data}")
+
+        // when & then
+        let expectedSource = makeExpandedSource(
+            from: originalSource,
+            deobfuscateDataCallee: """
+            { data, _ in
+            \(Trivia.spaces(12))data
+            \(Trivia.spaces(8))}
+            """,
+            deobfuscateDataArgumentLabels: (.none, .none)
+        )
+        assertMacroExpansion(
+            originalSource.description,
+            expandedSource: expectedSource.description,
+            macros: sut,
+            indentationWidth: .spaces(4)
+        )
+    }
+
     func test_givenDeobfuscateDataFunctionWithoutArgumentLabels_whenExpandMacro_thenProducesExpectedSourceCode() {
         // given
         let originalSource = makeOriginalSource(deobfuscateDataArgument: "deobfuscateData")
@@ -62,8 +85,8 @@ final class ObfuscatedMacroTests: XCTestCase {
         // when & then
         let expectedSource = makeExpandedSource(
             from: originalSource,
-            deobfuscateDataFunctionName: "deobfuscateData",
-            deobfuscateDataFunctionArgumentLabels: (.none, "nonce")
+            deobfuscateDataCallee: "deobfuscateData",
+            deobfuscateDataArgumentLabels: (.none, "nonce")
         )
         assertMacroExpansion(
             originalSource.description,
@@ -83,13 +106,13 @@ final class ObfuscatedMacroTests: XCTestCase {
         let expectedSources = [
             makeExpandedSource(
                 from: originalSources[0],
-                deobfuscateDataFunctionName: "deobfuscateData",
-                deobfuscateDataFunctionArgumentLabels: ("arg1", "arg2")
+                deobfuscateDataCallee: "deobfuscateData",
+                deobfuscateDataArgumentLabels: ("arg1", "arg2")
             ),
             makeExpandedSource(
                 from: originalSources[1],
-                deobfuscateDataFunctionName: "deobfuscateData",
-                deobfuscateDataFunctionArgumentLabels: (.none, .none)
+                deobfuscateDataCallee: "deobfuscateData",
+                deobfuscateDataArgumentLabels: (.none, .none)
             )
         ]
         zip(originalSources, expectedSources).forEach { originalSource, expectedSource in
@@ -99,6 +122,35 @@ final class ObfuscatedMacroTests: XCTestCase {
                 macros: sut
             )
         }
+    }
+
+    func test_givenDeobfuscateDataInvalidExpression_whenExpandMacro_thenEmitsExpectedDiagnostic() {
+        // given
+        let originalSource = """
+        @Obfuscated<Test>(2 + 2)
+        static let secret: ConfidentialKit.Obfuscation.Secret = .init(data: [], nonce: 12408361842259298372)
+        """
+
+        // when & then
+        let expectedDiagnostic = DiagnosticSpec(
+            id: .init(
+                domain: "ObfuscatedMacro",
+                id: "DiagnosticErrors.macroExpectsClosureOrFunctionReferenceExpression(node:highlight:)"
+            ),
+            message: "'@Obfuscated' expects closure or function reference expression",
+            line: 1,
+            column: 1,
+            severity: .error,
+            highlights: ["2 + 2"]
+        )
+        assertMacroExpansion(
+            originalSource,
+            expandedSource: """
+            static let secret: ConfidentialKit.Obfuscation.Secret = .init(data: [], nonce: 12408361842259298372)
+            """,
+            diagnostics: [expectedDiagnostic],
+            macros: sut
+        )
     }
 
     func test_givenDeobfuscateDataArgumentIsMissing_whenExpandMacro_thenEmitsExpectedDiagnostic() {
@@ -118,35 +170,6 @@ final class ObfuscatedMacroTests: XCTestCase {
             line: 1,
             column: 1,
             severity: .error
-        )
-        assertMacroExpansion(
-            originalSource,
-            expandedSource: """
-            static let secret: ConfidentialKit.Obfuscation.Secret = .init(data: [], nonce: 12408361842259298372)
-            """,
-            diagnostics: [expectedDiagnostic],
-            macros: sut
-        )
-    }
-
-    func test_givenDeobfuscateDataClosureExpression_whenExpandMacro_thenEmitsExpectedDiagnostic() {
-        // given
-        let originalSource = """
-        @Obfuscated<Test>({ data, _ in data })
-        static let secret: ConfidentialKit.Obfuscation.Secret = .init(data: [], nonce: 12408361842259298372)
-        """
-
-        // when & then
-        let expectedDiagnostic = DiagnosticSpec(
-            id: .init(
-                domain: "ObfuscatedMacro",
-                id: "DiagnosticErrors.macroDoesNotSupportClosureExpressions(node:highlight:)"
-            ),
-            message: "'@Obfuscated' does not support closure expressions, use function reference instead",
-            line: 1,
-            column: 1,
-            severity: .error,
-            highlights: ["{ data, _ in data }"]
         )
         assertMacroExpansion(
             originalSource,
@@ -304,14 +327,14 @@ private extension ObfuscatedMacroTests {
         let variableName: String
         let projectionVariableModifiers: [String]
         let projectionVariableType: String
-        let deobfuscateDataFunctionName: String
-        let deobfuscateDataFunctionArgumentLabels: (String?, String?)
+        let deobfuscateDataCallee: String
+        let deobfuscateDataArgumentLabels: (String?, String?)
 
         var description: String {
             let variableModifiers = variableModifiers.joined(separator: " ")
             let projectionVariableModifiers = projectionVariableModifiers.joined(separator: " ")
-            let dataArgumentLabel = deobfuscateDataFunctionArgumentLabels.0.map { "\($0): " } ?? ""
-            let nonceArgumentLabel = deobfuscateDataFunctionArgumentLabels.1.map { "\($0): " } ?? ""
+            let dataArgumentLabel = deobfuscateDataArgumentLabels.0.map { "\($0): " } ?? ""
+            let nonceArgumentLabel = deobfuscateDataArgumentLabels.1.map { "\($0): " } ?? ""
             return """
             \(variableModifiers) let \(variableName): ConfidentialKit.Obfuscation.Secret = \
             .init(data: [], nonce: 12408361842259298372)
@@ -322,7 +345,7 @@ private extension ObfuscatedMacroTests {
                 let value: \(projectionVariableType)
                 do {
                     let deobfuscatedData = \
-            try \(deobfuscateDataFunctionName)(\(dataArgumentLabel)data, \(nonceArgumentLabel)nonce)
+            try \(deobfuscateDataCallee)(\(dataArgumentLabel)data, \(nonceArgumentLabel)nonce)
                     value = try JSONDecoder().decode(\(projectionVariableType).self, from: deobfuscatedData)
                 } catch {
                     preconditionFailure("Unexpected error: \\(error)")
@@ -335,30 +358,30 @@ private extension ObfuscatedMacroTests {
 
     func makeExpandedSource(
         from originalSource: OriginalSource,
-        deobfuscateDataFunctionName: String = "deobfuscateData",
-        deobfuscateDataFunctionArgumentLabels: (String?, String?) = (.none, "nonce")
+        deobfuscateDataCallee: String = "deobfuscateData",
+        deobfuscateDataArgumentLabels: (String?, String?) = (.none, "nonce")
     ) -> ExpandedSource {
         makeExpandedSource(
             from: originalSource,
             projectionVariableModifiers: originalSource.variableModifiers,
-            deobfuscateDataFunctionName: deobfuscateDataFunctionName,
-            deobfuscateDataFunctionArgumentLabels: deobfuscateDataFunctionArgumentLabels
+            deobfuscateDataCallee: deobfuscateDataCallee,
+            deobfuscateDataArgumentLabels: deobfuscateDataArgumentLabels
         )
     }
 
     func makeExpandedSource(
         from originalSource: OriginalSource,
         projectionVariableModifiers: [String],
-        deobfuscateDataFunctionName: String = "deobfuscateData",
-        deobfuscateDataFunctionArgumentLabels: (String?, String?) = (.none, "nonce")
+        deobfuscateDataCallee: String = "deobfuscateData",
+        deobfuscateDataArgumentLabels: (String?, String?) = (.none, "nonce")
     ) -> ExpandedSource {
         .init(
             variableModifiers: originalSource.variableModifiers,
             variableName: originalSource.variableName,
             projectionVariableModifiers: projectionVariableModifiers,
             projectionVariableType: originalSource.plainValueGenericArgument,
-            deobfuscateDataFunctionName: deobfuscateDataFunctionName,
-            deobfuscateDataFunctionArgumentLabels: deobfuscateDataFunctionArgumentLabels
+            deobfuscateDataCallee: deobfuscateDataCallee,
+            deobfuscateDataArgumentLabels: deobfuscateDataArgumentLabels
         )
     }
 }
