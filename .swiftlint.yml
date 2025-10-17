@@ -11,6 +11,9 @@ included:
 #   RULES STATE    #
 ####################
 
+disabled_rules:
+  - syntactic_sugar
+
 opt_in_rules:
   - closure_body_length
   - closure_end_indentation

@@ -6,6 +6,7 @@ import SwiftSyntaxMacros
 struct ConfidentialCompilerPlugin: CompilerPlugin {
 
     let providingMacros: [Macro.Type] = [
+        ObfuscateMacro.self,
         ObfuscatedMacro.self
     ]
 }

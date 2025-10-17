@@ -17,8 +17,8 @@ readonly SWIFT_BUILD_DIR_NAME=".build"
 readonly COVERAGE_DIR_NAME=".coverage"
 readonly COVERAGE_INCLUDE_LIST=(
         "Sources/ConfidentialCore/"
-        "Sources/ConfidentialKit/"
         "Sources/ConfidentialKitMacros/"
+        "Sources/ConfidentialParsing/"
         "Sources/ConfidentialUtils/"
     )
 

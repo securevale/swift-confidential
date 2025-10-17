@@ -23,12 +23,20 @@ var package = Package(
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.1"..<"603.0.0")
     ],
     targets: [
+        // Core Module
+        .target(
+            name: "ConfidentialCore",
+            dependencies: [
+                "ConfidentialUtils"
+            ]
+        ),
+
         // Client Library
         .target(
             name: "ConfidentialKit",
             dependencies: [
-                "ConfidentialKitMacros",
-                "ConfidentialUtils"
+                "ConfidentialCore",
+                "ConfidentialKitMacros"
             ]
         ),
 
@@ -36,6 +44,8 @@ var package = Package(
         .macro(
             name: "ConfidentialKitMacros",
             dependencies: [
+                "ConfidentialCore",
+                "ConfidentialUtils",
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
             ]
@@ -46,13 +56,15 @@ var package = Package(
 
         // Tests
         .testTarget(
-            name: "ConfidentialKitTests",
-            dependencies: ["ConfidentialKit"]
+            name: "ConfidentialCoreTests",
+            dependencies: ["ConfidentialCore"]
         ),
         .testTarget(
             name: "ConfidentialKitMacrosTests",
             dependencies: [
+                "ConfidentialCore",
                 "ConfidentialKitMacros",
+                "ConfidentialUtils",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
             ]
         ),
@@ -71,11 +83,11 @@ package.dependencies.append(contentsOf: [
     .package(url: "https://github.com/jpsim/Yams.git", from: "6.1.0")
 ])
 package.targets.append(contentsOf: [
-    // Core Module
+    // Parsing
     .target(
-        name: "ConfidentialCore",
+        name: "ConfidentialParsing",
         dependencies: [
-            "ConfidentialKit",
+            "ConfidentialCore",
             "ConfidentialUtils",
             .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
             .product(name: "Parsing", package: "swift-parsing")
@@ -86,7 +98,7 @@ package.targets.append(contentsOf: [
     .executableTarget(
         name: "swift-confidential",
         dependencies: [
-            "ConfidentialCore",
+            "ConfidentialParsing",
             "Yams",
             .product(name: "ArgumentParser", package: "swift-argument-parser")
         ]
@@ -94,8 +106,8 @@ package.targets.append(contentsOf: [
 
     // Tests
     .testTarget(
-        name: "ConfidentialCoreTests",
-        dependencies: ["ConfidentialCore"]
+        name: "ConfidentialParsingTests",
+        dependencies: ["ConfidentialParsing"]
     )
 ])
 #endif

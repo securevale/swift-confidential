@@ -5,9 +5,9 @@
 [![Swift](https://img.shields.io/badge/Swift-6.2%20%7C%206.1%20%7C%206.0-red)](https://www.swift.org/download)
 [![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%20visionOS%20%7C%20watchOS%20%7C%20tvOS-red)]()
 
-A highly configurable and performant tool for obfuscating Swift literals embedded in the application code that you should protect from static code analysis, making the app more resistant to reverse engineering.
+A highly configurable and performant tool for obfuscating Swift literals embedded in the application code that you should protect against static code analysis, making the app more resistant to reverse engineering.
 
-Simply integrate the tool with your Swift package or Xcode project, configure your own obfuscation algorithm along with the list of secret literals, and build the project 🚀
+Simply add the `swift-confidential` package dependency to your Swift package or Xcode project, use the `Obfuscate(algorithm:declarations:)` macro to obfuscate your secret literals, and build the project 🚀
 
 Swift Confidential can save you a lot of time, especially if you are developing an iOS app and seeking to meet [OWASP MASVS-RESILIENCE](https://mas.owasp.org/MASVS/11-MASVS-RESILIENCE/) requirements.
 
@@ -32,9 +32,6 @@ Begin by creating a `confidential.yml` YAML configuration file in the root direc
 For example, a configuration file for the hypothetical `RASP` module could look like this:
 
 ```yaml
-algorithm:
-  - encrypt using aes-192-gcm
-  - shuffle
 defaultNamespace: create ObfuscatedLiterals
 secrets:
   - name: suspiciousDynamicLibraries
@@ -51,8 +48,8 @@ secrets:
       # ... other suspicious file paths
 ```
 
-> [!WARNING]  
-> The algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**. Instead, compose your own algorithm from the [obfuscation techniques](#obfuscation-techniques) described below and **don't share your algorithm with anyone**. Moreover, following the [secure SDLC](https://owasp.org/www-project-integration-standards/writeups/owasp_in_sdlc/) best practices, consider not to commit the production algorithm in your repository, but instead configure your CI/CD pipeline to run a custom script (ideally just before the build step), which will modify the configuration file by replacing the algorithm value with the one retrieved from the secrets vault.
+> [!TIP]  
+> If you choose to use your own [obfuscation algorithm](#obfuscation-techniques), following the [secure SDLC](https://owasp.org/www-project-integration-standards/writeups/owasp_in_sdlc/) best practices, consider not to commit the production algorithm in your repository, but instead configure your CI/CD pipeline to run a custom script (ideally just before the build step), which will modify the configuration file by replacing the algorithm value with the one retrieved from the secrets vault.
 
 Having created the configuration file, you can use the [Confidential build tool plugin](https://github.com/securevale/swift-confidential-plugin) (see [Installation section](#installation) below) to generate Swift code with obfuscated secret literals.
 
@@ -66,25 +63,23 @@ Upon successful command execution, the generated `Confidential.generated.swift` 
 
 ```swift
 import ConfidentialKit
-import Foundation
 
 internal enum ObfuscatedLiterals {
 
-    @ConfidentialKit.Obfuscated<Swift.Array<Swift.String>>(deobfuscateData)
-    internal static var suspiciousDynamicLibraries: ConfidentialKit.Obfuscation.Secret = .init(data: [0x14, 0x4b, 0xe5, 0x48, 0xd2, 0xc4, 0xb1, 0xba, 0xac, 0xa8, 0x65, 0x8e, 0x15, 0x34, 0x12, 0x87, 0x35, 0x49, 0xfb, 0xa4, 0xc8, 0x10, 0x5f, 0x4a, 0xe0, 0xf3, 0x69, 0x4a, 0x53, 0xa1, 0xdf, 0x58, 0x9d, 0x45, 0xa3, 0xf3, 0x00, 0xa2, 0x0f, 0x9c, 0x7d, 0x93, 0x14, 0x20, 0x04, 0xb2, 0xe8, 0x97, 0x26, 0x04, 0x5b, 0x00, 0x9e, 0x06, 0x30, 0x23, 0xaa, 0xa2, 0xc4, 0xfc, 0xba, 0x22, 0x97, 0x2b, 0x2d, 0x6e, 0x5f, 0x1d, 0xd5, 0xab, 0x9a, 0xe0, 0xf3, 0x1f, 0x17, 0x58, 0xab, 0xda, 0x49, 0x0a, 0xc2, 0x0a, 0xa2, 0x9a, 0xcc, 0x6d, 0x8c, 0x5e, 0xc0, 0x73, 0x77, 0x76, 0x6c, 0x2f, 0x2c, 0x2b, 0x2a, 0x65, 0x48, 0x04, 0x01, 0x07, 0x0b, 0x78, 0x1c, 0x52, 0x6a, 0x6f, 0x0e, 0x01, 0x6e, 0x63, 0x08, 0x5b, 0x62, 0x5f, 0x59, 0x72, 0x5a, 0x5c, 0x68, 0x1f, 0x1a, 0x64, 0x12, 0x13, 0x19, 0x55, 0x53, 0x4f, 0x06, 0x4e, 0x46, 0x7e, 0x10, 0x60, 0x40, 0x7d, 0x48, 0x76, 0x77, 0x4a, 0x7f, 0x1d, 0x71, 0x51, 0x03, 0x7a, 0x47, 0x09, 0x56, 0x11, 0x6c, 0x49, 0x0a, 0x04, 0x5e, 0x0f, 0x61, 0x65, 0x41, 0x75, 0x73, 0x4b, 0x57, 0x0d, 0x42, 0x02, 0x4c, 0x1e, 0x18, 0x1b, 0x45, 0x69, 0x66, 0x00, 0x7b, 0x6b, 0x70, 0x6d, 0x50, 0x0c, 0x5d, 0x54, 0x4d, 0x79, 0x74, 0x58, 0x44, 0x05, 0x43, 0x7c, 0x67], nonce: 13452749969377545032)
-
-    @ConfidentialKit.Obfuscated<Swift.Array<Swift.String>>(deobfuscateData)
-    internal static var suspiciousFilePaths: ConfidentialKit.Obfuscation.Secret = .init(data: [0x04, 0xdf, 0x99, 0x61, 0x39, 0xca, 0x19, 0x3d, 0xcd, 0xa9, 0xd0, 0xf3, 0x31, 0xc9, 0x8a, 0x2a, 0x00, 0x76, 0x51, 0xab, 0xae, 0xc1, 0xf8, 0x31, 0x00, 0x14, 0x40, 0x78, 0x5e, 0x8e, 0x14, 0x98, 0xc4, 0xbb, 0x26, 0xb4, 0x48, 0x6c, 0x56, 0xd8, 0x99, 0x31, 0x19, 0x96, 0xce, 0x8a, 0x97, 0x00, 0xde, 0xa4, 0x83, 0xe0, 0xcc, 0x1a, 0x3b, 0x2a, 0x55, 0xb7, 0x72, 0x36, 0xa1, 0xd2, 0x70, 0x0c, 0x8d, 0xe6, 0xe6, 0x78, 0x41, 0xa9, 0xdb, 0x45, 0x38, 0x5b, 0x97, 0x22, 0xb4, 0x8a, 0x4d, 0xd6, 0x59, 0xaa, 0x4e, 0xf7, 0x36, 0xba, 0xda, 0x0c, 0xb2, 0x82, 0x9e, 0x64, 0xd4, 0x41, 0xd7, 0x48, 0x0b, 0x04, 0xa4, 0x77, 0xfa, 0xcf, 0x07, 0xd2, 0x3b, 0x4d, 0xc7, 0x3d, 0x65, 0xb2, 0xfa, 0x1c, 0x77, 0x7f, 0xd4, 0x24, 0xf3, 0x99, 0xbd, 0xad, 0x1e, 0x17, 0x8e, 0x5a, 0xc2, 0xae, 0x9d, 0xb5, 0xa1, 0x3d, 0x1a, 0x70, 0xcd, 0x80, 0x8e, 0x9a, 0xb1, 0x75, 0xf3, 0x8c, 0xc7, 0x01, 0x94, 0x9e, 0xaf, 0x98, 0xb8, 0xf9, 0xd0, 0xbd, 0xbe, 0xca, 0xe5, 0xcc, 0xfa, 0xc6, 0xa3, 0xec, 0xae, 0x8a, 0xb9, 0xd6, 0xbb, 0x01, 0xc7, 0x8b, 0xc1, 0xac, 0xc9, 0xd8, 0x86, 0xf5, 0xe7, 0xb3, 0xc8, 0xfd, 0x99, 0xdc, 0xc4, 0x81, 0xad, 0xd4, 0xe0, 0x9f, 0xa6, 0x05, 0x8d, 0xea, 0x96, 0xa9, 0xe8, 0x92, 0xf6, 0x90, 0x8f, 0xb5, 0xb1, 0xb7, 0xc0, 0xdd, 0xce, 0xfb, 0xab, 0xe9, 0xe4, 0xf8, 0xe6, 0xc3, 0xba, 0xa7, 0xdb, 0xf4, 0xcb, 0xfe, 0xc5, 0xde, 0xd7, 0xcd, 0xf3, 0xd2, 0xe2, 0x88, 0xa8, 0xcf, 0x95, 0x93, 0x9a, 0xa1, 0xe1, 0xfc, 0xb4, 0x82, 0xb0, 0xd3, 0xf0, 0x97, 0xd5, 0xf7, 0x87, 0x03, 0xef, 0xdf, 0xbf, 0xee, 0x9c, 0x8e, 0x02, 0xb2, 0x91, 0xa4, 0x89, 0xeb, 0xa0, 0xd9, 0xf1, 0xc2, 0xff, 0xe3, 0xb6, 0xaa, 0x00, 0xa5, 0xed, 0xda, 0xbc, 0xd1, 0x9d, 0x80, 0x9b, 0x8c, 0xa2, 0x84, 0x85, 0x83, 0xf2], nonce: 4402772458530791297)
-
-    @inline(__always)
-    private static func deobfuscateData(_ data: Foundation.Data, nonce: Swift.UInt64) throws -> Foundation.Data {
-        try ConfidentialKit.Obfuscation.Encryption.DataCrypter(algorithm: .aes192GCM)
-            .deobfuscate(
-                try ConfidentialKit.Obfuscation.Randomization.DataShuffler()
-                    .deobfuscate(data, nonce: nonce),
-                nonce: nonce
-            )
-    }
+    internal static #Obfuscate(algorithm: .random) {
+        let suspiciousDynamicLibraries = [
+            "Substrate",
+            "Substitute",
+            "FridaGadget",
+            // ... other suspicious dylibs
+        ]
+        let suspiciousFilePaths = [
+            "/.installed_unc0ver",
+            "/usr/sbin/frida-server",
+            "/private/var/lib/cydia",
+            // ... other suspicious file paths
+        ]
+    } 
 }
 ```
 
@@ -159,7 +154,7 @@ Once set up, build your target and the Confidential plugin will automatically ge
 <details>
 <summary><strong>Swift Confidential 0.4.0-0.4.2</strong></summary>
 
-Swift Confidential 0.4.0 introduces experimental support for Swift 6 language mode by replacing the [`@Obfuscated` property wrapper](./Sources/ConfidentialKit/Obfuscation/PropertyWrappers/Obfuscated.swift) with an [`@Obfuscated` macro](./Sources/_ConfidentialKit/Obfuscation/Macros/Obfuscated.swift).
+Swift Confidential 0.4.0 introduces experimental support for Swift 6 language mode by replacing the [`@Obfuscated` property wrapper](https://github.com/securevale/swift-confidential/blob/0.4.2/Sources/ConfidentialKit/Obfuscation/PropertyWrappers/Obfuscated.swift) with an [`@Obfuscated` macro](https://github.com/securevale/swift-confidential/blob/0.4.2/Sources/_ConfidentialKit/Obfuscation/Macros/Obfuscated.swift).
 
 To use experimental API for generated Swift code:
 
@@ -186,7 +181,7 @@ The table below lists the keys to include in the configuration file along with t
 |--------------------------|---------------------|-----------------------------------------------------------------------------------|
 | algorithm                | List of strings     | The list of obfuscation techniques representing individual steps that are composed together to form the obfuscation algorithm. See [Obfuscation techniques](#obfuscation-techniques) section for usage details.<br/><sub>**Required.**</sub> |
 | defaultAccessModifier    | String              | The default access-level modifier applied to each generated secret literal, unless the secret definition states otherwise. The default value is `internal`. See [Access control](#access-control) section for usage details. |
-| defaultNamespace         | String              | The default namespace in which to enclose all the generated secret literals without explicitly assigned namespace. The default value is `extend Obfuscation.Secret from ConfidentialKit`. See [Namespaces](#namespaces) section for usage details. |
+| defaultNamespace         | String              | The default namespace in which to enclose all the generated secret literals without explicitly assigned namespace. The default value is `extend Obfuscation.Secret from ConfidentialCore`. See [Namespaces](#namespaces) section for usage details. |
 | experimentalMode         | Boolean             | Specifies whether to use [Experimental Mode](#experimental-mode). The default value is `false`. <br/><sub>**Swift 6 only.**</sub> |
 | internalImport           | Boolean             | Specifies whether to generate internal (previously known as implementation-only) `ConfidentialKit` import. The default value is `false`. See [Building libraries for distribution](#building-libraries-for-distribution) section for usage details. |
 | secrets                  | List of objects     | The list of objects defining the secret literals to be obfuscated. See [Secrets](#secrets) section for usage details.<br/><sub>**Required.**</sub> |
@@ -211,7 +206,7 @@ secrets:
 ```
 
 > **Warning**  
-> The algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**.
+> The algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**. Instead, compose your own algorithm from the available [obfuscation techniques](#obfuscation-techniques) and **don't share your algorithm with anyone**.
 </details>
 
 ### Obfuscation techniques
@@ -293,15 +288,14 @@ namespace: extend KeychainAccess.Key from Crypto
 The above YAML secret definition will result in the following Swift code being generated:
 
 ```swift
+import ConfidentialKit
 import Crypto
-// ... other imports
 
 extension Crypto.KeychainAccess.Key {
 
-    @ConfidentialKit.Obfuscated<Swift.String>(deobfuscateData)
-    internal static var secretVaultKeyTag: ConfidentialKit.Obfuscation.Secret = .init(data: [/* obfuscated data */], nonce: /* cryptographically secure random number */)
-
-    // ... other secret declarations
+    internal static #Obfuscate(algorithm: .random) {
+        let secretVaultKeyTag = "com.example.app.keys.secret_vault_private_key"
+    }
 }
 ```
 
@@ -320,15 +314,14 @@ namespace: extend Pinning from Crypto
 With the above YAML secret definition, the following Swift code will be generated:
 
 ```swift
+import ConfidentialKit
 import Crypto
-// ... other imports
 
 extension Crypto.Pinning {
 
-    @ConfidentialKit.Obfuscated<Swift.Array<Swift.String>>(deobfuscateData)
-    public static var trustedSPKIDigests: ConfidentialKit.Obfuscation.Secret = .init(data: [/* obfuscated data */], nonce: /* cryptographically secure random number */)
-
-    // ... other secret declarations
+    public static #Obfuscate(algorithm: .random) {
+        let trustedSPKIDigests = ["7a6820614ee600bbaed493522c221c0d9095f3b4d7839415ffab16cbf61767ad", "cf84a70a41072a42d0f25580b5cb54d6a9de45db824bbb7ba85d541b099fd49f", "c1a5d45809269301993d028313a5c4a5d8b2f56de9725d4d1af9da1ccf186f30"]
+    }
 }
 ```
 </details>
@@ -361,11 +354,12 @@ create Secrets
 The above namespace definition will result in the following Swift code being generated:
 
 ```swift
+import ConfidentialKit
+
 internal enum Secrets {
 
     // Encapsulated declarations ...
 }
-
 ```
 
 If, however, you would rather like to keep the generated secret literal declaration(s) in an existing namespace named `Pinning` and imported from `Crypto` module, use the following YAML code instead:
@@ -377,8 +371,8 @@ extend Pinning from Crypto
 With the above namespace definition, the following Swift code will be generated:
 
 ```swift
+import ConfidentialKit
 import Crypto
-// ... other imports
 
 extension Crypto.Pinning {
 
@@ -426,23 +420,19 @@ secrets:
 ```
 
 > **Warning**  
-> The algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**.
+> The algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**. Instead, compose your own algorithm from the available [obfuscation techniques](#obfuscation-techniques) and **don't share your algorithm with anyone**.
 
-With `defaultAccessModifier` set to `package`, all of the Swift properties generated based on the `secrets` list are accessible within their defining package:
+With `defaultAccessModifier` set to `package`, all of the Swift declarations generated based on the `secrets` list are accessible within their defining package:
 
 ```swift
 import ConfidentialKit
-import Foundation
 
 package enum Secrets {
 
-    @ConfidentialKit.Obfuscated<Swift.String>(deobfuscateData)
-    package static var apiKey: ConfidentialKit.Obfuscation.Secret = .init(data: [/* obfuscated data */], nonce: /* cryptographically secure random number */)
-
-    @ConfidentialKit.Obfuscated<Swift.Array<Swift.String>>(deobfuscateData)
-    package static var trustedSPKIDigests: ConfidentialKit.Obfuscation.Secret = .init(data: [/* obfuscated data */], nonce: /* cryptographically secure random number */)
-
-    // ...
+    package static #Obfuscate(algorithm: .custom([.encrypt(algorithm: .aes192GCM), .shuffle])) {
+        let apiKey = "214C1E2E-A87E-4460-8205-4562FDF54D1C"
+        let trustedSPKIDigests = ["7a6820614ee600bbaed493522c221c0d9095f3b4d7839415ffab16cbf61767ad", "cf84a70a41072a42d0f25580b5cb54d6a9de45db824bbb7ba85d541b099fd49f", "c1a5d45809269301993d028313a5c4a5d8b2f56de9725d4d1af9da1ccf186f30"]
+    }
 }
 ```
 

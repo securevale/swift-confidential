@@ -1,5 +1,5 @@
 import ArgumentParser
-import ConfidentialCore
+import ConfidentialParsing
 import Foundation
 import Yams
 
@@ -40,13 +40,10 @@ extension SwiftConfidential {
             let configurationYAML = try Data(contentsOf: configuration)
             let configuration = try YAMLDecoder().decode(Configuration.self, from: configurationYAML)
 
-            var sourceFileSpec = try Parsers.ModelTransform.SourceFileSpec()
+            let sourceFileSpec = try Parsers.ModelTransform.SourceFileSpec()
                 .parse(configuration)
-
-            try SourceObfuscator().obfuscate(&sourceFileSpec)
-
             let sourceFileText = try Parsers.CodeGeneration.SourceFile()
-                .parse(&sourceFileSpec)
+                .parse(sourceFileSpec)
 
             guard fileManager.createFile(atPath: output.path, contents: .none) else {
                 throw RuntimeError(description: #"Failed to create output file at "\#(output.path)""#)

@@ -1,4 +1,4 @@
-import Foundation
+import struct Foundation.Data
 
 /// Creates a projection variable that exposes a plain secret value.
 ///
@@ -13,7 +13,7 @@ import Foundation
 /// except it begins with a dollar sign ($).
 ///
 /// - Important: This macro is only meant to be attached to variables of type
-///              ``/ConfidentialKit/Obfuscation/Secret``.
+///              ``/ConfidentialCore/Obfuscation/Secret``.
 ///
 /// - Parameter deobfuscateData: A closure that takes an obfuscated secret’s data and its
 ///                              corresponding nonce as arguments, and returns the
