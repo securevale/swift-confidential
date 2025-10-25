@@ -66,9 +66,6 @@ jobs:
             upload_coverage: false
           - macos: 15
             xcode: '16.4'  # Swift 6.1
-            upload_coverage: false
-          - macos: 15
-            xcode: '26.0'  # Swift 6.2
             upload_coverage: true
 
     steps:
