@@ -24,7 +24,7 @@ final class SourceFileTextTests: XCTestCase {
     func test_givenSourceFileTextWithSourceFileSyntax_whenWriteToFile_thenFileContainsExpectedSyntaxText() throws {
         // given
         let sourceFile = SourceFileSyntax(
-            statements: CodeBlockItemListSyntax(itemsBuilder: {
+            statements: CodeBlockItemListSyntax {
                 CodeBlockItemSyntax(
                     item: .init(
                         ImportDeclSyntax(
@@ -36,10 +36,10 @@ final class SourceFileTextTests: XCTestCase {
                 CodeBlockItemSyntax(
                     item: .init(
                         StructDeclSyntax(
-                            structKeyword: .keyword(.struct, leadingTrivia: .newlines(1)),
+                            structKeyword: .keyword(.struct, leadingTrivia: .newline),
                             name: "Test",
                             memberBlock: .init(
-                                leftBrace: .leftBraceToken(leadingTrivia: .spaces(1)),
+                                leftBrace: .leftBraceToken(leadingTrivia: .space),
                                 rightBrace: .rightBraceToken()
                             ) {
                                 VariableDeclSyntax(
@@ -56,7 +56,7 @@ final class SourceFileTextTests: XCTestCase {
                         )
                     )
                 )
-            })
+            }
         )
         let sut = SUT(from: sourceFile)
         let encoding = String.Encoding.utf8

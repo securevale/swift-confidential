@@ -1,5 +1,5 @@
 // swiftlint:disable discouraged_optional_boolean
-package struct Configuration: Equatable, Decodable {
+package struct Configuration: Equatable {
     var algorithm: Algorithm?
     var defaultAccessModifier: String?
     var defaultNamespace: String?
@@ -9,9 +9,9 @@ package struct Configuration: Equatable, Decodable {
 }
 // swiftlint:enable discouraged_optional_boolean
 
-package extension Configuration {
+extension Configuration: Decodable {
 
-    init(from decoder: Decoder) throws {
+    package init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let internalImport = if container.contains(.internalImport) {
             try container.decode(Bool.self, forKey: .internalImport)

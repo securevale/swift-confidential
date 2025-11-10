@@ -1,6 +1,6 @@
 import Parsing
 
-package struct SourceFileSpecParser<SecretsParser: Parser>: Parser
+struct SourceFileSpecParser<SecretsParser: Parser>: Parser
 where
     SecretsParser.Input == Configuration,
     SecretsParser.Output == SourceFileSpec.Secrets
@@ -12,7 +12,7 @@ where
         self.secretsParser = secretsParser
     }
 
-    package func parse(_ input: inout Configuration) throws -> SourceFileSpec {
+    func parse(_ input: inout Configuration) throws -> SourceFileSpec {
         let spec = SourceFileSpec(
             experimentalMode: input.isExperimentalModeEnabled,
             internalImport: input.isInternalImportEnabled,
@@ -25,9 +25,4 @@ where
 
         return spec
     }
-}
-
-package extension Parsers.ModelTransform {
-
-    typealias SourceFileSpec = SourceFileSpecParser
 }

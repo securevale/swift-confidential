@@ -1,16 +1,35 @@
 import ConfidentialCore
 import Parsing
 import SwiftSyntax
+import class Yams.YAMLDecoder
 
-package typealias AnySecretsParser = AnyParser<Configuration, SourceFileSpec.Secrets>
+package typealias AnySourceFileSpecParser = AnyParser<Configuration, SourceFileSpec>
+package typealias AnySourceFileParser = AnyParser<SourceFileSpec, SourceFileSyntax>
 
-package extension Parsers.ModelTransform.SourceFileSpec
+package extension ConfidentialParser
+where
+    SourceFileSpecParser == AnySourceFileSpecParser,
+    SourceFileParser == AnySourceFileParser
+{ // swiftlint:disable:this opening_brace
+
+    init() {
+        self.init(
+            configurationDecoder: YAMLDecoder(),
+            sourceFileSpecParser: ConfidentialParsing.SourceFileSpecParser().eraseToAnyParser(),
+            sourceFileParser: ConfidentialParsing.SourceFileParser().eraseToAnyParser()
+        )
+    }
+}
+
+private typealias AnySecretsParser = AnyParser<Configuration, SourceFileSpec.Secrets>
+
+private extension SourceFileSpecParser
 where
     SecretsParser == AnySecretsParser
 { // swiftlint:disable:this opening_brace
 
-    private typealias AnyObfuscationStepParser = AnyParser<Substring, Obfuscation.Step>
-    private typealias OneOfManyObfuscationSteps = OneOfBuilder<Substring, Obfuscation.Step>.OneOf2<
+    typealias AnyObfuscationStepParser = AnyParser<Substring, Obfuscation.Step>
+    typealias OneOfManyObfuscationSteps = OneOfBuilder<Substring, Obfuscation.Step>.OneOf2<
         OneOfBuilder<Substring, Obfuscation.Step>.OneOf2<AnyObfuscationStepParser, AnyObfuscationStepParser>,
         AnyObfuscationStepParser
     >
@@ -36,9 +55,9 @@ where
     }
 }
 
-package typealias AnyCodeBlockParser = AnyParser<SourceFileSpec, [CodeBlockItemSyntax]>
+private typealias AnyCodeBlockParser = AnyParser<SourceFileSpec, [CodeBlockItemSyntax]>
 
-package extension Parsers.CodeGeneration.SourceFile
+private extension SourceFileParser
 where
     CodeBlockParsers == AnyCodeBlockParser
 { // swiftlint:disable:this opening_brace

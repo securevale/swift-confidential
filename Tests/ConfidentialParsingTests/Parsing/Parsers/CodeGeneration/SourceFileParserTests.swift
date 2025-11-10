@@ -39,16 +39,15 @@ final class SourceFileParserTests: XCTestCase {
         )
 
         // when
-        let sourceFileText: SourceFileText = try sut.parse(&sourceFileSpec)
+        let sourceFileSyntax: SourceFileSyntax = try sut.parse(&sourceFileSpec)
 
         // then
         XCTAssertEqual(
             """
-
-            enum \(enumNameStub) {
-            }
+            
+            enum \(enumNameStub) {}
             """,
-            .init(describing: sourceFileText)
+            sourceFileSyntax.description
         )
         XCTAssertTrue(sourceFileSpec.secrets.isEmpty)
     }
@@ -71,9 +70,9 @@ private extension SourceFileParserTests {
                 leadingTrivia: .newline,
                 item: .init(
                     EnumDeclSyntax(
-                        name: .identifier(enumNameStub),
+                        name: .identifier(enumNameStub, leadingTrivia: .space),
                         memberBlock: MemberBlockSyntax(
-                            leftBrace: .leftBraceToken(leadingTrivia: .spaces(1)),
+                            leftBrace: .leftBraceToken(leadingTrivia: .space),
                             members: []
                         )
                     )

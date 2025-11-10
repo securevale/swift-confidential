@@ -90,7 +90,8 @@ package.targets.append(contentsOf: [
             "ConfidentialCore",
             "ConfidentialUtils",
             .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
-            .product(name: "Parsing", package: "swift-parsing")
+            .product(name: "Parsing", package: "swift-parsing"),
+            .product(name: "Yams", package: "Yams")
         ]
     ),
 
@@ -99,7 +100,6 @@ package.targets.append(contentsOf: [
         name: "swift-confidential",
         dependencies: [
             "ConfidentialParsing",
-            "Yams",
             .product(name: "ArgumentParser", package: "swift-argument-parser")
         ]
     ),
