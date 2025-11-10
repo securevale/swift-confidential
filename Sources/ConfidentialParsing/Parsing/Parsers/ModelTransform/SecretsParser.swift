@@ -12,18 +12,18 @@ where
 
     typealias Output = SourceFileSpec.Secrets
 
-    private let namespaceParser: NamespaceParser
     private let accessModifierParser: AccessModifierParser
     private let algorithmParser: AlgorithmParser
+    private let namespaceParser: NamespaceParser
 
     init(
-        namespaceParser: NamespaceParser,
         accessModifierParser: AccessModifierParser,
-        algorithmParser: AlgorithmParser
+        algorithmParser: AlgorithmParser,
+        namespaceParser: NamespaceParser
     ) {
-        self.namespaceParser = namespaceParser
         self.accessModifierParser = accessModifierParser
         self.algorithmParser = algorithmParser
+        self.namespaceParser = namespaceParser
     }
 
     func parse(_ input: inout Configuration) throws -> Output {
@@ -32,9 +32,9 @@ where
         }
 
         var parsedSecretsCount: Int = .zero
-        let algorithm = try input.algorithm.map { algorithm in
+        let defaultAlgorithm = try input.algorithm.map { algorithm in
             try algorithmParser.parse(algorithm)
-        }
+        } ?? .random
         let output: Output
         do {
             output = try input.secrets.reduce(into: .init(), { secrets, secret in
@@ -45,7 +45,9 @@ where
                     accessModifier: try accessModifierParser.parse(
                         secret.accessModifier ?? input.defaultAccessModifier ?? ""
                     ),
-                    algorithm: algorithm ?? .random,
+                    algorithm: try secret.algorithm.map { algorithm in
+                        try algorithmParser.parse(algorithm)
+                    } ?? defaultAlgorithm,
                     name: secret.name,
                     value: .init(from: secret.value)
                 )

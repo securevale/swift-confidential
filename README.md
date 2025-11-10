@@ -177,17 +177,19 @@ Swift Confidential supports a number of configuration options, all of which are 
 
 The table below lists the keys to include in the configuration file along with the type of information to include in each. Any other keys in the configuration file are ignored by the CLI tool.
 
-| Key                      | Value type          | Description                                                                       |
-|--------------------------|---------------------|-----------------------------------------------------------------------------------|
-| algorithm                | List of strings     | The list of obfuscation techniques representing individual steps that are composed together to form the obfuscation algorithm. See [Obfuscation techniques](#obfuscation-techniques) section for usage details.<br/><sub>**Required.**</sub> |
-| defaultAccessModifier    | String              | The default access-level modifier applied to each generated secret literal, unless the secret definition states otherwise. The default value is `internal`. See [Access control](#access-control) section for usage details. |
-| defaultNamespace         | String              | The default namespace in which to enclose all the generated secret literals without explicitly assigned namespace. The default value is `extend Obfuscation.Secret from ConfidentialCore`. See [Namespaces](#namespaces) section for usage details. |
-| experimentalMode         | Boolean             | Specifies whether to use [Experimental Mode](#experimental-mode). The default value is `false`. <br/><sub>**Swift 6 only.**</sub> |
-| internalImport           | Boolean             | Specifies whether to generate internal (previously known as implementation-only) `ConfidentialKit` import. The default value is `false`. See [Building libraries for distribution](#building-libraries-for-distribution) section for usage details. |
-| secrets                  | List of objects     | The list of objects defining the secret literals to be obfuscated. See [Secrets](#secrets) section for usage details.<br/><sub>**Required.**</sub> |
+| Key                      | Value type                | Description                                                                       |
+|--------------------------|---------------------------|-----------------------------------------------------------------------------------|
+| algorithm                | String OR List of strings | The obfuscation algorithm applied to each generated secret literal, unless the secret definition states otherwise. Specify `random` to generate a random obfuscation algorithm on per-secret basis. Otherwise, specify the list of [obfuscation techniques](#obfuscation-techniques) representing individual steps that are composed together to form the obfuscation algorithm. The default value is `random`. |
+| defaultAccessModifier    | String                    | The default access-level modifier applied to each generated secret literal, unless the secret definition states otherwise. The default value is `internal`. See [Access control](#access-control) section for usage details. |
+| defaultNamespace         | String                    | The default namespace in which to enclose all the generated secret literals without explicitly assigned namespace. The default value is `extend Obfuscation.Secret from ConfidentialCore`. See [Namespaces](#namespaces) section for usage details. |
+| experimentalMode         | Boolean                   | Specifies whether to use [Experimental Mode](#experimental-mode). The default value is `false`. |
+| internalImport           | Boolean                   | Specifies whether to generate internal (previously known as implementation-only) `ConfidentialKit` import. The default value is `false`. See [Building libraries for distribution](#building-libraries-for-distribution) section for usage details. |
+| secrets                  | List of objects           | The list of objects defining the secret literals to be obfuscated. See [Secrets](#secrets) section for usage details.<br/><sub>**Required.**</sub> |
 
 <details>
 <summary><strong>Example configuration</strong></summary>
+
+Supposing that you would like the secrets enclosed in the `Secrets` namespace and use a custom obfuscation algorithm for all the secrets except `apiKey` for which you would like the algorithm to be randomly generated with each build:
 
 ```yaml
 algorithm:
@@ -197,16 +199,17 @@ defaultNamespace: create Secrets
 secrets:
   - name: apiKey
     value: 214C1E2E-A87E-4460-8205-4562FDF54D1C
+    algorithm: random
   - name: trustedSPKIDigests
     value:
       - 7a6820614ee600bbaed493522c221c0d9095f3b4d7839415ffab16cbf61767ad
       - cf84a70a41072a42d0f25580b5cb54d6a9de45db824bbb7ba85d541b099fd49f
       - c1a5d45809269301993d028313a5c4a5d8b2f56de9725d4d1af9da1ccf186f30
-    namespace: extend Pinning from Crypto
+  # ... other secret definitions
 ```
 
 > **Warning**  
-> The algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**. Instead, compose your own algorithm from the available [obfuscation techniques](#obfuscation-techniques) and **don't share your algorithm with anyone**.
+> The custom algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**. Instead, compose your own algorithm from the available [obfuscation techniques](#obfuscation-techniques) and **don't share your algorithm with anyone**.
 </details>
 
 ### Obfuscation techniques
@@ -269,9 +272,10 @@ The configuration file utilizes YAML objects to describe the secret literals, wh
 | Key              | Value type                | Description                                                                      |
 |------------------|---------------------------|----------------------------------------------------------------------------------|
 | accessModifier   | String                    | The access-level modifier of the generated Swift property containing obfuscated secret literal's data. The supported values are `internal`, `package` and `public`. If not specified, the top-level `defaultAccessModifier` value is used. See [Access control](#access-control) section for usage details. |
+| algorithm        | String OR List of strings | The obfuscation algorithm for obfuscating the secret literal. Specify `random` to generate a random obfuscation algorithm. Otherwise, specify the list of [obfuscation techniques](#obfuscation-techniques) representing individual steps that are composed together to form the obfuscation algorithm. If not specified, the top-level `algorithm` value is used. |
 | name             | String                    | The name of the generated Swift property containing obfuscated secret literal's data. This value is used as-is, without validity checking. Thus, make sure to use a valid property name.<br/><sub>**Required.**</sub> | 
 | namespace        | String                    | The namespace in which to enclose the generated secret literal declaration. See [Namespaces](#namespaces) section for usage details. |
-| value            | String or List of strings | The plain value of the secret literal, which is to be obfuscated. The YAML data types are mapped to `String` and `Array<String>` in Swift, respectively.<br/><sub>**Required.**</sub> |
+| value            | String OR List of strings | The plaintext value of the secret literal, which is to be obfuscated. The YAML data types are mapped to `String` and `Array<String>` in Swift, respectively.<br/><sub>**Required.**</sub> |
 
 <details>
 <summary><strong>Example secret definition</strong></summary>
@@ -404,9 +408,6 @@ The supported access-level modifiers are shown in the following table:
 Supposing that you would like to keep all your secret literals in a single shared Swift module used by other modules within the same Swift package, you can do so with a configuration similar to this one:
 
 ```yaml
-algorithm:
-  - encrypt using aes-192-gcm
-  - shuffle
 defaultNamespace: create Secrets
 defaultAccessModifier: package
 secrets:
@@ -418,9 +419,6 @@ secrets:
       - cf84a70a41072a42d0f25580b5cb54d6a9de45db824bbb7ba85d541b099fd49f
       - c1a5d45809269301993d028313a5c4a5d8b2f56de9725d4d1af9da1ccf186f30
 ```
-
-> **Warning**  
-> The algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**. Instead, compose your own algorithm from the available [obfuscation techniques](#obfuscation-techniques) and **don't share your algorithm with anyone**.
 
 With `defaultAccessModifier` set to `package`, all of the Swift declarations generated based on the `secrets` list are accessible within their defining package:
 

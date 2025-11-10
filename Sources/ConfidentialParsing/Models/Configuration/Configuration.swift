@@ -38,7 +38,7 @@ extension Configuration {
 
 extension Configuration {
 
-    enum Algorithm: Equatable, Decodable {
+    enum Algorithm: Hashable, Decodable {
 
         case random(String)
         case custom(ArraySlice<String>)
@@ -59,10 +59,11 @@ extension Configuration {
 extension Configuration {
 
     struct Secret: Hashable, Decodable {
-        let name: String
-        let value: Value
-        let namespace: String?
-        let accessModifier: String?
+        var name: String
+        var value: Value
+        var accessModifier: String?
+        var algorithm: Algorithm?
+        var namespace: String?
     }
 }
 

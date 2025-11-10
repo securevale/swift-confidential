@@ -18,7 +18,6 @@ where
     init() {
         self.init(
             secretsParser: ConfidentialParsing.SecretsParser(
-                namespaceParser: SecretNamespaceParser(),
                 accessModifierParser: SecretAccessModifierParser(),
                 algorithmParser: ConfidentialParsing.AlgorithmParser(
                     obfuscationStepsParser: ObfuscationStepsParser<OneOfManyObfuscationSteps>(
@@ -29,7 +28,8 @@ where
                         }
                     )
                 )
-                .eraseToAnyParser()
+                .eraseToAnyParser(),
+                namespaceParser: SecretNamespaceParser()
             )
             .eraseToAnyParser()
         )
