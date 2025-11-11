@@ -18,12 +18,14 @@ extension SwiftConfidential {
         )
 
         @Option(
+            name: [.long, .short],
             help: "The path to a Confidential configuration file.",
             transform: URL.init(fileURLWithPath:)
         )
         var configuration: URL
 
         @Option(
+            name: [.long, .short],
             help: "The path to an output source file where the generated Swift code is to be written.",
             transform: URL.init(fileURLWithPath:)
         )
