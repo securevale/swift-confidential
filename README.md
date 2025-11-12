@@ -7,7 +7,7 @@
 
 A highly configurable and performant tool for obfuscating Swift literals embedded in the application code that you should protect against static code analysis, making the app more resistant to reverse engineering.
 
-Simply add the `swift-confidential` package dependency to your Swift package or Xcode project, use the `Obfuscate(algorithm:declarations:)` macro to obfuscate your secret literals, and build the project 🚀
+Use the [#Obfuscate macro](#getting-started) to obfuscate your secret literals directly in code, or adopt the [YAML-based approach with build tool plugin](#advanced-usage) for advanced use cases.
 
 Swift Confidential can save you a lot of time, especially if you are developing an iOS app and seeking to meet [OWASP MASVS-RESILIENCE](https://mas.owasp.org/MASVS/11-MASVS-RESILIENCE/) requirements.
 
@@ -27,7 +27,84 @@ This tool aims to provide an elegant and maintainable solution to the above prob
 
 ## Getting Started
 
-Begin by creating a `confidential.yml` YAML configuration file in the root directory of your SwiftPM target's sources or Xcode project (depending on the preferred [installation method](#installation)). At minimum, the configuration must contain obfuscation algorithm and one or more secret definitions.
+Add Swift Confidential to your SwiftPM or Xcode project. See the relevant installation instructions in the expandable sections below.
+
+<details>
+<summary>
+    <strong>
+        <a href="https://docs.swift.org/swiftpm/documentation/packagemanagerdocs/addingdependencies/">SwiftPM</a>
+    </strong>
+</summary>
+
+1. Add the `swift-confidential` package dependency to your `Package.swift`:
+   ```swift
+   .package(url: "https://github.com/securevale/swift-confidential.git", .upToNextMinor(from: "0.5.0"))
+   ```
+
+2. Add the `ConfidentialKit` library dependency to your target:
+   ```swift
+   .product(name: "ConfidentialKit", package: "swift-confidential")
+   ```
+</details>
+
+<details>
+<summary>
+    <strong>
+        <a href="https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app">Xcode</a>
+    </strong>
+</summary>
+
+1. Select `File` > `Add Package Dependencies...`.
+2. In the `Search or Enter Package URL` field, enter the following URL:
+   ```
+   https://github.com/securevale/swift-confidential.git
+   ```
+3. Change the `Dependency Rule` to `Up to Next Minor Version`.
+4. Click the `Add Package` button.
+5. Select the target to which you want to add the `ConfidentialKit` package product and click the `Add Package` button.
+</details>
+
+Import and use the `Obfuscate(algorithm:declarations:)` macro in your code:
+
+```swift
+import ConfidentialKit
+
+enum ObfuscatedLiterals {
+
+    static #Obfuscate {
+        // You can obfuscate a single string literal:
+        let helloMessage = "Hello, Obfuscation!"
+        // , or an array of string literals:
+        let helloMessageWords = ["Hello", "Obfuscation"]
+    }
+
+    static #Obfuscate(algorithm: .custom([.encrypt(algorithm: .aes192GCM), .shuffle])) {
+        let errorMessage = "404: World Not Found"
+    }
+}
+```
+
+In the above example, the `helloMessage` and `helloMessageWords` will each be obfuscated using a randomly generated obfuscation algorithm. The `errorMessage`, however, will be obfuscated using a custom obfuscation algorithm, as specified by the `algorithm` argument.
+
+> [!NOTE]  
+> You cannot use `Obfuscate(algorithm:declarations:)` macro at global scope. This aligns with the recommended practice of encapsulating secret declarations within namespaces, such as caseless enums.
+
+> [!WARNING]  
+> The custom obfuscation algorithm from the above code snippet serves as example only. **For production use, always compose your own algorithm from the available [obfuscation techniques](#obfuscation-techniques) and do not share it with anyone.**
+
+You can then access a deobfuscated secret literal via its projected value:
+
+```swift
+print(ObfuscatedLiterals.$helloMessage)
+```
+
+See the [full documentation](https://swiftpackageindex.com/securevale/swift-confidential/documentation/confidentialkit) for more details.
+
+## Advanced Usage
+
+For advanced use cases, such as projects with many RASP-related literals and/or pins used for certificate pinning, it’s often preferable to manage all secret literals from a single source of truth (SSoT). Swift Confidential fulfills this need through its YAML-based mode of operation.
+
+Begin by creating a `confidential.yml` YAML configuration file in the root directory of your SwiftPM target's sources or Xcode project (depending on the preferred [installation method](#installation)). At minimum, the configuration must contain one or more secret definitions.
 
 For example, a configuration file for the hypothetical `RASP` module could look like this:
 
@@ -110,8 +187,8 @@ let package = Package(
     // name, platforms, products, etc.
     dependencies: [
         // other dependencies
-        .package(url: "https://github.com/securevale/swift-confidential.git", .upToNextMinor(from: "0.4.0")),
-        .package(url: "https://github.com/securevale/swift-confidential-plugin.git", .upToNextMinor(from: "0.4.0"))
+        .package(url: "https://github.com/securevale/swift-confidential.git", .upToNextMinor(from: "0.5.0")),
+        .package(url: "https://github.com/securevale/swift-confidential-plugin.git", .upToNextMinor(from: "0.5.0"))
     ],
     targets: [
         .target(
@@ -151,29 +228,31 @@ Once set up, build your target and the Confidential plugin will automatically ge
 
 ### Experimental Mode
 
+Experimental features in YAML-based obfuscation are available only when Experimental Mode is enabled. See below for a list of versions that ship with experimental APIs and their descriptions.
+
 <details>
 <summary><strong>Swift Confidential 0.4.0-0.4.2</strong></summary>
 
 Swift Confidential 0.4.0 introduces experimental support for Swift 6 language mode by replacing the [`@Obfuscated` property wrapper](https://github.com/securevale/swift-confidential/blob/0.4.2/Sources/ConfidentialKit/Obfuscation/PropertyWrappers/Obfuscated.swift) with an [`@Obfuscated` macro](https://github.com/securevale/swift-confidential/blob/0.4.2/Sources/_ConfidentialKit/Obfuscation/Macros/Obfuscated.swift).
-
-To use experimental API for generated Swift code:
-
-1. Explicitly enable Experimental Mode by setting `experimentalMode` configuration option to `true` in your `confidential.yml` configuration file.
-2. In the applicable SwiftPM and/or Xcode targets, change your target dependency from the `ConfidentialKit` to the `_ConfidentialKit` (note the leading underscore) library.
-
-> **Note**  
-> Experimental Mode requires the Swift 6 toolchain (i.e. Xcode 16.0 or later).
 
 > **Caution**  
 > Swift macros have a noticeable impact on build time, especially on CI/CD machines with limited CPU and memory. To address this issue, starting with Xcode 16.4, you can consider enabling [SwiftSyntax prebuilts for macros](https://forums.swift.org/t/preview-swift-syntax-prebuilts-for-macros/80202).
 
 </details>
 
-## Configuration
+To use experimental API for generated Swift code:
+
+1. Explicitly enable Experimental Mode by setting `experimentalMode` configuration option to `true` in your `confidential.yml` configuration file.
+2. In the applicable SwiftPM and/or Xcode targets, change your target dependency from the `ConfidentialKit` to the `_ConfidentialKit` (note the leading underscore) library.
+
+> [!NOTE]  
+> Experimental Mode requires the Swift 6 toolchain (i.e. Xcode 16.0 or later).
+
+### Configuration
 
 Swift Confidential supports a number of configuration options, all of which are stored in a single YAML configuration file.
 
-### YAML configuration keys
+#### YAML configuration keys
 
 The table below lists the keys to include in the configuration file along with the type of information to include in each. Any other keys in the configuration file are ignored by the CLI tool.
 
@@ -189,13 +268,13 @@ The table below lists the keys to include in the configuration file along with t
 <details>
 <summary><strong>Example configuration</strong></summary>
 
-Supposing that you would like the secrets enclosed in the `Secrets` namespace and use a custom obfuscation algorithm for all the secrets except `apiKey` for which you would like the algorithm to be randomly generated with each build:
+Supposing that you would like the secrets enclosed in the `ObfuscatedLiterals` namespace and use a custom obfuscation algorithm for all the secrets except `apiKey` for which you would like the algorithm to be randomly generated with each build:
 
 ```yaml
 algorithm:
   - encrypt using aes-192-gcm
   - shuffle
-defaultNamespace: create Secrets
+defaultNamespace: create ObfuscatedLiterals
 secrets:
   - name: apiKey
     value: 214C1E2E-A87E-4460-8205-4562FDF54D1C
@@ -209,63 +288,10 @@ secrets:
 ```
 
 > **Warning**  
-> The custom algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**. Instead, compose your own algorithm from the available [obfuscation techniques](#obfuscation-techniques) and **don't share your algorithm with anyone**.
+> The custom obfuscation algorithm from the above configuration serves as example only, **do not use this particular algorithm in your production code**. Instead, compose your own algorithm from the available [obfuscation techniques](#obfuscation-techniques) and **don't share your algorithm with anyone**.
 </details>
 
-### Obfuscation techniques
-
-The obfuscation techniques are the composable building blocks from which you can create your own obfuscation algorithm. You can compose them in any order you want, so that no one exept you knows how the secret literals are obfuscated.
-
-#### Compression
-
-This technique involves data compression using the algorithm of your choice. In general, the compression technique is *non-polymorphic*, meaning that given the same input data, the same output data is produced with each run. However, Swift Confidential applies additional polymorphic obfuscation routines to mask the bytes identifying the compression algorithm used.
-
-**Syntax**
-
-```yaml
-compress using <#algorithm#>
-```
-
-The supported algorithms are shown in the following table:
-| Algorithm        | Description                                               |
-|------------------|-----------------------------------------------------------|
-| lzfse            | The LZFSE compression algorithm.                          |
-| lz4              | The LZ4 compression algorithm.                            |
-| lzma             | The LZMA compression algorithm.                           |
-| zlib             | The zlib compression algorithm.                           |
-
-#### Encryption
-
-This technique involves data encryption using the algorithm of your choice. The encryption technique is *polymorphic*, meaning that given the same input data, different output data is produced with each run.
-
-**Syntax**
-
-```yaml
-encrypt using <#algorithm#>
-```
-
-The supported algorithms are shown in the following table:
-| Algorithm        | Description                                                                                     |
-|------------------|-------------------------------------------------------------------------------------------------|
-| aes-128-gcm      | The Advanced Encryption Standard (AES) algorithm in Galois/Counter Mode (GCM) with 128-bit key. |
-| aes-192-gcm      | The Advanced Encryption Standard (AES) algorithm in Galois/Counter Mode (GCM) with 192-bit key. |
-| aes-256-gcm      | The Advanced Encryption Standard (AES) algorithm in Galois/Counter Mode (GCM) with 256-bit key. |
-| chacha20-poly    | The ChaCha20-Poly1305 algorithm.                                                                |
-
-#### Randomization
-
-This technique involves data randomization. The randomization technique is *polymorphic*, meaning that given the same input data, different output data is produced with each run.
-
-> [!NOTE]  
-> Randomization technique is best suited for secrets of which size does not exceed 256 bytes. For larger secrets, the size of the obfuscated data will grow from 2N to 3N, where N is the input data size in bytes, or even 5N (32-bit platform) or 9N (64-bit platform) if the size of input data is larger than 65 536 bytes. For this reason, the internal implementation of this technique is a subject to change in next releases.
-
-**Syntax**
-
-```yaml
-shuffle
-```
-
-### Secrets
+#### Secrets
 
 The configuration file utilizes YAML objects to describe the secret literals, which are to be obfuscated. The table below lists the keys to define secret literal along with the type of information to include in each.
 
@@ -330,14 +356,14 @@ extension Crypto.Pinning {
 ```
 </details>
 
-### Namespaces
+#### Namespaces
 
 In accordance with Swift programming best practices, Swift Confidential encapsulates generated secret literal declarations in namespaces (i.e. caseless enums). The namespaces syntax allows you to either create a new namespace or extend an existing one.
 
 > [!NOTE]  
 > The creation of the nested namespaces is currently not supported.
 
-**Syntax**
+**YAML syntax**
 
 ```yaml
 create <#namespace#> # creates new namespace
@@ -349,10 +375,10 @@ extend <#namespace#> [from <#module#>] # extends existing namespace, optionally 
 <details>
 <summary><strong>Example usage</strong></summary>
 
-Assuming that you would like to keep the generated secret literal declaration(s) in a new namespace named `Secrets`, use the following YAML code:
+Assuming that you would like to keep the generated secret literal declaration(s) in a new namespace named `ObfuscatedLiterals`, use the following YAML code:
 
 ```yaml
-create Secrets
+create ObfuscatedLiterals
 ```
 
 The above namespace definition will result in the following Swift code being generated:
@@ -360,7 +386,7 @@ The above namespace definition will result in the following Swift code being gen
 ```swift
 import ConfidentialKit
 
-internal enum Secrets {
+internal enum ObfuscatedLiterals {
 
     // Encapsulated declarations ...
 }
@@ -385,11 +411,11 @@ extension Crypto.Pinning {
 ```
 </details>
 
-### Access control
+#### Access control
 
 You can specify the access-level modifiers for generated Swift code, both globally and on per secret basis. Yet, the general recommendation is to use the default `internal` access level, so as to keep your code well encapsulated.
 
-**Syntax**
+**YAML syntax**
 
 ```yaml
 <#access modifier#>
@@ -408,7 +434,7 @@ The supported access-level modifiers are shown in the following table:
 Supposing that you would like to keep all your secret literals in a single shared Swift module used by other modules within the same Swift package, you can do so with a configuration similar to this one:
 
 ```yaml
-defaultNamespace: create Secrets
+defaultNamespace: create ObfuscatedLiterals
 defaultAccessModifier: package
 secrets:
   - name: apiKey
@@ -425,7 +451,7 @@ With `defaultAccessModifier` set to `package`, all of the Swift declarations gen
 ```swift
 import ConfidentialKit
 
-package enum Secrets {
+package enum ObfuscatedLiterals {
 
     package static #Obfuscate(algorithm: .custom([.encrypt(algorithm: .aes192GCM), .shuffle])) {
         let apiKey = "214C1E2E-A87E-4460-8205-4562FDF54D1C"
@@ -448,11 +474,87 @@ By default, Swift Confidential does not apply the `internal` access-level modifi
 
 The [Confidential plugin](https://github.com/securevale/swift-confidential-plugin) expects the configuration file to be named `confidential.yml` or `confidential.yaml`, and it assumes a single configuration file per SwiftPM target / Xcode project. If you use the plugin with SwiftPM target and you define multiple configuration files in different subdirectories, then the plugin will use the first one it finds, and which one is undefined. Whereas, if you apply the plugin to the Xcode project's target, the configuration file is expected to be located in the project's top-level directory (all other configuration files are ignored).
 
+> [!TIP]  
+> You can use symbolic links to reference a configuration file located outside your SwiftPM target or Xcode project.
+> ```sh
+> ln -s ../path/to/source/confidential.yml ./path/to/symlink/confidential.yml
+> ```
+> This approach is useful when the file resides in a git submodule or when you want to share a single configuration across multiple targets to avoid data duplication.
+
+## Obfuscation techniques
+
+The obfuscation techniques are the composable building blocks from which you can create your own obfuscation algorithm. You can compose them in any order you want, so that no one exept you knows how the secret literals are obfuscated.
+
+### Compression
+
+This technique involves data compression using the algorithm of your choice. In general, the compression technique is *non-polymorphic*, meaning that given the same input data, the same output data is produced with each run. However, Swift Confidential applies additional polymorphic obfuscation routines to mask the bytes identifying the compression algorithm used.
+
+**YAML syntax**
+
+```yaml
+compress using <#algorithm#>
+```
+
+The supported algorithms are shown in the following table:
+| Algorithm        | Description                                               |
+|------------------|-----------------------------------------------------------|
+| lzfse            | The LZFSE compression algorithm.                          |
+| lz4              | The LZ4 compression algorithm.                            |
+| lzma             | The LZMA compression algorithm.                           |
+| zlib             | The zlib compression algorithm.                           |
+
+### Encryption
+
+This technique involves data encryption using the algorithm of your choice. The encryption technique is *polymorphic*, meaning that given the same input data, different output data is produced with each run.
+
+**YAML syntax**
+
+```yaml
+encrypt using <#algorithm#>
+```
+
+The supported algorithms are shown in the following table:
+| Algorithm        | Description                                                                                     |
+|------------------|-------------------------------------------------------------------------------------------------|
+| aes-128-gcm      | The Advanced Encryption Standard (AES) algorithm in Galois/Counter Mode (GCM) with 128-bit key. |
+| aes-192-gcm      | The Advanced Encryption Standard (AES) algorithm in Galois/Counter Mode (GCM) with 192-bit key. |
+| aes-256-gcm      | The Advanced Encryption Standard (AES) algorithm in Galois/Counter Mode (GCM) with 256-bit key. |
+| chacha20-poly    | The ChaCha20-Poly1305 algorithm.                                                                |
+
+### Randomization
+
+This technique involves data randomization. The randomization technique is *polymorphic*, meaning that given the same input data, different output data is produced with each run.
+
+> [!NOTE]  
+> Randomization technique is best suited for secrets of which size does not exceed 256 bytes. For larger secrets, the size of the obfuscated data will grow from 2N to 3N, where N is the input data size in bytes, or even 5N (32-bit platform) or 9N (64-bit platform) if the size of input data is larger than 65 536 bytes. For this reason, the internal implementation of this technique is a subject to change in next releases.
+
+**YAML syntax**
+
+```yaml
+shuffle
+```
+
+## CI/CD Considerations
+
+For unattended use, macro and package plugin validations can be disabled with either of the following:
+
+* Using `xcodebuild` options:
+  ```sh
+  -skipMacroValidation
+  -skipPackagePluginValidation
+  ```
+
+* Setting Xcode defaults:
+  ```sh
+  defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
+  defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidatation -bool YES
+  ```
+
 ## Source Stability
 
-This project follows [semantic versioning](https://semver.org/). While still in major version `0`, source-stability is only guaranteed within minor versions (e.g. between `0.4.0` and `0.4.1`). If you want to guard against potentially source-breaking package updates, you can specify your package dependency using source control requirement (e.g. `.upToNextMinor(from: "0.4.0")`).
+This project follows [semantic versioning](https://semver.org/). While still in major version `0`, source-stability is only guaranteed within minor versions (e.g. between `0.5.0` and `0.5.1`). If you want to guard against potentially source-breaking package updates, you can specify your package dependency using source control requirement (e.g. `.upToNextMinor(from: "0.5.0")`).
 
-The public API of the `swift-confidential` package consists of non-underscored declarations that are marked public in the `ConfidentialKit` module. The [experimental API](#experimental-mode) (denoted with a leading underscore) may change in any release, including patch releases.
+The public API of the `swift-confidential` package consists of non-underscored declarations that are marked public in the `ConfidentialKit` module. The experimental API (denoted with a leading underscore) may change in any release, including patch releases.
 
 ## License
 
