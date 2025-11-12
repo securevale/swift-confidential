@@ -1,4 +1,6 @@
 version: 1
 builder:
   configs:
-    - documentation_targets: [ConfidentialKit]
+    - documentation_targets:
+        - ConfidentialKit
+        - ConfidentialCore
