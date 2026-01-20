@@ -37,3 +37,4 @@ file_length:
 line_length:
   ignores_function_declarations: true
   ignores_interpolated_strings: true
+  ignores_multiline_strings: true
