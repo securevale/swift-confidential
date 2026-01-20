@@ -1,3 +1,5 @@
+import Foundation  // <- required when enabling support for library evolution (BUILD_LIBRARY_FOR_DISTRIBUTION=YES)
+
 public extension Obfuscation {
 
     /// A specifier that describes the obfuscation algorithm properties.
