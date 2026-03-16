@@ -11,7 +11,11 @@ extension AttributeSyntax {
                 IdentifierTypeSyntax(
                     name: .identifier(C.Code.Generation.obfuscatedMacroFullyQualifiedName),
                     genericArgumentClause: .init {
+                        #if canImport(SwiftSyntax601)
                         GenericArgumentSyntax(argument: .type(plainValueType))
+                        #else
+                        GenericArgumentSyntax(argument: plainValueType)
+                        #endif
                     }
                 )
             )
