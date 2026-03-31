@@ -10,15 +10,26 @@ extension AttributeSyntax {
             TypeSyntax(
                 IdentifierTypeSyntax(
                     name: .identifier(C.Code.Generation.obfuscatedMacroFullyQualifiedName),
-                    genericArgumentClause: .init {
-                        GenericArgumentSyntax(argument: .type(plainValueType))
-                    }
+                    genericArgumentClause: genericArgumentClause(argument: plainValueType)
                 )
             )
         ) {
             LabeledExprSyntax(
                 expression: deobfuscateDataExpression
             )
+        }
+    }
+}
+
+private extension AttributeSyntax {
+
+    static func genericArgumentClause(argument: TypeSyntax) -> GenericArgumentClauseSyntax {
+        .init {
+            #if canImport(SwiftSyntax601)
+            GenericArgumentSyntax(argument: .type(argument))
+            #else
+            GenericArgumentSyntax(argument: argument)
+            #endif
         }
     }
 }
