@@ -20,7 +20,7 @@ var package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.1"..<"603.0.0")
+        .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.1"..<"604.0.0")
     ],
     targets: [
         // Core Module
