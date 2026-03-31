@@ -38,7 +38,7 @@ jobs:
         run: brew install swiftlint
 
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Lint Swift Code
         run: swiftlint lint --strict --reporter github-actions-logging
@@ -46,7 +46,7 @@ jobs:
       - name: Lint Bash Code
         uses: ludeeus/action-shellcheck@master
         with:
-          scandir: './Scripts'
+          scandir: './scripts'
           ignore_paths: Templates
           version: v0.11.0
         env:
@@ -66,6 +66,12 @@ jobs:
             upload_coverage: false
           - macos: 15
             xcode: '16.4'  # Swift 6.1
+            upload_coverage: false
+          - macos: 26
+            xcode: '26.3'  # Swift 6.2
+            upload_coverage: false
+          - macos: 26
+            xcode: '26.4'  # Swift 6.3
             upload_coverage: true
 
     steps:
@@ -73,7 +79,7 @@ jobs:
         run: system_profiler SPHardwareDataType SPSoftwareDataType SPDeveloperToolsDataType
 
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Upgrade Bash
         run: make bash
@@ -83,7 +89,7 @@ jobs:
 
       - name: Upload Code Coverage Report
         if: ${{ matrix.upload_coverage }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./.coverage/
