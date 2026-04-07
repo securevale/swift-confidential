@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/securevale/swift-confidential/actions/workflows/ci.yml/badge.svg)](https://github.com/securevale/swift-confidential/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/securevale/swift-confidential/branch/master/graph/badge.svg)](https://codecov.io/gh/securevale/swift-confidential)
-[![Swift](https://img.shields.io/badge/Swift-6.2%20%7C%206.1%20%7C%206.0-red)](https://www.swift.org/download)
+[![Swift](https://img.shields.io/badge/Swift-6.3%20%7C%206.2%20%7C%206.1%20%7C%206.0-red)](https://www.swift.org/download)
 [![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%20visionOS%20%7C%20watchOS%20%7C%20tvOS-red)]()
 
 A highly configurable and performant tool for obfuscating Swift literals embedded in the application code that you should protect against static code analysis, making the app more resistant to reverse engineering.
@@ -13,7 +13,7 @@ Swift Confidential can save you a lot of time, especially if you are developing 
 
 ## Motivation
 
-Pretty much every single app has at least few literals embedded in code, those include: URLs, various client identifiers (e.g. API keys), pinning data (e.g. X.509 certificates or SPKI digests), Keychain item identifiers, RASP-related literals (e.g. list of suspicious dylibs or list of suspicious file paths for jailbreak detection), and many other context-specific literals. While the listed examples of code literals might seem innocent, not obfuscating them, in many cases, can be considered as giving a handshake to the potential threat actor. This is especially true in security-sensitive apps, such as mobile banking apps, 2FA authenticator apps and password managers. As a responsible software engineer, you should be aware that extracting source code literals from the app package is generally easy enough that even less experienced malicious users can accomplish this with little effort.
+Pretty much every single app has at least few literals embedded in code, those include: URLs, various client identifiers (e.g. API keys), pinning data (e.g. X.509 certificates or SPKI digests), Keychain item identifiers, RASP-related literals (e.g. list of suspicious dylibs or list of suspicious file paths for jailbreak detection), and many other context-specific literals. While the listed examples of code literals might seem innocent, not obfuscating them, in many cases, can be considered as giving a handshake to the potential threat actor. This is especially true in security-sensitive apps, such as mobile banking apps, 2FA authenticator apps and password managers. As a responsible software engineer, you should be aware that extracting source code literals from the app package is generally easy enough that even less experienced threat actors can accomplish this with little effort.
 
 <p align="center">
     <img src="resources/machoview-cstring-literals.png" alt="Mach-O C String Literals">
